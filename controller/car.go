@@ -2,17 +2,23 @@ package controller
 
 import (
 	"fmt"
+	"net/http"
 	"test/models"
+	"test/pkg/check"
 	"time"
 
 	"github.com/google/uuid"
 )
 
-func (c Controller) CreateCar() {
-	car := getCarInfo()
+func (c Controller) Car(w http.ResponseWriter, r *http.Request)  {
+	
+}
 
-	if car.Year <= 0 || car.Year > time.Now().Year()+1 {
-		fmt.Println("year intput is not correct")
+func (c Controller) CreateCar(w http.ResponseWriter) {
+	car := models.Car{}
+
+	if err := check.ValidateCarYear(car.Year); err != nil {
+		hanldeResponse(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -53,7 +59,7 @@ func (c Controller) GetCarList() {
 
 }
 func (c Controller) UpdateCar() {
-	car := getCarInfo()
+	car := models.Car{}
 
 	if !checkCarInfo(car) {
 		return
@@ -81,53 +87,3 @@ func checkCarInfo(car models.Car) bool {
 	return true
 }
 
-func getCarInfo() models.Car {
-	var (
-		model, brand, idStr string
-		cmd, year           int
-	)
-
-a:
-	fmt.Print(`enter command: 
-			1 - create
-			2 - update
-	`)
-	fmt.Scan(&cmd)
-
-	if cmd == 2 {
-		fmt.Print("enter id: ")
-		fmt.Scan(&idStr)
-
-		fmt.Print("enter model and brand: ")
-		fmt.Scan(&model, &brand)
-
-		fmt.Print("enter year: ")
-		fmt.Scan(&year)
-	} else if cmd == 1 {
-
-		fmt.Print("enter model and brand: ")
-		fmt.Scan(&model, &brand)
-
-		fmt.Print("enter year: ")
-		fmt.Scan(&year)
-
-	} else {
-		fmt.Println("not found")
-		goto a
-	}
-
-	if idStr != "" {
-		return models.Car{
-			ID:    uuid.MustParse(idStr),
-			Model: model,
-			Brand: brand,
-			Year:  year,
-		}
-	}
-
-	return models.Car{
-		Model: model,
-		Brand: brand,
-		Year: year,
-	}
-}

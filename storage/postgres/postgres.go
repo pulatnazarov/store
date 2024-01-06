@@ -26,8 +26,8 @@ func New(cfg config.Config) (Store, error) {
 	driverRepo := NewDriverRepo(db)
 
 	return Store{
-		DB:         db,
-		CarStorage: carRepo,
+		DB:            db,
+		CarStorage:    carRepo,
 		DriverStorage: driverRepo,
 	}, nil
 }

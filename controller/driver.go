@@ -1,50 +1,95 @@
 package controller
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
+	"net/http"
 	"test/models"
+	"test/pkg/check"
 )
 
-func (c Controller) CreateDriver() {
-	driver := getDriverInfo()
+func (c Controller) Driver(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		c.CreateDriver(w, r)
+	case http.MethodGet:
+		values := r.URL.Query()
+		_, ok := values["id"]
+		if ok {
+			c.GetDriver(w, r)
+		} else {
+			c.GetDriverList(w, r)
+		}
+	case http.MethodPut:
+		// put
+	case http.MethodDelete:
+		// delete
+	}
+}
 
-	if !checkPhoneNumber(driver.Phone) {
+func (c Controller) CreateDriver(w http.ResponseWriter, r *http.Request) {
+	driver := models.Driver{}
+
+	if err := json.NewDecoder(r.Body).Decode(&driver); err != nil {
+		fmt.Println("error while reading data from client", err.Error())
+		hanldeResponse(w, http.StatusBadRequest, err)
+		return
+	}
+
+	if !check.PhoneNumber(driver.Phone) {
 		fmt.Println("the phone number format is not correct!")
+		hanldeResponse(w, http.StatusBadRequest, errors.New("phone type is not correct!"))
 		return
 	}
 
 	id, err := c.Store.DriverStorage.Insert(driver)
 	if err != nil {
 		fmt.Println("error while inserting driver inside controller err: ", err.Error())
+		hanldeResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	fmt.Println("your new driver's id is: ", id)
-}
-
-func checkPhoneNumber(phone string) bool {
-	for _, r := range phone {
-		if r > '0' || r < '9' || r != '+' {
-			return false
-		}
+	resp, err := c.Store.DriverStorage.GetByID(id)
+	if err != nil {
+		//handle error
+		return
 	}
 
-	return true
+	hanldeResponse(w, http.StatusOK, resp)
 }
 
-func getDriverInfo() models.Driver {
-	var (
-		fullName, phone string
-	)
+func (c Controller) GetDriver(w http.ResponseWriter, r *http.Request) {
+	values := r.URL.Query()
+	id := values["id"][0]
 
-	fmt.Print("enter driver's full name: ")
-	fmt.Scan(&fullName)
-
-	fmt.Println("enter phone: ")
-	fmt.Scan(&phone)
-
-	return models.Driver{
-		FullName: fullName,
-		Phone:    phone,
+	driver, err := c.Store.DriverStorage.GetByID(id)
+	if err != nil {
+		fmt.Println("error while getting driver by id")
+		hanldeResponse(w, http.StatusInternalServerError, err)
+		return
 	}
+
+	hanldeResponse(w, http.StatusOK, driver)
+}
+
+func (c Controller) GetDriverList(w http.ResponseWriter, r *http.Request) {
+	cars, err := c.Store.CarStorage.GetList()
+	if err != nil {
+		fmt.Println("error while getting list of cars:", err.Error())
+		hanldeResponse(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	hanldeResponse(w, http.StatusOK, cars)
+}
+
+func (c Controller) UpdateDriver(w http.ResponseWriter, r *http.Request) {
+	// var
+
+	// read body
+
+	// send to db for updating body
+
+	// return status ok
 }
