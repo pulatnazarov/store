@@ -43,45 +43,47 @@ func (c Controller) CreateDriver(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := c.Store.DriverStorage.Insert(driver)
-	if err != nil {
-		fmt.Println("error while inserting driver inside controller err: ", err.Error())
-		hanldeResponse(w, http.StatusInternalServerError, err)
-		return
-	}
+	// id, err := c.Storage.DriverStorage.Insert(driver)
+	// if err != nil {
+	// 	fmt.Println("error while inserting driver inside controller err: ", err.Error())
+	// 	hanldeResponse(w, http.StatusInternalServerError, err)
+	// 	return
+	// }
 
-	resp, err := c.Store.DriverStorage.GetByID(id)
-	if err != nil {
-		//handle error
-		return
-	}
+	// resp, err := c.Storage.DriverStorage.GetByID(id)
+	// if err != nil {
+	// 	//handle error
+	// 	return
+	// }
 
-	hanldeResponse(w, http.StatusOK, resp)
+	// hanldeResponse(w, http.StatusOK, resp)
 }
 
 func (c Controller) GetDriver(w http.ResponseWriter, r *http.Request) {
 	values := r.URL.Query()
 	id := values["id"][0]
+	var err error
 
-	driver, err := c.Store.DriverStorage.GetByID(id)
+	// driver, err := c.Storage.DriverStorage.GetByID(id)
 	if err != nil {
 		fmt.Println("error while getting driver by id")
 		hanldeResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	hanldeResponse(w, http.StatusOK, driver)
+	hanldeResponse(w, http.StatusOK, id)
 }
 
 func (c Controller) GetDriverList(w http.ResponseWriter, r *http.Request) {
-	cars, err := c.Store.CarStorage.GetList()
+	// cars, err := c.Storage.CarStorage.GetList()
+	var err error
 	if err != nil {
 		fmt.Println("error while getting list of cars:", err.Error())
 		hanldeResponse(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	hanldeResponse(w, http.StatusOK, cars)
+	hanldeResponse(w, http.StatusOK, nil)
 }
 
 func (c Controller) UpdateDriver(w http.ResponseWriter, r *http.Request) {

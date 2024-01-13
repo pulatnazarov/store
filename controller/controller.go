@@ -4,16 +4,16 @@ import (
 	"encoding/json"
 	"net/http"
 	"test/models"
-	"test/storage/postgres"
+	"test/storage"
 )
 
 type Controller struct {
-	Store postgres.Store
+	Storage storage.IStorage
 }
 
-func New(store postgres.Store) Controller {
+func New(store storage.IStorage) Controller {
 	return Controller{
-		Store: store,
+		Storage: store,
 	}
 }
 

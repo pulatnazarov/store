@@ -17,11 +17,11 @@ func main() {
 		log.Fatalln("error while connecting to db err:", err.Error())
 		return
 	}
-	defer store.DB.Close()
+	defer store.Close()
 
 	con := controller.New(store)
 
-	http.HandleFunc("/driver", con.Driver)
+	http.HandleFunc("/user", con.User)
 	http.HandleFunc("/car", con.Car)
 
 	fmt.Println("listening at port :8080")
