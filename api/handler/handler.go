@@ -1,23 +1,23 @@
-package controller
+package handler
 
 import (
 	"encoding/json"
 	"net/http"
-	"test/models"
+	"test/api/models"
 	"test/storage"
 )
 
-type Controller struct {
-	Storage storage.IStorage
+type Handler struct {
+	storage storage.IStorage
 }
 
-func New(store storage.IStorage) Controller {
-	return Controller{
-		Storage: store,
+func New(store storage.IStorage) Handler {
+	return Handler{
+		storage: store,
 	}
 }
 
-func hanldeResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+func handleResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 	resp := models.Response{}
 
 	switch code := statusCode; {

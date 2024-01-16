@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"test/api"
 	"test/config"
-	"test/controller"
 	"test/storage/postgres"
 )
 
@@ -19,11 +19,10 @@ func main() {
 	}
 	defer store.Close()
 
-	con := controller.New(store)
-
-	http.HandleFunc("/user", con.User)
-	http.HandleFunc("/car", con.Car)
+	api.New(store)
 
 	fmt.Println("listening at port :8080")
-	http.ListenAndServe(":8080", nil)
+	if err = http.ListenAndServe(":8080", nil); err != nil {
+		log.Fatalln("Server has stopped!", err.Error())
+	}
 }

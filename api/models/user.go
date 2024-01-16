@@ -25,16 +25,13 @@ type UpdateUser struct {
 	Cash     uint   `json:"cash"`
 }
 
-type PrimaryKey struct {
-	ID string `json:"id"`
-}
-
 type UsersResponse struct {
 	Users []User `json:"users"`
-	Count int   `json:"count"`
+	Count int    `json:"count"`
 }
 
-type GetListRequest struct {
-	Page  int `json:"page"`
-	Limit int `json:"limit"`
+type UpdateUserPassword struct {
+	ID          string `json:"id"`
+	NewPassword string `json:"new_password"`
+	OldPassword string `json:"old_password"`
 }
