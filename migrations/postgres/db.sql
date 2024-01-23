@@ -8,3 +8,9 @@ create table users (
     user_role user_role_enum not null,
     cash int
 );
+
+create table baskets(
+    id uuid primary key not null ,
+    customer_id uuid references users(id) not null ,
+    total_sum integer default 0
+);
