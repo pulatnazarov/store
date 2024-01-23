@@ -1,9 +1,7 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"test/api"
 	"test/config"
 	"test/storage/postgres"
@@ -19,10 +17,9 @@ func main() {
 	}
 	defer store.Close()
 
-	api.New(store)
+	server := api.New(store)
 
-	fmt.Println("listening at port :8080")
-	if err = http.ListenAndServe(":8080", nil); err != nil {
-		log.Fatalln("Server has stopped!", err.Error())
+	if err = server.Run("localhost:8080"); err != nil {
+		panic(err)
 	}
 }

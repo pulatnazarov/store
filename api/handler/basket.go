@@ -1,8 +1,10 @@
 package handler
 
+/*
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"net/http"
 	"test/api/models"
 )
@@ -25,12 +27,14 @@ func (h Handler) Basket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+var w *gin.Context
+
 func (h Handler) CreateBasket(w http.ResponseWriter, r *http.Request) {
 	createBasket := models.CreateBasket{}
 
 	if err := json.NewDecoder(r.Body).Decode(&createBasket); err != nil {
 		fmt.Println("error is while decoding", err.Error())
-		handleResponse(w, http.StatusBadRequest, err.Error())
+		handleResponse(w, "", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -126,3 +130,4 @@ func (h Handler) DeleteBasket(w http.ResponseWriter, r *http.Request) {
 
 	handleResponse(w, http.StatusOK, nil)
 }
+*/

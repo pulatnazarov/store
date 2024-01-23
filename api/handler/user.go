@@ -1,47 +1,26 @@
 package handler
 
 import (
-	"encoding/json"
 	"errors"
-	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 	"strconv"
 	"test/api/models"
 	"test/pkg/check"
 )
 
-func (h Handler) User(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		h.CreateUser(w, r)
-	case http.MethodGet:
-		values := r.URL.Query()
-		_, ok := values["id"]
-		if ok {
-			h.GetUser(w, r)
-		} else {
-			h.GetUserList(w, r)
-		}
-	case http.MethodPut:
-		h.UpdateUser(w, r)
-	case http.MethodDelete:
-		h.DeleteUser(w, r)
-	case http.MethodPatch:
-		h.UpdateUserPassword(w, r)
-	}
-}
-
-func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
+func (h Handler) CreateUser(c *gin.Context) {
 	createUser := models.CreateUser{}
 
-	if err := json.NewDecoder(r.Body).Decode(&createUser); err != nil {
-		handleResponse(w, http.StatusBadRequest, err)
+	if err := c.ShouldBindJSON(&createUser); err != nil {
+		handleResponse(c, "error while reading body from client", http.StatusBadRequest, err)
 		return
 	}
 
 	pKey, err := h.storage.User().Create(createUser)
 	if err != nil {
-		handleResponse(w, http.StatusInternalServerError, err)
+		handleResponse(c, "error while creating user", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -49,60 +28,51 @@ func (h Handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		ID: pKey,
 	})
 	if err != nil {
-		handleResponse(w, http.StatusInternalServerError, err)
+		handleResponse(c, "error while getting user by id", http.StatusInternalServerError, err)
 		return
 	}
 
-	handleResponse(w, http.StatusCreated, user)
+	handleResponse(c, "", http.StatusCreated, user)
 }
 
-func (h Handler) GetUser(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-	if len(values["id"]) <= 0 {
-		handleResponse(w, http.StatusBadRequest, errors.New("id is required"))
-		return
-	}
-
-	id := values["id"][0]
+func (h Handler) GetUser(c *gin.Context) {
 	var err error
 
+	uid := c.Param("id")
+
 	user, err := h.storage.User().GetByID(models.PrimaryKey{
-		ID: id,
+		ID: uid,
 	})
 	if err != nil {
-		handleResponse(w, http.StatusInternalServerError, err)
+		handleResponse(c, "error while getting user by id", http.StatusInternalServerError, err)
 		return
 	}
 
-	handleResponse(w, http.StatusOK, user)
+	handleResponse(c, "", http.StatusOK, user)
 }
 
-func (h Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
+func (h Handler) GetUserList(c *gin.Context) {
 	var (
-		page, limit = 1, 10
+		page, limit int
 		search      string
 		err         error
 	)
-	values := r.URL.Query()
 
-	if len(values["page"]) > 0 {
-		page, err = strconv.Atoi(values["page"][0])
-		if err != nil {
-			page = 1
-		}
+	pageStr := c.DefaultQuery("page", "1")
+	page, err = strconv.Atoi(pageStr)
+	if err != nil {
+		handleResponse(c, "error while parsing page", http.StatusBadRequest, err.Error())
+		return
 	}
 
-	if len(values["limit"]) > 0 {
-		limit, err = strconv.Atoi(values["limit"][0])
-		if err != nil {
-			fmt.Println("limit", values["limit"])
-			limit = 10
-		}
+	limitStr := c.DefaultQuery("limit", "10")
+	limit, err = strconv.Atoi(limitStr)
+	if err != nil {
+		handleResponse(c, "error while parsing limit", http.StatusBadRequest, err.Error())
+		return
 	}
 
-	if len(values["search"]) > 0 {
-		search = values["search"][0]
-	}
+	search = c.Query("search")
 
 	resp, err := h.storage.User().GetList(models.GetListRequest{
 		Page:   page,
@@ -110,24 +80,32 @@ func (h Handler) GetUserList(w http.ResponseWriter, r *http.Request) {
 		Search: search,
 	})
 	if err != nil {
-		handleResponse(w, http.StatusInternalServerError, err)
+		handleResponse(c, "error while getting users", http.StatusInternalServerError, err)
 		return
 	}
 
-	handleResponse(w, http.StatusOK, resp)
+	handleResponse(c, "", http.StatusOK, resp)
 }
 
-func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
+func (h Handler) UpdateUser(c *gin.Context) {
 	updateUser := models.UpdateUser{}
 
-	if err := json.NewDecoder(r.Body).Decode(&updateUser); err != nil {
-		handleResponse(w, http.StatusBadRequest, err.Error())
+	uid := c.Param("id")
+	if uid == "" {
+		handleResponse(c, "invalid uuid", http.StatusBadRequest, errors.New("uuid is not valid"))
+		return
+	}
+
+	updateUser.ID = uid
+
+	if err := c.ShouldBindJSON(&updateUser); err != nil {
+		handleResponse(c, "error while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	pKey, err := h.storage.User().Update(updateUser)
 	if err != nil {
-		handleResponse(w, http.StatusInternalServerError, err.Error())
+		handleResponse(c, "error while updating user", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -135,65 +113,67 @@ func (h Handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		ID: pKey,
 	})
 	if err != nil {
-		handleResponse(w, http.StatusInternalServerError, err)
+		handleResponse(c, "error while getting user by id", http.StatusInternalServerError, err)
 		return
 	}
 
-	handleResponse(w, http.StatusOK, user)
+	handleResponse(c, "", http.StatusOK, user)
 }
 
-func (h Handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
-	values := r.URL.Query()
-	if len(values["id"]) <= 0 {
-		handleResponse(w, http.StatusBadRequest, errors.New("id is required"))
+func (h Handler) DeleteUser(c *gin.Context) {
+	uid := c.Param("id")
+	id, err := uuid.Parse(uid)
+	if err != nil {
+		handleResponse(c, "uuid is not valid", http.StatusBadRequest, err.Error())
 		return
 	}
 
-	id := values["id"][0]
-
-	if err := h.storage.User().Delete(models.PrimaryKey{
-		ID: id,
+	if err = h.storage.User().Delete(models.PrimaryKey{
+		ID: id.String(),
 	}); err != nil {
-		handleResponse(w, http.StatusInternalServerError, err.Error())
+		handleResponse(c, "error while deleting user by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(w, http.StatusOK, "data successfully deleted")
+	handleResponse(c, "", http.StatusOK, "data successfully deleted")
 }
 
-func (h Handler) UpdateUserPassword(w http.ResponseWriter, r *http.Request) {
+func (h Handler) UpdateUserPassword(c *gin.Context) {
 	updateUserPassword := models.UpdateUserPassword{}
 
-	if err := json.NewDecoder(r.Body).Decode(&updateUserPassword); err != nil {
-		handleResponse(w, http.StatusBadRequest, err.Error())
+	if err := c.ShouldBindJSON(&updateUserPassword); err != nil {
+		handleResponse(c, "error while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if len(updateUserPassword.ID) == 0 {
-		handleResponse(w, http.StatusBadRequest, errors.New("id is required"))
+	uid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		handleResponse(c, "error while parsing uuid", http.StatusBadRequest, err.Error())
 		return
 	}
+
+	updateUserPassword.ID = uid.String()
 
 	oldPassword, err := h.storage.User().GetPassword(updateUserPassword.ID)
 	if err != nil {
-		handleResponse(w, http.StatusInternalServerError, err.Error())
+		handleResponse(c, "error while getting password by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	if oldPassword != updateUserPassword.OldPassword {
-		handleResponse(w, http.StatusBadRequest, errors.New("old password is not correct"))
+		handleResponse(c, "old password is not correct", http.StatusBadRequest, "old password is not correct")
 		return
 	}
 
 	if err = check.ValidatePassword(updateUserPassword.NewPassword); err != nil {
-		handleResponse(w, http.StatusBadRequest, err.Error())
+		handleResponse(c, "new password is weak", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err = h.storage.User().UpdatePassword(updateUserPassword); err != nil {
-		handleResponse(w, http.StatusInternalServerError, err.Error())
+		handleResponse(c, "error while updating user password by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(w, http.StatusOK, "password successfully updated")
+	handleResponse(c, "", http.StatusOK, "password successfully updated")
 }

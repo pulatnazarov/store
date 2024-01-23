@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"encoding/json"
-	"net/http"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"test/api/models"
 	"test/storage"
 )
@@ -17,7 +17,7 @@ func New(store storage.IStorage) Handler {
 	}
 }
 
-func handleResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+func handleResponse(c *gin.Context, msg string, statusCode int, data interface{}) {
 	resp := models.Response{}
 
 	switch code := statusCode; {
@@ -25,15 +25,16 @@ func handleResponse(w http.ResponseWriter, statusCode int, data interface{}) {
 		resp.Description = "success"
 	case code < 500:
 		resp.Description = "bad request"
+		fmt.Println("BAD REQUEST: "+msg, "reason: ", data)
 	default:
 		resp.Description = "internal server error"
+		fmt.Println("INTERNAL SERVER ERROR: "+msg, "reason: ", data)
 	}
+	fmt.Println("data: ", data)
 
 	resp.StatusCode = statusCode
 	resp.Data = data
+	fmt.Println("resp ", resp)
 
-	js, _ := json.Marshal(resp)
-
-	w.WriteHeader(statusCode)
-	w.Write(js)
+	c.JSON(resp.StatusCode, resp)
 }
