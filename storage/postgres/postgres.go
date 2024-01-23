@@ -35,3 +35,9 @@ func (s Store) User() storage.IUserStorage {
 
 	return newUser
 }
+
+func (s Store) Basket() storage.IBasket {
+	newBasket := NewBasketRepo(s.DB)
+	return newBasket
+
+}

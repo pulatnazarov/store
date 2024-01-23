@@ -7,7 +7,8 @@ import (
 type IStorage interface {
 	Close()
 	User() IUserStorage
-	Category() ICategoryStorage
+	Basket() IBasket
+	//Category() ICategoryStorage
 }
 
 type IUserStorage interface {
@@ -20,5 +21,13 @@ type IUserStorage interface {
 	UpdatePassword(password models.UpdateUserPassword) error
 }
 
-type ICategoryStorage interface {
+//type ICategoryStorage interface {}
+
+type IBasket interface {
+	CreateBasket(models.CreateBasket) (models.Basket, error)
+	GetBasketByID(models.PrimaryKey) (models.Basket, error)
+	GetBasketList() (models.BasketResponse, error)
+	//GetBasketList(models.GetListRequest) (models.BasketResponse, error)
+	UpdateBasket(models.UpdateBasket) (models.Basket, error)
+	DeleteBasket(key models.PrimaryKey) error
 }
