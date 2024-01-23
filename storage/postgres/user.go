@@ -13,12 +13,12 @@ type userRepo struct {
 }
 
 func NewUserRepo(db *sql.DB) storage.IUserStorage {
-	return userRepo{
+	return &userRepo{
 		db: db,
 	}
 }
 
-func (u userRepo) Create(createUser models.CreateUser) (string, error) {
+func (u *userRepo) Create(createUser models.CreateUser) (string, error) {
 
 	uid := uuid.New()
 
@@ -39,7 +39,7 @@ func (u userRepo) Create(createUser models.CreateUser) (string, error) {
 	return uid.String(), nil
 }
 
-func (u userRepo) GetByID(pKey models.PrimaryKey) (models.User, error) {
+func (u *userRepo) GetByID(pKey models.PrimaryKey) (models.User, error) {
 	user := models.User{}
 
 	query := `
@@ -58,7 +58,7 @@ func (u userRepo) GetByID(pKey models.PrimaryKey) (models.User, error) {
 	return user, nil
 }
 
-func (u userRepo) GetList(request models.GetListRequest) (models.UsersResponse, error) {
+func (u *userRepo) GetList(request models.GetListRequest) (models.UsersResponse, error) {
 	var (
 		users             = []models.User{}
 		count             = 0
@@ -120,7 +120,7 @@ func (u userRepo) GetList(request models.GetListRequest) (models.UsersResponse, 
 	}, nil
 }
 
-func (u userRepo) Update(request models.UpdateUser) (string, error) {
+func (u *userRepo) Update(request models.UpdateUser) (string, error) {
 	query := `
 		update users 
 			set full_name = $1, phone = $2, cash = $3
@@ -134,7 +134,7 @@ func (u userRepo) Update(request models.UpdateUser) (string, error) {
 	return request.ID, nil
 }
 
-func (u userRepo) Delete(request models.PrimaryKey) error {
+func (u *userRepo) Delete(request models.PrimaryKey) error {
 	query := `
 		delete from users
 			where id = $1
@@ -147,7 +147,7 @@ func (u userRepo) Delete(request models.PrimaryKey) error {
 	return nil
 }
 
-func (u userRepo) GetPassword(id string) (string, error) {
+func (u *userRepo) GetPassword(id string) (string, error) {
 	password := ""
 
 	query := `
@@ -162,7 +162,7 @@ func (u userRepo) GetPassword(id string) (string, error) {
 	return password, nil
 }
 
-func (u userRepo) UpdatePassword(request models.UpdateUserPassword) error {
+func (u *userRepo) UpdatePassword(request models.UpdateUserPassword) error {
 	query := `
 		update users 
 				set password = $1
