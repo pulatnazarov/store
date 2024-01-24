@@ -45,3 +45,7 @@ func (s Store) Basket() storage.IBasketStorage {
 	return NewBasketRepo(s.DB)
 
 }
+
+func (s Store) BasketProduct() storage.IBasketProductStorage {
+	return NewBasketProductRepo(s.DB)
+}

@@ -10,6 +10,7 @@ type IStorage interface {
 	Category() ICategoryStorage
 	Product() IProductStorage
 	Basket() IBasketStorage
+	BasketProduct() IBasketProductStorage
 }
 
 type IUserStorage interface {
@@ -43,4 +44,12 @@ type IBasketStorage interface {
 	GetList(models.GetListRequest) (models.BasketResponse, error)
 	Update(models.UpdateBasket) (string, error)
 	Delete(key models.PrimaryKey) error
+}
+
+type IBasketProductStorage interface {
+	Create(models.CreateBasketProduct) (string, error)
+	GetByID(models.PrimaryKey) (models.BasketProduct, error)
+	GetList(models.GetListRequest) (models.BasketProductResponse, error)
+	Update(models.UpdateBasketProduct) (string, error)
+	Delete(models.PrimaryKey) error
 }
