@@ -7,8 +7,9 @@ import (
 type IStorage interface {
 	Close()
 	User() IUserStorage
-	Basket() IBasket
-	//Category() ICategoryStorage
+	Category() ICategoryStorage
+	Product() IProductStorage
+	Basket() IBasketStorage
 }
 
 type IUserStorage interface {
@@ -21,13 +22,25 @@ type IUserStorage interface {
 	UpdatePassword(password models.UpdateUserPassword) error
 }
 
-//type ICategoryStorage interface {}
+type ICategoryStorage interface {
+	Create(models.CreateCategory) (string, error)
+	GetByID(models.PrimaryKey) (models.Category, error)
+	GetList(models.GetListRequest) (models.CategoryResponse, error)
+	Update(models.UpdateCategory) (string, error)
+	Delete(models.PrimaryKey) error
+}
 
-type IBasket interface {
-	CreateBasket(models.CreateBasket) (models.Basket, error)
-	GetBasketByID(models.PrimaryKey) (models.Basket, error)
-	GetBasketList() (models.BasketResponse, error)
-	//GetBasketList(models.GetListRequest) (models.BasketResponse, error)
-	UpdateBasket(models.UpdateBasket) (models.Basket, error)
-	DeleteBasket(key models.PrimaryKey) error
+type IProductStorage interface {
+	Create(models.CreateProduct) (string, error)
+	GetByID(models.PrimaryKey) (models.Product, error)
+	GetList(models.GetListRequest) (models.ProductResponse, error)
+	Update(models.UpdateProduct) (string, error)
+	Delete(models.PrimaryKey) error
+}
+type IBasketStorage interface {
+	Create(models.CreateBasket) (string, error)
+	GetByID(models.PrimaryKey) (models.Basket, error)
+	GetList(models.GetListRequest) (models.BasketResponse, error)
+	Update(models.UpdateBasket) (string, error)
+	Delete(key models.PrimaryKey) error
 }
