@@ -31,13 +31,21 @@ func (s Store) Close() {
 }
 
 func (s Store) User() storage.IUserStorage {
-	newUser := NewUserRepo(s.DB)
-
-	return newUser
+	return NewUserRepo(s.DB)
+}
+func (s Store) Category() storage.ICategoryStorage {
+	return NewCategoryRepo(s.DB)
 }
 
-func (s Store) Basket() storage.IBasket {
-	newBasket := NewBasketRepo(s.DB)
-	return newBasket
+func (s Store) Product() storage.IProductStorage {
+	return NewProductRepo(s.DB)
+}
 
+func (s Store) Basket() storage.IBasketStorage {
+	return NewBasketRepo(s.DB)
+
+}
+
+func (s Store) BasketProduct() storage.IBasketProductStorage {
+	return NewBasketProductRepo(s.DB)
 }
