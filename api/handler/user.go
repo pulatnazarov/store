@@ -10,6 +10,18 @@ import (
 	"test/pkg/check"
 )
 
+// CreateUser godoc
+// @Router       /user [POST]
+// @Summary      Creates a new user
+// @Description  create a new user
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        user body models.CreateUser false "user"
+// @Success      201  {object}  models.User
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) CreateUser(c *gin.Context) {
 	createUser := models.CreateUser{}
 
@@ -35,13 +47,31 @@ func (h Handler) CreateUser(c *gin.Context) {
 	handleResponse(c, "", http.StatusCreated, user)
 }
 
+// GetUser godoc
+// @Router       /user/{id} [GET]
+// @Summary      Gets user
+// @Description  get user by ID
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        id path string true "user"
+// @Success      200  {object}  models.User
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) GetUser(c *gin.Context) {
 	var err error
 
 	uid := c.Param("id")
 
+	id, err := uuid.Parse(uid)
+	if err != nil {
+		handleResponse(c, "invalid uuid type", http.StatusBadRequest, err.Error())
+		return
+	}
+
 	user, err := h.storage.User().GetByID(models.PrimaryKey{
-		ID: uid,
+		ID: id.String(),
 	})
 	if err != nil {
 		handleResponse(c, "error while getting user by id", http.StatusInternalServerError, err)
@@ -51,6 +81,20 @@ func (h Handler) GetUser(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, user)
 }
 
+// GetUserList godoc
+// @Router       /users [GET]
+// @Summary      Get user list
+// @Description  get user list
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        page query string false "page"
+// @Param 		 limit query string false "limit"
+// @Param 		 search query string false "search"
+// @Success      200  {object}  models.UsersResponse
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) GetUserList(c *gin.Context) {
 	var (
 		page, limit int
@@ -87,6 +131,19 @@ func (h Handler) GetUserList(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, resp)
 }
 
+// UpdateUser godoc
+// @Router       /user/{id} [PUT]
+// @Summary      Update user
+// @Description  update user
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param 		 id path string true "user_id"
+// @Param        user body models.UpdateUser true "user"
+// @Success      200  {object}  models.User
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) UpdateUser(c *gin.Context) {
 	updateUser := models.UpdateUser{}
 
@@ -120,6 +177,18 @@ func (h Handler) UpdateUser(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, user)
 }
 
+// DeleteUser godoc
+// @Router       /user/{id} [DELETE]
+// @Summary      Delete user
+// @Description  delete user
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param 		 id path string true "user_id"
+// @Success      200  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) DeleteUser(c *gin.Context) {
 	uid := c.Param("id")
 	id, err := uuid.Parse(uid)
@@ -138,6 +207,19 @@ func (h Handler) DeleteUser(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, "data successfully deleted")
 }
 
+// UpdateUserPassword godoc
+// @Router       /user/{id} [PATCH]
+// @Summary      Update user password
+// @Description  update user password
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param 		 id path string true "user_id"
+// @Param        user body models.UpdateUserPassword true "user"
+// @Success      200  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) UpdateUserPassword(c *gin.Context) {
 	updateUserPassword := models.UpdateUserPassword{}
 

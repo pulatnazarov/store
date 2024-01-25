@@ -21,7 +21,6 @@ type UpdateUser struct {
 	ID       string `json:"id"`
 	FullName string `json:"full_name"`
 	Phone    string `json:"phone"`
-	Password string `json:"password"`
 	Cash     uint   `json:"cash"`
 }
 
@@ -31,7 +30,7 @@ type UsersResponse struct {
 }
 
 type UpdateUserPassword struct {
-	ID          string `json:"id"`
+	ID          string `json:"-"`
 	NewPassword string `json:"new_password"`
 	OldPassword string `json:"old_password"`
 }

@@ -30,11 +30,9 @@ func handleResponse(c *gin.Context, msg string, statusCode int, data interface{}
 		resp.Description = "internal server error"
 		fmt.Println("INTERNAL SERVER ERROR: "+msg, "reason: ", data)
 	}
-	fmt.Println("data: ", data)
 
 	resp.StatusCode = statusCode
 	resp.Data = data
-	fmt.Println("resp ", resp)
 
 	c.JSON(resp.StatusCode, resp)
 }

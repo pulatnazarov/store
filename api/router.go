@@ -2,10 +2,17 @@ package api
 
 import (
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	_ "test/api/docs"
 	"test/api/handler"
 	"test/storage"
 )
 
+// New ...
+// @title           Swagger Example API
+// @version         1.0
+// @description     This is a sample server celler server.
 func New(store storage.IStorage) *gin.Engine {
 	h := handler.New(store)
 
@@ -42,5 +49,6 @@ func New(store storage.IStorage) *gin.Engine {
 	r.PUT("/basketProduct/:id", h.UpdateBasketProduct)
 	r.DELETE("/basketProduct/:id", h.DeleteBasketProduct)
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }
