@@ -7,11 +7,23 @@ import (
 	"test/api/models"
 )
 
+// CreateCategory godoc
+// @Router       /category [POST]
+// @Summary      Creates a new category
+// @Description  create a new category
+// @Tags         category
+// @Accept       json
+// @Produce      json
+// @Param        category body models.CreateCategory false "category"
+// @Success      201  {object}  models.Category
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) CreateCategory(c *gin.Context) {
 	category := models.CreateCategory{}
 
 	if err := c.ShouldBindJSON(&category); err != nil {
-		handleResponse(c, "error is while rading body from client", http.StatusBadRequest, err.Error())
+		handleResponse(c, "error is while reading body from client", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -30,6 +42,18 @@ func (h Handler) CreateCategory(c *gin.Context) {
 	handleResponse(c, "", http.StatusCreated, createdCategory)
 }
 
+// GetCategory godoc
+// @Router       /category/{id} [GET]
+// @Summary      Get category by id
+// @Description  get category by id
+// @Tags         category
+// @Accept       json
+// @Produce      json
+// @Param        id path string true "category_id"
+// @Success      201  {object}  models.Category
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) GetCategory(c *gin.Context) {
 	uid := c.Param("id")
 
@@ -42,6 +66,20 @@ func (h Handler) GetCategory(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, category)
 }
 
+// GetCategoryList godoc
+// @Router       /categories [GET]
+// @Summary      Get category list
+// @Description  get category list
+// @Tags         category
+// @Accept       json
+// @Produce      json
+// @Param        page query string false "page"
+// @Param        limit query string false "limit"
+// @Param        search query string false "search"
+// @Success      201  {object}  models.CategoryResponse
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) GetCategoryList(c *gin.Context) {
 	var (
 		page, limit int
@@ -79,6 +117,19 @@ func (h Handler) GetCategoryList(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, categories)
 }
 
+// UpdateCategory godoc
+// @Router       /category/{id} [PUT]
+// @Summary      Update category
+// @Description  update category
+// @Tags         category
+// @Accept       json
+// @Produce      json
+// @Param        id path string true "category_id"
+// @Param        category body models.UpdateCategory false "category"
+// @Success      201  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) UpdateCategory(c *gin.Context) {
 	category := models.UpdateCategory{}
 	uid := c.Param("id")
@@ -105,6 +156,18 @@ func (h Handler) UpdateCategory(c *gin.Context) {
 	handleResponse(c, "", http.StatusOK, updatedCategory)
 }
 
+// DeleteCategory godoc
+// @Router       /category/{id} [DELETE]
+// @Summary      Delete category
+// @Description  delete category
+// @Tags         category
+// @Accept       json
+// @Produce      json
+// @Param        id path string true "category_id"
+// @Success      201  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
 func (h Handler) DeleteCategory(c *gin.Context) {
 	uid := c.Param("id")
 
