@@ -11,6 +11,22 @@ type IStorage interface {
 	Product() IProductStorage
 	Basket() IBasketStorage
 	BasketProduct() IBasketProductStorage
+	Store() IStore
+	Repo() IRepository
+}
+
+type IStore interface {
+	Sell(sell models.ProductSell, userSell models.UserSell) (models.Ticket, error)
+}
+
+type IRepository interface {
+	Search(productName string, quantity uint) (models.ProductSell, error)
+	TakeProduct(productName string, quantity uint)
+}
+
+type IProductList interface {
+	AddProduct(product models.Product) (string, error)
+	RemoveProduct(id string) error
 }
 
 type IUserStorage interface {

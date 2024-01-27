@@ -12,7 +12,7 @@ type CreateBasket struct {
 }
 
 type UpdateBasket struct {
-	ID         string `json:"id"`
+	ID         string `json:"-"`
 	CustomerID string `json:"customer_id"`
 	TotalSum   uint   `json:"total_sum"`
 }

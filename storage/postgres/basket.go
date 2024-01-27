@@ -55,7 +55,7 @@ func (b basketRepo) GetList(req models.GetListRequest) (models.BasketResponse, e
 	countQuery = `select count(1) from baskets `
 
 	if search != "" {
-		countQuery += fmt.Sprintf(` and total_sum ilike '%%%s%%'`, search)
+		countQuery += fmt.Sprintf(` where CAST(total_sum AS TEXT) ilike '%%%s%%'`, search)
 	}
 	if err := b.db.QueryRow(countQuery).Scan(&count); err != nil {
 		fmt.Println("error is while selecting count", err.Error())
@@ -65,7 +65,7 @@ func (b basketRepo) GetList(req models.GetListRequest) (models.BasketResponse, e
 	query = `select id, customer_id, total_sum from baskets `
 
 	if search != "" {
-		query += fmt.Sprintf(` and total_sum ilike '%%%s%%'`, search)
+		query += fmt.Sprintf(` where CAST(total_sum AS TEXT) ilike '%%%s%%'`, search)
 	}
 
 	query += `LIMIT $1 OFFSET $2`

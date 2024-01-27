@@ -39,7 +39,7 @@ func New(store storage.IStorage) *gin.Engine {
 
 	r.POST("/basket", h.CreateBasket)
 	r.GET("/basket/:id", h.GetBasket)
-	r.GET("/basket", h.GetBasketList)
+	r.GET("/baskets", h.GetBasketList)
 	r.PUT("basket/:id", h.UpdateBasket)
 	r.DELETE("basket/:id", h.DeleteBasket)
 
@@ -49,6 +49,7 @@ func New(store storage.IStorage) *gin.Engine {
 	r.PUT("/basketProduct/:id", h.UpdateBasketProduct)
 	r.DELETE("/basketProduct/:id", h.DeleteBasketProduct)
 
+	r.PUT("/sell", h.StartSell)
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return r
 }
