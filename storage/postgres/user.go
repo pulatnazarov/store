@@ -1,18 +1,19 @@
 package postgres
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"test/api/models"
 	"test/storage"
 )
 
 type userRepo struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewUserRepo(db *sql.DB) storage.IUserStorage {
+func NewUserRepo(db *pgxpool.Pool) storage.IUserStorage {
 	return &userRepo{
 		db: db,
 	}
@@ -22,7 +23,7 @@ func (u *userRepo) Create(createUser models.CreateUser) (string, error) {
 
 	uid := uuid.New()
 
-	if _, err := u.db.Exec(`insert into 
+	if _, err := u.db.Exec(context.Background(), `insert into 
 			users values ($1, $2, $3, $4, $5, $6)
 			`,
 		uid,
@@ -45,7 +46,7 @@ func (u *userRepo) GetByID(pKey models.PrimaryKey) (models.User, error) {
 	query := `
 		select id, full_name, phone, cash from users where id = $1 and user_role = 'customer'
 `
-	if err := u.db.QueryRow(query, pKey.ID).Scan(
+	if err := u.db.QueryRow(context.Background(), query, pKey.ID).Scan(
 		&user.ID,
 		&user.FullName,
 		&user.Phone,
@@ -75,7 +76,7 @@ func (u *userRepo) GetList(request models.GetListRequest) (models.UsersResponse,
 		countQuery += fmt.Sprintf(` and (phone ilike '%%%s%%' or full_name ilike '%%%s%%')`, search, search)
 	}
 
-	if err := u.db.QueryRow(countQuery).Scan(&count); err != nil {
+	if err := u.db.QueryRow(context.Background(), countQuery).Scan(&count); err != nil {
 		fmt.Println("error while scanning count of users", err.Error())
 		return models.UsersResponse{}, err
 	}
@@ -92,7 +93,7 @@ func (u *userRepo) GetList(request models.GetListRequest) (models.UsersResponse,
 
 	query += ` LIMIT $1 OFFSET $2`
 
-	rows, err := u.db.Query(query, request.Limit, offset)
+	rows, err := u.db.Query(context.Background(), query, request.Limit, offset)
 	if err != nil {
 		fmt.Println("error while query rows", err.Error())
 		return models.UsersResponse{}, err
@@ -126,7 +127,7 @@ func (u *userRepo) Update(request models.UpdateUser) (string, error) {
 			set full_name = $1, phone = $2, cash = $3
 				where user_role = 'customer' and id = $4`
 
-	if _, err := u.db.Exec(query, request.FullName, request.Phone, request.Cash, request.ID); err != nil {
+	if _, err := u.db.Exec(context.Background(), query, request.FullName, request.Phone, request.Cash, request.ID); err != nil {
 		fmt.Println("error while updating user data", err.Error())
 		return "", err
 	}
@@ -139,7 +140,7 @@ func (u *userRepo) Delete(request models.PrimaryKey) error {
 		delete from users
 			where id = $1
 `
-	if _, err := u.db.Exec(query, request.ID); err != nil {
+	if _, err := u.db.Exec(context.Background(), query, request.ID); err != nil {
 		fmt.Println("error while deleting user by id", err.Error())
 		return err
 	}
@@ -154,7 +155,7 @@ func (u *userRepo) GetPassword(id string) (string, error) {
 		select password from users 
 		                where user_role = 'customer' and id = $1`
 
-	if err := u.db.QueryRow(query, id).Scan(&password); err != nil {
+	if err := u.db.QueryRow(context.Background(), query, id).Scan(&password); err != nil {
 		fmt.Println("Error while scanning password from users", err.Error())
 		return "", err
 	}
@@ -168,7 +169,7 @@ func (u *userRepo) UpdatePassword(request models.UpdateUserPassword) error {
 				set password = $1
 					where id = $2 and user_role = 'customer'`
 
-	if _, err := u.db.Exec(query, request.NewPassword, request.ID); err != nil {
+	if _, err := u.db.Exec(context.Background(), query, request.NewPassword, request.ID); err != nil {
 		fmt.Println("error while updating password for user", err.Error())
 		return err
 	}
