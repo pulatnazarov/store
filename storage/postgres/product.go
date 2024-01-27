@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 	"test/api/models"
 	"test/storage"
 )
@@ -132,5 +134,66 @@ func (p *productRepo) Delete(key models.PrimaryKey) error {
 		fmt.Println("error is while deleting product", err.Error())
 		return err
 	}
+	return nil
+}
+
+func (p *productRepo) Search(customerProductIDs map[string]int) (map[string]int, map[string]int, error) {
+	var (
+		selectedProducts = models.SellRequest{
+			Products: map[string]int{},
+		}
+		products      = make([]string, len(customerProductIDs))
+		productPrices = make(map[string]int, 0)
+	)
+
+	for key := range customerProductIDs {
+		products = append(products, key)
+	}
+
+	query := `
+			select id, quantity, price, original_price from products where id::varchar = ANY($1)
+`
+
+	rows, err := p.db.Query(query, pq.Array(products)) // [a, b, c]
+	if err != nil {
+		fmt.Println("Error while getting products by product ids", err.Error())
+		return nil, nil, err
+	}
+
+	for rows.Next() {
+		var (
+			quantity, price, originalPrice int
+			productID                      string
+		)
+		if err = rows.Scan(
+			&productID,
+			&quantity,
+			&price,
+			&originalPrice,
+		); err != nil {
+			fmt.Println("Error while scanning rows one by one", err.Error())
+			return nil, nil, err
+		}
+
+		if customerProductIDs[productID] <= quantity {
+			selectedProducts.Products[productID] = price
+			productPrices[productID] = originalPrice
+		}
+	}
+
+	return selectedProducts.Products, productPrices, nil
+}
+
+func (p *productRepo) TakeProducts(products map[string]int) error {
+	query := `
+		update products set quantity = quantity - $1 where id = $2
+`
+	for productID, quantity := range products {
+		if _, err := p.db.Exec(query, quantity, productID); err != nil {
+			fmt.Println("Error while updating product quantity", err.Error())
+			return err
+		}
+	}
+
 	return nil
 }

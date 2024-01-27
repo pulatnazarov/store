@@ -37,3 +37,8 @@ type ProductSell struct {
 	OriginalPrice uint   `json:"-"`
 	Quantity      uint   `json:"quantity"`
 }
+
+type SellRequest struct {
+	Products map[string]int `json:"products"`
+	BasketID string         `json:"basket_id"`
+}

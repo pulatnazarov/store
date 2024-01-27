@@ -179,3 +179,77 @@ func (h Handler) DeleteProduct(c *gin.Context) {
 
 	handleResponse(c, "", http.StatusOK, "product deleted")
 }
+
+// StartSellNew godoc
+// @Router       /sell-new [POST]
+// @Summary      Selling products
+// @Description  selling products
+// @Tags         product
+// @Accept       json
+// @Produce      json
+// @Param 		 sell_request body models.SellRequest false "sell_request"
+// @Success      200  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h Handler) StartSellNew(c *gin.Context) {
+	request := models.SellRequest{}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
+		handleResponse(c, "error while reading body", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	selectedProducts, productPrices, err := h.storage.Product().Search(request.Products)
+	if err != nil {
+		handleResponse(c, "error while searching products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	basket, err := h.storage.Basket().GetByID(models.PrimaryKey{
+		ID: request.BasketID,
+	})
+	if err != nil {
+		handleResponse(c, "error while searching products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	customer, err := h.storage.User().GetByID(models.PrimaryKey{
+		ID: basket.CustomerID,
+	})
+	if err != nil {
+		handleResponse(c, "error while getting customer by id", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	totalSum, profit := 0, 0
+	basketProducts := map[string]int{}
+
+	for productID, price := range selectedProducts {
+		customerQuantity := request.Products[productID]
+		totalSum += price * customerQuantity
+
+		// profit logic
+		profit += customerQuantity * (price - productPrices[productID])
+		basketProducts[productID] = customerQuantity
+	}
+
+	if customer.Cash < uint(totalSum) {
+		handleResponse(c, "not enough customer cash", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err = h.storage.Product().TakeProducts(basketProducts); err != nil {
+		handleResponse(c, "error while taking products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if err = h.storage.BasketProduct().AddProducts(basket.ID, basketProducts); err != nil {
+		handleResponse(c, "error while adding products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// save profit in db
+
+	handleResponse(c, "successfully finished the purchase", http.StatusOK, profit)
+}

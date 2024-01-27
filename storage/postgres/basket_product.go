@@ -119,3 +119,20 @@ func (b basketProductRepo) Delete(key models.PrimaryKey) error {
 	}
 	return nil
 }
+
+func (b basketProductRepo) AddProducts(basketID string, products map[string]int) error {
+	query := `
+			insert into basket_products 
+			    (id, basket_id, product_id, quantity) 
+					values ($1, $2, $3, $4)
+`
+
+	for productID, quantity := range products {
+		if _, err := b.db.Exec(query, uuid.New(), basketID, productID, quantity); err != nil {
+			fmt.Println("Error while adding product to basket_products table", err.Error())
+			return err
+		}
+	}
+
+	return nil
+}

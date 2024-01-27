@@ -1144,6 +1144,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/sell-new": {
+            "post": {
+                "description": "selling products",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "product"
+                ],
+                "summary": "Selling products",
+                "parameters": [
+                    {
+                        "description": "sell_request",
+                        "name": "sell_request",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.SellRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "post": {
                 "description": "create a new user",
@@ -1659,6 +1710,20 @@ const docTemplate = `{
                 },
                 "statusCode": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.SellRequest": {
+            "type": "object",
+            "properties": {
+                "basket_id": {
+                    "type": "string"
+                },
+                "products": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "integer"
+                    }
                 }
             }
         },
