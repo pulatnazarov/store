@@ -49,3 +49,11 @@ func (s Store) Basket() storage.IBasketStorage {
 func (s Store) BasketProduct() storage.IBasketProductStorage {
 	return NewBasketProductRepo(s.DB)
 }
+
+func (s Store) Store() storage.IStore {
+	return NewStoreRepo(s.DB)
+}
+
+func (s Store) Repo() storage.IRepository {
+	return NewRepository(s.DB)
+}

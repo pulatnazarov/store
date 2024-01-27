@@ -24,3 +24,8 @@ type BasketProductResponse struct {
 	BasketProducts []BasketProduct
 	Count          int
 }
+
+type BasketProductSell struct {
+	ProductName string `json:"product_name"`
+	Quantity    uint   `json:"quantity"`
+}

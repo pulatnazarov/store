@@ -35,3 +35,9 @@ create table basket_products (
     product_id uuid references products(id),
     quantity int
 );
+
+CREATE TABLE store (
+    budget NUMERIC(100, 2),
+    profit NUMERIC(100, 2)
+);
+

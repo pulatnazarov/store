@@ -30,3 +30,10 @@ type ProductResponse struct {
 	Product []Product
 	Count   int
 }
+
+type ProductSell struct {
+	Name          string `json:"name"`
+	Price         uint   `json:"-"`
+	OriginalPrice uint   `json:"-"`
+	Quantity      uint   `json:"quantity"`
+}

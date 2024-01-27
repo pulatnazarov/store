@@ -192,6 +192,17 @@ definitions:
       user_type:
         type: string
     type: object
+  models.UserSell:
+    properties:
+      cash:
+        type: integer
+      full_name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+    type: object
   models.UsersResponse:
     properties:
       count:
@@ -907,6 +918,49 @@ paths:
       summary: Get product list
       tags:
       - product
+  /sell:
+    put:
+      consumes:
+      - application/json
+      description: sale products
+      parameters:
+      - description: product
+        in: query
+        name: product
+        required: true
+        type: string
+      - description: quantity
+        in: query
+        name: quantity
+        required: true
+        type: string
+      - description: user
+        in: body
+        name: user
+        schema:
+          $ref: '#/definitions/models.UserSell'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: sale products
+      tags:
+      - sale
   /user:
     post:
       consumes:

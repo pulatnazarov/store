@@ -13,10 +13,10 @@ type productRepo struct {
 }
 
 func NewProductRepo(db *sql.DB) storage.IProductStorage {
-	return productRepo{db: db}
+	return &productRepo{db: db}
 }
 
-func (p productRepo) Create(product models.CreateProduct) (string, error) {
+func (p *productRepo) Create(product models.CreateProduct) (string, error) {
 	id := uuid.New()
 	query := `insert into products(id, name, price, original_price, quantity, category_id) 
 						values($1, $2, $3, $4, $5, $6)`
@@ -35,7 +35,7 @@ func (p productRepo) Create(product models.CreateProduct) (string, error) {
 	return id.String(), nil
 }
 
-func (p productRepo) GetByID(key models.PrimaryKey) (models.Product, error) {
+func (p *productRepo) GetByID(key models.PrimaryKey) (models.Product, error) {
 	product := models.Product{}
 	query := `select id, name, price, original_price, quantity, category_id from products where id = $1 `
 	if err := p.db.QueryRow(query, key.ID).Scan(
@@ -51,7 +51,7 @@ func (p productRepo) GetByID(key models.PrimaryKey) (models.Product, error) {
 	return product, nil
 }
 
-func (p productRepo) GetList(request models.GetListRequest) (models.ProductResponse, error) {
+func (p *productRepo) GetList(request models.GetListRequest) (models.ProductResponse, error) {
 	var (
 		products          = []models.Product{}
 		page              = request.Page
@@ -108,7 +108,7 @@ func (p productRepo) GetList(request models.GetListRequest) (models.ProductRespo
 	}, err
 }
 
-func (p productRepo) Update(product models.UpdateProduct) (string, error) {
+func (p *productRepo) Update(product models.UpdateProduct) (string, error) {
 	query := `update products set name = $1, price = $2, original_price = $3, quantity = $4, category_id = $5 where id = $6`
 
 	if _, err := p.db.Exec(query,
@@ -125,7 +125,7 @@ func (p productRepo) Update(product models.UpdateProduct) (string, error) {
 	return product.ID, nil
 }
 
-func (p productRepo) Delete(key models.PrimaryKey) error {
+func (p *productRepo) Delete(key models.PrimaryKey) error {
 	query := `delete from products where id = $1`
 
 	if _, err := p.db.Exec(query, key.ID); err != nil {
