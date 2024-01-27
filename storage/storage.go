@@ -24,11 +24,6 @@ type IRepository interface {
 	TakeProduct(productName string, quantity uint)
 }
 
-type IProductList interface {
-	AddProduct(product models.Product) (string, error)
-	RemoveProduct(id string) error
-}
-
 type IUserStorage interface {
 	Create(models.CreateUser) (string, error)
 	GetByID(models.PrimaryKey) (models.User, error)
