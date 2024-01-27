@@ -58,3 +58,9 @@ func (p *repo) TakeProduct(productName string, quantity uint) {
 		return
 	}
 }
+
+func (p *repo) ProductProvide(productName string, budget uint, quantity uint) {
+	//if product exists update product quantity
+	//if product does not exist insert this product
+
+}

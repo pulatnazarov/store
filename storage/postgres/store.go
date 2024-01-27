@@ -8,8 +8,7 @@ import (
 )
 
 type storeRepo struct {
-	db   *sql.DB
-	repo repo
+	db *sql.DB
 }
 
 func NewStoreRepo(db *sql.DB) storage.IStore {
