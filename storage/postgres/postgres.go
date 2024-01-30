@@ -64,11 +64,3 @@ func (s Store) Basket() storage.IBasketStorage {
 func (s Store) BasketProduct() storage.IBasketProductStorage {
 	return NewBasketProductRepo(s.Pool)
 }
-
-func (s Store) Store() storage.IStore {
-	return NewStoreRepo(s.Pool)
-}
-
-func (s Store) Repo() storage.IRepository {
-	return NewRepository(s.Pool)
-}

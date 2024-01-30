@@ -49,7 +49,6 @@ func New(store storage.IStorage) *gin.Engine {
 	r.PUT("/basketProduct/:id", h.UpdateBasketProduct)
 	r.DELETE("/basketProduct/:id", h.DeleteBasketProduct)
 
-	r.PUT("/sell", h.StartSell)
 	r.POST("/sell-new", h.StartSellNew)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
