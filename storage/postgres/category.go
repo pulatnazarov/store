@@ -1,25 +1,26 @@
 package postgres
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"test/api/models"
 	"test/storage"
 )
 
 type categoryRepo struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewCategoryRepo(db *sql.DB) storage.ICategoryStorage {
+func NewCategoryRepo(db *pgxpool.Pool) storage.ICategoryStorage {
 	return categoryRepo{db: db}
 }
 func (c categoryRepo) Create(category models.CreateCategory) (string, error) {
 	id := uuid.New()
 	query := `insert into categories (id, name) values($1, $2)`
 
-	if _, err := c.db.Exec(query, id, category.Name); err != nil {
+	if _, err := c.db.Exec(context.Background(), query, id, category.Name); err != nil {
 		fmt.Println("error is while creating category", err.Error())
 		return "", err
 	}
@@ -31,7 +32,7 @@ func (c categoryRepo) GetByID(key models.PrimaryKey) (models.Category, error) {
 	category := models.Category{}
 
 	query := `select id, name from categories where id = $1`
-	if err := c.db.QueryRow(query, key.ID).Scan(&category.ID, &category.Name); err != nil {
+	if err := c.db.QueryRow(context.Background(), query, key.ID).Scan(&category.ID, &category.Name); err != nil {
 		fmt.Println("error is while getting by id", err.Error())
 		return models.Category{}, err
 	}
@@ -55,7 +56,7 @@ func (c categoryRepo) GetList(request models.GetListRequest) (models.CategoryRes
 		countQuery += fmt.Sprintf(` where name ilike '%%%s%%'`, search)
 	}
 
-	if err := c.db.QueryRow(countQuery).Scan(&count); err != nil {
+	if err := c.db.QueryRow(context.Background(), countQuery).Scan(&count); err != nil {
 		fmt.Println("error is while scanning count", err.Error())
 		return models.CategoryResponse{}, err
 	}
@@ -68,7 +69,7 @@ func (c categoryRepo) GetList(request models.GetListRequest) (models.CategoryRes
 
 	query += ` LIMIT $1 OFFSET $2`
 
-	rows, err := c.db.Query(query, request.Limit, offset)
+	rows, err := c.db.Query(context.Background(), query, request.Limit, offset)
 	if err != nil {
 		fmt.Println("error is while selecting categories", err.Error())
 		return models.CategoryResponse{}, err
@@ -91,7 +92,7 @@ func (c categoryRepo) GetList(request models.GetListRequest) (models.CategoryRes
 func (c categoryRepo) Update(category models.UpdateCategory) (string, error) {
 	query := `update categories set name = $1 where id = $2`
 
-	if _, err := c.db.Exec(query, &category.Name, &category.ID); err != nil {
+	if _, err := c.db.Exec(context.Background(), query, &category.Name, &category.ID); err != nil {
 		fmt.Println("error is while updating category", err.Error())
 		return "", err
 	}
@@ -101,7 +102,7 @@ func (c categoryRepo) Update(category models.UpdateCategory) (string, error) {
 func (c categoryRepo) Delete(key models.PrimaryKey) error {
 	query := `delete from categories where id = $1`
 
-	if _, err := c.db.Exec(query, key.ID); err != nil {
+	if _, err := c.db.Exec(context.Background(), query, key.ID); err != nil {
 		fmt.Println("error is while deleting category", err.Error())
 		return err
 	}

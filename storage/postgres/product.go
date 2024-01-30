@@ -1,9 +1,10 @@
 package postgres
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
 	"test/api/models"
@@ -11,10 +12,10 @@ import (
 )
 
 type productRepo struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewProductRepo(db *sql.DB) storage.IProductStorage {
+func NewProductRepo(db *pgxpool.Pool) storage.IProductStorage {
 	return &productRepo{db: db}
 }
 
@@ -23,7 +24,7 @@ func (p *productRepo) Create(product models.CreateProduct) (string, error) {
 	query := `insert into products(id, name, price, original_price, quantity, category_id) 
 						values($1, $2, $3, $4, $5, $6)`
 
-	if _, err := p.db.Exec(query,
+	if _, err := p.db.Exec(context.Background(), query,
 		id,
 		product.Name,
 		product.Price,
@@ -40,7 +41,7 @@ func (p *productRepo) Create(product models.CreateProduct) (string, error) {
 func (p *productRepo) GetByID(key models.PrimaryKey) (models.Product, error) {
 	product := models.Product{}
 	query := `select id, name, price, original_price, quantity, category_id from products where id = $1 `
-	if err := p.db.QueryRow(query, key.ID).Scan(
+	if err := p.db.QueryRow(context.Background(), query, key.ID).Scan(
 		&product.ID,
 		&product.Name,
 		&product.Price,
@@ -70,7 +71,7 @@ func (p *productRepo) GetList(request models.GetListRequest) (models.ProductResp
 			CAST(price AS TEXT) ilike '%%%s%%' or CAST(quantity AS TEXT) ilike '%%%s%%')`, search, search, search)
 	}
 
-	if err := p.db.QueryRow(countQuery).Scan(&count); err != nil {
+	if err := p.db.QueryRow(context.Background(), countQuery).Scan(&count); err != nil {
 		fmt.Println("error is while scanning count", err.Error())
 		return models.ProductResponse{}, err
 	}
@@ -84,7 +85,7 @@ func (p *productRepo) GetList(request models.GetListRequest) (models.ProductResp
 
 	query += ` LIMIT $1 OFFSET $2`
 
-	rows, err := p.db.Query(query, request.Limit, offset)
+	rows, err := p.db.Query(context.Background(), query, request.Limit, offset)
 	if err != nil {
 		fmt.Println("error is while selecting products", err.Error())
 		return models.ProductResponse{}, err
@@ -113,7 +114,7 @@ func (p *productRepo) GetList(request models.GetListRequest) (models.ProductResp
 func (p *productRepo) Update(product models.UpdateProduct) (string, error) {
 	query := `update products set name = $1, price = $2, original_price = $3, quantity = $4, category_id = $5 where id = $6`
 
-	if _, err := p.db.Exec(query,
+	if _, err := p.db.Exec(context.Background(), query,
 		&product.Name,
 		&product.Price,
 		&product.OriginalPrice,
@@ -130,7 +131,7 @@ func (p *productRepo) Update(product models.UpdateProduct) (string, error) {
 func (p *productRepo) Delete(key models.PrimaryKey) error {
 	query := `delete from products where id = $1`
 
-	if _, err := p.db.Exec(query, key.ID); err != nil {
+	if _, err := p.db.Exec(context.Background(), query, key.ID); err != nil {
 		fmt.Println("error is while deleting product", err.Error())
 		return err
 	}
@@ -142,19 +143,21 @@ func (p *productRepo) Search(customerProductIDs map[string]int) (map[string]int,
 		selectedProducts = models.SellRequest{
 			Products: map[string]int{},
 		}
-		products      = make([]string, len(customerProductIDs))
-		productPrices = make(map[string]int, 0)
+		products         = make([]string, len(customerProductIDs))
+		productQuantites []int
+		productPrices    = make(map[string]int, 0)
 	)
 
-	for key := range customerProductIDs {
+	for key, value := range customerProductIDs {
 		products = append(products, key)
+		productQuantites = append(productQuantites, value)
 	}
 
 	query := `
-			select id, quantity, price, original_price from products where id::varchar = ANY($1)
-`
+				select id, quantity, price, original_price from products where id::varchar = ANY($1)
+	`
 
-	rows, err := p.db.Query(query, pq.Array(products)) // [a, b, c]
+	rows, err := p.db.Query(context.Background(), query, pq.Array(products), pq.Array(productQuantites)) // [a, b, c]
 	if err != nil {
 		fmt.Println("Error while getting products by product ids", err.Error())
 		return nil, nil, err
@@ -189,7 +192,7 @@ func (p *productRepo) TakeProducts(products map[string]int) error {
 		update products set quantity = quantity - $1 where id = $2
 `
 	for productID, quantity := range products {
-		if _, err := p.db.Exec(query, quantity, productID); err != nil {
+		if _, err := p.db.Exec(context.Background(), query, quantity, productID); err != nil {
 			fmt.Println("Error while updating product quantity", err.Error())
 			return err
 		}
