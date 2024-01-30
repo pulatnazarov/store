@@ -1,17 +1,18 @@
 package postgres
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"test/api/models"
 	"test/storage"
 )
 
 type repo struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewRepository(db *sql.DB) storage.IRepository {
+func NewRepository(db *pgxpool.Pool) storage.IRepository {
 	return &repo{db: db}
 }
 
@@ -19,7 +20,7 @@ func (p *repo) Search(productName string, quantity uint) (models.ProductSell, er
 	product := models.ProductSell{}
 
 	query := `select name, quantity, price, original_price from products where name = $1`
-	if err := p.db.QueryRow(query, productName).Scan(
+	if err := p.db.QueryRow(context.Background(), query, productName).Scan(
 		&product.Name,
 		&product.Quantity,
 		&product.Price,
@@ -53,7 +54,7 @@ func (p *repo) Search(productName string, quantity uint) (models.ProductSell, er
 
 func (p *repo) TakeProduct(productName string, quantity uint) {
 	query := `update products set quantity = $1 where name = $2`
-	if _, err := p.db.Exec(query, quantity, productName); err != nil {
+	if _, err := p.db.Exec(context.Background(), query, quantity, productName); err != nil {
 		fmt.Println("error is while taking product from database", err.Error())
 		return
 	}

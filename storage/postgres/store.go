@@ -1,17 +1,18 @@
 package postgres
 
 import (
-	"database/sql"
+	"context"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"test/api/models"
 	"test/storage"
 )
 
 type storeRepo struct {
-	db *sql.DB
+	db *pgxpool.Pool
 }
 
-func NewStoreRepo(db *sql.DB) storage.IStore {
+func NewStoreRepo(db *pgxpool.Pool) storage.IStore {
 	return &storeRepo{db: db}
 }
 
@@ -23,7 +24,7 @@ func (s *storeRepo) Sell(product models.ProductSell, user models.UserSell) (mode
 
 	profit := product.Quantity * (product.Price - product.OriginalPrice)
 	query := `update store set profit = $1`
-	if _, err := s.db.Exec(query, profit); err != nil {
+	if _, err := s.db.Exec(context.Background(), query, profit); err != nil {
 		fmt.Println("error is while updating profit", err.Error())
 		return models.Ticket{}, err
 	}
