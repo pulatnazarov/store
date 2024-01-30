@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -236,6 +237,11 @@ func (h Handler) StartSellNew(c *gin.Context) {
 
 	if customer.Cash < uint(totalSum) {
 		handleResponse(c, "not enough customer cash", http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if err = h.storage.User().UpdateCustomerCash(context.Background(), customer.ID, totalSum); err != nil {
+		handleResponse(c, "error while updating customer cash with total sum", http.StatusInternalServerError, err.Error())
 		return
 	}
 

@@ -176,3 +176,14 @@ func (u *userRepo) UpdatePassword(request models.UpdateUserPassword) error {
 
 	return nil
 }
+
+func (u *userRepo) UpdateCustomerCash(ctx context.Context, id string, sum int) error {
+	query := `update customer set cash = cash - $1 where id = $2`
+
+	if _, err := u.db.Exec(ctx, query, sum, id); err != nil {
+		fmt.Println("error while updating customer cash", err.Error())
+		return err
+	}
+
+	return nil
+}

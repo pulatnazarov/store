@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"context"
 	"test/api/models"
 )
 
@@ -19,8 +20,9 @@ type IUserStorage interface {
 	GetList(models.GetListRequest) (models.UsersResponse, error)
 	Update(models.UpdateUser) (string, error)
 	Delete(models.PrimaryKey) error
-	GetPassword(id string) (string, error)
-	UpdatePassword(password models.UpdateUserPassword) error
+	GetPassword(string) (string, error)
+	UpdatePassword(models.UpdateUserPassword) error
+	UpdateCustomerCash(context.Context, string, int) error
 }
 
 type ICategoryStorage interface {
