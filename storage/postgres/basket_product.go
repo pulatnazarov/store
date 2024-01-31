@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
 	"test/api/models"
 	"test/storage"
 )
@@ -122,18 +123,43 @@ func (b basketProductRepo) Delete(key models.PrimaryKey) error {
 }
 
 func (b basketProductRepo) AddProducts(basketID string, products map[string]int) error {
+	var (
+		insertStatements []string
+	)
 	query := `
-			insert into basket_products 
-			    (id, basket_id, product_id, quantity) 
-					values ($1, $2, $3, $4)
+		DO $$
+		BEGIN 
+           %s
+		END $$
 `
-
 	for productID, quantity := range products {
-		if _, err := b.db.Exec(context.Background(), query, uuid.New(), basketID, productID, quantity); err != nil {
-			fmt.Println("Error while adding product to basket_products table", err.Error())
-			return err
-		}
+		insertStatements = append(insertStatements, fmt.Sprintf(`insert into basket_products (id, basket_id, product_id, quantity)
+                      values ('%s', '%s', '%s', %d) ;`, uuid.New(), basketID, productID, quantity))
+	}
+
+	finalQuery := fmt.Sprintf(query, strings.Join(insertStatements, "\n"))
+
+	if _, err := b.db.Exec(context.Background(), finalQuery); err != nil {
+		fmt.Println("error is while inserting to basket products", err.Error())
+		return err
 	}
 
 	return nil
 }
+
+//func (b basketProductRepo) AddProducts(basketID string, products map[string]int) error {
+//	query := `
+//			insert into basket_products
+//			    (id, basket_id, product_id, quantity)
+//					values ($1, $2, $3, $4)
+//`
+//
+//	for productID, quantity := range products {
+//		if _, err := b.db.Exec(context.Background(), query, uuid.New(), basketID, productID, quantity); err != nil {
+//			fmt.Println("Error while adding product to basket_products table", err.Error())
+//			return err
+//		}
+//	}
+//
+//	return nil
+//}

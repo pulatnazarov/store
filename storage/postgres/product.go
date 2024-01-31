@@ -7,6 +7,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lib/pq"
 	_ "github.com/lib/pq"
+	"strings"
 	"test/api/models"
 	"test/storage"
 )
@@ -188,15 +189,25 @@ func (p *productRepo) Search(customerProductIDs map[string]int) (map[string]int,
 }
 
 func (p *productRepo) TakeProducts(products map[string]int) error {
+	var (
+		updateStatements []string
+	)
 	query := `
-		update products set quantity = quantity - $1 where id = $2
+	DO $$
+	BEGIN
+		%s
+	END $$
 `
+
 	for productID, quantity := range products {
-		if _, err := p.db.Exec(context.Background(), query, quantity, productID); err != nil {
-			fmt.Println("Error while updating product quantity", err.Error())
-			return err
-		}
+		updateStatements = append(updateStatements, fmt.Sprintf(`update products 
+			set quantity = quantity - %d where id = '%s' ;`, quantity, productID))
 	}
 
+	finalQuery := fmt.Sprintf(query, strings.Join(updateStatements, "\n"))
+	if _, err := p.db.Exec(context.Background(), finalQuery); err != nil {
+		fmt.Println("Error while updating product quantity", err.Error())
+		return err
+	}
 	return nil
 }
