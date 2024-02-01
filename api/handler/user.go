@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"strconv"
 	"test/api/models"
-	"test/pkg/check"
 )
 
 // CreateUser godoc
@@ -31,21 +30,13 @@ func (h Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	pKey, err := h.storage.User().Create(context.Background(), createUser)
+	resp, err := h.services.User().Create(context.Background(), createUser)
 	if err != nil {
-		handleResponse(c, "error while creating user", http.StatusInternalServerError, err)
+		handleResponse(c, "error while creating user", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	user, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
-		ID: pKey,
-	})
-	if err != nil {
-		handleResponse(c, "error while getting user by id", http.StatusInternalServerError, err)
-		return
-	}
-
-	handleResponse(c, "", http.StatusCreated, user)
+	handleResponse(c, "", http.StatusCreated, resp)
 }
 
 // GetUser godoc
@@ -71,7 +62,7 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
+	user, err := h.services.User().GetUser(context.Background(), models.PrimaryKey{
 		ID: id.String(),
 	})
 	if err != nil {
@@ -119,7 +110,7 @@ func (h Handler) GetUserList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	resp, err := h.storage.User().GetList(context.Background(), models.GetListRequest{
+	resp, err := h.services.User().GetUsers(context.Background(), models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -161,21 +152,13 @@ func (h Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	pKey, err := h.storage.User().Update(context.Background(), updateUser)
+	resp, err := h.services.User().Update(context.Background(), updateUser)
 	if err != nil {
 		handleResponse(c, "error while updating user", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	user, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
-		ID: pKey,
-	})
-	if err != nil {
-		handleResponse(c, "error while getting user by id", http.StatusInternalServerError, err)
-		return
-	}
-
-	handleResponse(c, "", http.StatusOK, user)
+	handleResponse(c, "", http.StatusOK, resp)
 }
 
 // DeleteUser godoc
@@ -198,7 +181,7 @@ func (h Handler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err = h.storage.User().Delete(context.Background(), models.PrimaryKey{
+	if err = h.services.User().Delete(context.Background(), models.PrimaryKey{
 		ID: id.String(),
 	}); err != nil {
 		handleResponse(c, "error while deleting user by id", http.StatusInternalServerError, err.Error())
@@ -237,24 +220,8 @@ func (h Handler) UpdateUserPassword(c *gin.Context) {
 
 	updateUserPassword.ID = uid.String()
 
-	oldPassword, err := h.storage.User().GetPassword(context.Background(), updateUserPassword.ID)
-	if err != nil {
-		handleResponse(c, "error while getting password by id", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if oldPassword != updateUserPassword.OldPassword {
-		handleResponse(c, "old password is not correct", http.StatusBadRequest, "old password is not correct")
-		return
-	}
-
-	if err = check.ValidatePassword(updateUserPassword.NewPassword); err != nil {
-		handleResponse(c, "new password is weak", http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err = h.storage.User().UpdatePassword(context.Background(), updateUserPassword); err != nil {
-		handleResponse(c, "error while updating user password by id", http.StatusInternalServerError, err.Error())
+	if err = h.services.User().UpdatePassword(context.Background(), updateUserPassword); err != nil {
+		handleResponse(c, "error while updating user password", http.StatusInternalServerError, err.Error())
 		return
 	}
 

@@ -1596,6 +1596,9 @@ const docTemplate = `{
         "models.CreateUser": {
             "type": "object",
             "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
                 "cash": {
                     "type": "integer"
                 },
@@ -1749,6 +1752,9 @@ const docTemplate = `{
         "models.User": {
             "type": "object",
             "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
                 "cash": {
                     "type": "integer"
                 },

@@ -89,6 +89,8 @@ definitions:
     type: object
   models.CreateUser:
     properties:
+      branch_id:
+        type: string
       cash:
         type: integer
       full_name:
@@ -188,6 +190,8 @@ definitions:
     type: object
   models.User:
     properties:
+      branch_id:
+        type: string
       cash:
         type: integer
       full_name:

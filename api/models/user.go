@@ -7,6 +7,7 @@ type User struct {
 	Password string `json:"password"`
 	Cash     uint   `json:"cash"`
 	UserType string `json:"user_type"`
+	BranchID string `json:"branch_id"`
 }
 
 type CreateUser struct {
@@ -15,6 +16,7 @@ type CreateUser struct {
 	Password string `json:"password"`
 	Cash     uint   `json:"cash"`
 	UserType string `json:"user_type"`
+	BranchID string `json:"branch_id"`
 }
 
 type UpdateUser struct {

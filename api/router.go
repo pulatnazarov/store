@@ -6,6 +6,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 	_ "test/api/docs"
 	"test/api/handler"
+	"test/service"
 	"test/storage"
 )
 
@@ -13,8 +14,8 @@ import (
 // @title           Swagger Example API
 // @version         1.0
 // @description     This is a sample server celler server.
-func New(store storage.IStorage) *gin.Engine {
-	h := handler.New(store)
+func New(services service.IServiceManager, store storage.IStorage) *gin.Engine {
+	h := handler.New(services, store)
 
 	r := gin.New()
 

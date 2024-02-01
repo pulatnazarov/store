@@ -28,19 +28,13 @@ func (h Handler) CreateCategory(c *gin.Context) {
 		return
 	}
 
-	id, err := h.storage.Category().Create(context.Background(), category)
+	resp, err := h.services.Category().Create(context.Background(), category)
 	if err != nil {
 		handleResponse(c, "error is while creating category", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	createdCategory, err := h.storage.Category().GetByID(context.Background(), models.PrimaryKey{ID: id})
-	if err != nil {
-		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	handleResponse(c, "", http.StatusCreated, createdCategory)
+	handleResponse(c, "", http.StatusCreated, resp)
 }
 
 // GetCategory godoc

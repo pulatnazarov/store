@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"test/api/models"
+	"test/service"
 	"test/storage"
 )
 
 type Handler struct {
-	storage storage.IStorage
+	storage  storage.IStorage
+	services service.IServiceManager
 }
 
-func New(store storage.IStorage) Handler {
+func New(services service.IServiceManager, store storage.IStorage) Handler {
 	return Handler{
-		storage: store,
+		storage:  store,
+		services: services,
 	}
 }
 

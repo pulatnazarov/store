@@ -5,6 +5,7 @@ import (
 	"log"
 	"test/api"
 	"test/config"
+	"test/service"
 	"test/storage/postgres"
 )
 
@@ -18,7 +19,9 @@ func main() {
 	}
 	defer pgStore.Close()
 
-	server := api.New(pgStore)
+	services := service.New(pgStore)
+
+	server := api.New(services, pgStore)
 
 	if err = server.Run("localhost:8080"); err != nil {
 		panic(err)

@@ -1588,6 +1588,9 @@
         "models.CreateUser": {
             "type": "object",
             "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
                 "cash": {
                     "type": "integer"
                 },
@@ -1741,6 +1744,9 @@
         "models.User": {
             "type": "object",
             "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
                 "cash": {
                     "type": "integer"
                 },
