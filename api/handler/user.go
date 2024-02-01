@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -30,13 +31,13 @@ func (h Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	pKey, err := h.storage.User().Create(createUser)
+	pKey, err := h.storage.User().Create(context.Background(), createUser)
 	if err != nil {
 		handleResponse(c, "error while creating user", http.StatusInternalServerError, err)
 		return
 	}
 
-	user, err := h.storage.User().GetByID(models.PrimaryKey{
+	user, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
 		ID: pKey,
 	})
 	if err != nil {
@@ -70,7 +71,7 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.storage.User().GetByID(models.PrimaryKey{
+	user, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
 		ID: id.String(),
 	})
 	if err != nil {
@@ -118,7 +119,7 @@ func (h Handler) GetUserList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	resp, err := h.storage.User().GetList(models.GetListRequest{
+	resp, err := h.storage.User().GetList(context.Background(), models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -160,13 +161,13 @@ func (h Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	pKey, err := h.storage.User().Update(updateUser)
+	pKey, err := h.storage.User().Update(context.Background(), updateUser)
 	if err != nil {
 		handleResponse(c, "error while updating user", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	user, err := h.storage.User().GetByID(models.PrimaryKey{
+	user, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
 		ID: pKey,
 	})
 	if err != nil {
@@ -197,7 +198,7 @@ func (h Handler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err = h.storage.User().Delete(models.PrimaryKey{
+	if err = h.storage.User().Delete(context.Background(), models.PrimaryKey{
 		ID: id.String(),
 	}); err != nil {
 		handleResponse(c, "error while deleting user by id", http.StatusInternalServerError, err.Error())
@@ -236,7 +237,7 @@ func (h Handler) UpdateUserPassword(c *gin.Context) {
 
 	updateUserPassword.ID = uid.String()
 
-	oldPassword, err := h.storage.User().GetPassword(updateUserPassword.ID)
+	oldPassword, err := h.storage.User().GetPassword(context.Background(), updateUserPassword.ID)
 	if err != nil {
 		handleResponse(c, "error while getting password by id", http.StatusInternalServerError, err.Error())
 		return
@@ -252,7 +253,7 @@ func (h Handler) UpdateUserPassword(c *gin.Context) {
 		return
 	}
 
-	if err = h.storage.User().UpdatePassword(updateUserPassword); err != nil {
+	if err = h.storage.User().UpdatePassword(context.Background(), updateUserPassword); err != nil {
 		handleResponse(c, "error while updating user password by id", http.StatusInternalServerError, err.Error())
 		return
 	}

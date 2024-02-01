@@ -15,46 +15,46 @@ type IStorage interface {
 }
 
 type IUserStorage interface {
-	Create(models.CreateUser) (string, error)
-	GetByID(models.PrimaryKey) (models.User, error)
-	GetList(models.GetListRequest) (models.UsersResponse, error)
-	Update(models.UpdateUser) (string, error)
-	Delete(models.PrimaryKey) error
-	GetPassword(string) (string, error)
-	UpdatePassword(models.UpdateUserPassword) error
+	Create(context.Context, models.CreateUser) (string, error)
+	GetByID(context.Context, models.PrimaryKey) (models.User, error)
+	GetList(context.Context, models.GetListRequest) (models.UsersResponse, error)
+	Update(context.Context, models.UpdateUser) (string, error)
+	Delete(context.Context, models.PrimaryKey) error
+	GetPassword(context.Context, string) (string, error)
+	UpdatePassword(context.Context, models.UpdateUserPassword) error
 	UpdateCustomerCash(context.Context, string, int) error
 }
 
 type ICategoryStorage interface {
-	Create(models.CreateCategory) (string, error)
-	GetByID(models.PrimaryKey) (models.Category, error)
-	GetList(models.GetListRequest) (models.CategoryResponse, error)
-	Update(models.UpdateCategory) (string, error)
-	Delete(models.PrimaryKey) error
+	Create(context.Context, models.CreateCategory) (string, error)
+	GetByID(context.Context, models.PrimaryKey) (models.Category, error)
+	GetList(context.Context, models.GetListRequest) (models.CategoryResponse, error)
+	Update(context.Context, models.UpdateCategory) (string, error)
+	Delete(context.Context, models.PrimaryKey) error
 }
 
 type IProductStorage interface {
-	Create(models.CreateProduct) (string, error)
-	GetByID(models.PrimaryKey) (models.Product, error)
-	GetList(models.GetListRequest) (models.ProductResponse, error)
-	Update(models.UpdateProduct) (string, error)
-	Delete(models.PrimaryKey) error
-	Search(map[string]int) (map[string]int, map[string]int, error)
-	TakeProducts(map[string]int) error
+	Create(context.Context, models.CreateProduct) (string, error)
+	GetByID(context.Context, models.PrimaryKey) (models.Product, error)
+	GetList(context.Context, models.GetListRequest) (models.ProductResponse, error)
+	Update(context.Context, models.UpdateProduct) (string, error)
+	Delete(context.Context, models.PrimaryKey) error
+	Search(context.Context, map[string]int) (map[string]int, map[string]int, error)
+	TakeProducts(context.Context, map[string]int) error
 }
 type IBasketStorage interface {
-	Create(models.CreateBasket) (string, error)
-	GetByID(models.PrimaryKey) (models.Basket, error)
-	GetList(models.GetListRequest) (models.BasketResponse, error)
-	Update(models.UpdateBasket) (string, error)
-	Delete(key models.PrimaryKey) error
+	Create(context.Context, models.CreateBasket) (string, error)
+	GetByID(context.Context, models.PrimaryKey) (models.Basket, error)
+	GetList(context.Context, models.GetListRequest) (models.BasketResponse, error)
+	Update(context.Context, models.UpdateBasket) (string, error)
+	Delete(context.Context, models.PrimaryKey) error
 }
 
 type IBasketProductStorage interface {
-	Create(models.CreateBasketProduct) (string, error)
-	GetByID(models.PrimaryKey) (models.BasketProduct, error)
-	GetList(models.GetListRequest) (models.BasketProductResponse, error)
-	Update(models.UpdateBasketProduct) (string, error)
-	Delete(models.PrimaryKey) error
-	AddProducts(string, map[string]int) error
+	Create(context.Context, models.CreateBasketProduct) (string, error)
+	GetByID(context.Context, models.PrimaryKey) (models.BasketProduct, error)
+	GetList(context.Context, models.GetListRequest) (models.BasketProductResponse, error)
+	Update(context.Context, models.UpdateBasketProduct) (string, error)
+	Delete(context.Context, models.PrimaryKey) error
+	AddProducts(context.Context, string, map[string]int) error
 }
