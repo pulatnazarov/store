@@ -14,10 +14,10 @@ type basketRepo struct {
 }
 
 func NewBasketRepo(db *pgxpool.Pool) storage.IBasketStorage {
-	return basketRepo{db: db}
+	return &basketRepo{db: db}
 }
 
-func (b basketRepo) Create(ctx context.Context, basket models.CreateBasket) (string, error) {
+func (b *basketRepo) Create(ctx context.Context, basket models.CreateBasket) (string, error) {
 	id := uuid.New()
 
 	if _, err := b.db.Exec(ctx, `insert into baskets(id, customer_id, total_sum)
@@ -29,7 +29,7 @@ func (b basketRepo) Create(ctx context.Context, basket models.CreateBasket) (str
 	return id.String(), nil
 }
 
-func (b basketRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Basket, error) {
+func (b *basketRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Basket, error) {
 	basket := models.Basket{}
 
 	if err := b.db.QueryRow(ctx, `select id, customer_id, total_sum from baskets where id = $1`,
@@ -43,7 +43,7 @@ func (b basketRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.
 	return basket, nil
 }
 
-func (b basketRepo) GetList(ctx context.Context, req models.GetListRequest) (models.BasketResponse, error) {
+func (b *basketRepo) GetList(ctx context.Context, req models.GetListRequest) (models.BasketResponse, error) {
 	var (
 		baskets           = []models.Basket{}
 		count             = 0
@@ -92,7 +92,7 @@ func (b basketRepo) GetList(ctx context.Context, req models.GetListRequest) (mod
 	}, nil
 }
 
-func (b basketRepo) Update(ctx context.Context, basket models.UpdateBasket) (string, error) {
+func (b *basketRepo) Update(ctx context.Context, basket models.UpdateBasket) (string, error) {
 	bas := models.Basket{}
 
 	if _, err := b.db.Exec(ctx, `update baskets set customer_id = $1, total_sum = $2 where id = $3`, &basket.CustomerID, &basket.TotalSum, &basket.ID); err != nil {
@@ -106,7 +106,7 @@ func (b basketRepo) Update(ctx context.Context, basket models.UpdateBasket) (str
 	return bas.ID, nil
 }
 
-func (b basketRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
+func (b *basketRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
 	if _, err := b.db.Exec(ctx, `delete from baskets where id = $1`, key.ID); err != nil {
 		return err
 	}

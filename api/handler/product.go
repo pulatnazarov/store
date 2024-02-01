@@ -223,7 +223,7 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	totalSum, profit := 0, 0
+	totalSum, profit := 0, float32(0.0)
 	basketProducts := map[string]int{}
 
 	for productID, price := range selectedProducts {
@@ -231,7 +231,7 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		totalSum += price * customerQuantity
 
 		// profit logic
-		profit += customerQuantity * (price - productPrices[productID])
+		profit += float32(customerQuantity * (price - productPrices[productID]))
 		basketProducts[productID] = customerQuantity
 	}
 
@@ -255,7 +255,14 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	// save profit in db
+	if err = h.storage.Store().AddProfit(context.Background(), profit, customer.BranchID); err != nil {
+		handleResponse(c, "error while adding amount to profit", http.StatusInternalServerError, err.Error())
+		return
+	}
 
-	handleResponse(c, "successfully finished the purchase", http.StatusOK, profit)
+	// dealer
+	// check
+	// report
+
+	handleResponse(c, "successfully finished the purchase", http.StatusOK, "success")
 }

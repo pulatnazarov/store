@@ -14,9 +14,9 @@ type categoryRepo struct {
 }
 
 func NewCategoryRepo(db *pgxpool.Pool) storage.ICategoryStorage {
-	return categoryRepo{db: db}
+	return &categoryRepo{db: db}
 }
-func (c categoryRepo) Create(ctx context.Context, category models.CreateCategory) (string, error) {
+func (c *categoryRepo) Create(ctx context.Context, category models.CreateCategory) (string, error) {
 	id := uuid.New()
 	query := `insert into categories (id, name) values($1, $2)`
 
@@ -28,7 +28,7 @@ func (c categoryRepo) Create(ctx context.Context, category models.CreateCategory
 	return id.String(), nil
 }
 
-func (c categoryRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Category, error) {
+func (c *categoryRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Category, error) {
 	category := models.Category{}
 
 	query := `select id, name from categories where id = $1`
@@ -40,7 +40,7 @@ func (c categoryRepo) GetByID(ctx context.Context, key models.PrimaryKey) (model
 	return category, nil
 }
 
-func (c categoryRepo) GetList(ctx context.Context, request models.GetListRequest) (models.CategoryResponse, error) {
+func (c *categoryRepo) GetList(ctx context.Context, request models.GetListRequest) (models.CategoryResponse, error) {
 	var (
 		query, countQuery string
 		count             = 0
@@ -89,7 +89,7 @@ func (c categoryRepo) GetList(ctx context.Context, request models.GetListRequest
 	}, err
 }
 
-func (c categoryRepo) Update(ctx context.Context, category models.UpdateCategory) (string, error) {
+func (c *categoryRepo) Update(ctx context.Context, category models.UpdateCategory) (string, error) {
 	query := `update categories set name = $1 where id = $2`
 
 	if _, err := c.db.Exec(ctx, query, &category.Name, &category.ID); err != nil {
@@ -99,7 +99,7 @@ func (c categoryRepo) Update(ctx context.Context, category models.UpdateCategory
 	return category.ID, nil
 }
 
-func (c categoryRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
+func (c *categoryRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
 	query := `delete from categories where id = $1`
 
 	if _, err := c.db.Exec(ctx, query, key.ID); err != nil {

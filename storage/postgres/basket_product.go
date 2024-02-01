@@ -15,10 +15,10 @@ type basketProductRepo struct {
 }
 
 func NewBasketProductRepo(db *pgxpool.Pool) storage.IBasketProductStorage {
-	return basketProductRepo{db: db}
+	return &basketProductRepo{db: db}
 }
 
-func (b basketProductRepo) Create(ctx context.Context, product models.CreateBasketProduct) (string, error) {
+func (b *basketProductRepo) Create(ctx context.Context, product models.CreateBasketProduct) (string, error) {
 	id := uuid.New()
 	query := `insert into basket_products(id, basket_id, product_id, quantity) 
 					values($1, $2, $3, $4)`
@@ -35,7 +35,7 @@ func (b basketProductRepo) Create(ctx context.Context, product models.CreateBask
 	return id.String(), nil
 }
 
-func (b basketProductRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.BasketProduct, error) {
+func (b *basketProductRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.BasketProduct, error) {
 	product := models.BasketProduct{}
 	query := `select id, basket_id, product_id, quantity from basket_products where id = $1`
 
@@ -51,7 +51,7 @@ func (b basketProductRepo) GetByID(ctx context.Context, key models.PrimaryKey) (
 	return product, nil
 }
 
-func (b basketProductRepo) GetList(ctx context.Context, request models.GetListRequest) (models.BasketProductResponse, error) {
+func (b *basketProductRepo) GetList(ctx context.Context, request models.GetListRequest) (models.BasketProductResponse, error) {
 	var (
 		count             = 0
 		basketProducts    = []models.BasketProduct{}
@@ -98,7 +98,7 @@ func (b basketProductRepo) GetList(ctx context.Context, request models.GetListRe
 	}, err
 }
 
-func (b basketProductRepo) Update(ctx context.Context, product models.UpdateBasketProduct) (string, error) {
+func (b *basketProductRepo) Update(ctx context.Context, product models.UpdateBasketProduct) (string, error) {
 	query := `update basket_products set basket_id = $1, product_id = $2, quantity = $3 where id = $4`
 	if _, err := b.db.Exec(ctx, query,
 		&product.BasketID,
@@ -112,7 +112,7 @@ func (b basketProductRepo) Update(ctx context.Context, product models.UpdateBask
 	return product.ID, nil
 }
 
-func (b basketProductRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
+func (b *basketProductRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
 	query := `delete from basket_products where id = $1`
 
 	if _, err := b.db.Exec(ctx, query, key.ID); err != nil {
@@ -122,7 +122,7 @@ func (b basketProductRepo) Delete(ctx context.Context, key models.PrimaryKey) er
 	return nil
 }
 
-func (b basketProductRepo) AddProducts(ctx context.Context, basketID string, products map[string]int) error {
+func (b *basketProductRepo) AddProducts(ctx context.Context, basketID string, products map[string]int) error {
 	var (
 		insertStatements []string
 	)

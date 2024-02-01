@@ -16,7 +16,7 @@ import (
 )
 
 type Store struct {
-	Pool *pgxpool.Pool
+	pool *pgxpool.Pool
 }
 
 func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
@@ -73,31 +73,35 @@ func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
 	}
 
 	return Store{
-		Pool: pool,
+		pool: pool,
 	}, nil
 }
 
 func (s Store) Close() {
-	s.Pool.Close()
+	s.pool.Close()
 }
 
 func (s Store) User() storage.IUserStorage {
-	return NewUserRepo(s.Pool)
+	return NewUserRepo(s.pool)
 }
 
 func (s Store) Category() storage.ICategoryStorage {
-	return NewCategoryRepo(s.Pool)
+	return NewCategoryRepo(s.pool)
 }
 
 func (s Store) Product() storage.IProductStorage {
-	return NewProductRepo(s.Pool)
+	return NewProductRepo(s.pool)
 }
 
 func (s Store) Basket() storage.IBasketStorage {
-	return NewBasketRepo(s.Pool)
+	return NewBasketRepo(s.pool)
 
 }
 
 func (s Store) BasketProduct() storage.IBasketProductStorage {
-	return NewBasketProductRepo(s.Pool)
+	return NewBasketProductRepo(s.pool)
+}
+
+func (s Store) Store() storage.IStoreStorage {
+	return NewStoreRepo(s.pool)
 }

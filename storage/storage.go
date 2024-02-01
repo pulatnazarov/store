@@ -12,6 +12,7 @@ type IStorage interface {
 	Product() IProductStorage
 	Basket() IBasketStorage
 	BasketProduct() IBasketProductStorage
+	Store() IStoreStorage
 }
 
 type IUserStorage interface {
@@ -57,4 +58,8 @@ type IBasketProductStorage interface {
 	Update(context.Context, models.UpdateBasketProduct) (string, error)
 	Delete(context.Context, models.PrimaryKey) error
 	AddProducts(context.Context, string, map[string]int) error
+}
+
+type IStoreStorage interface {
+	AddProfit(ctx context.Context, profit float32, branchID string) error
 }

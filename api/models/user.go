@@ -1,13 +1,17 @@
 package models
 
+import "time"
+
 type User struct {
-	ID       string `json:"id"`
-	FullName string `json:"full_name"`
-	Phone    string `json:"phone"`
-	Password string `json:"password"`
-	Cash     uint   `json:"cash"`
-	UserType string `json:"user_type"`
-	BranchID string `json:"branch_id"`
+	ID        string    `json:"id"`
+	FullName  string    `json:"full_name"`
+	Phone     string    `json:"phone"`
+	Password  string    `json:"password"`
+	Cash      uint      `json:"cash"`
+	UserType  string    `json:"user_type"`
+	BranchID  string    `json:"branch_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt string    `json:"updated_at"`
 }
 
 type CreateUser struct {
