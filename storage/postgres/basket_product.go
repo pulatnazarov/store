@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
 	"test/api/models"
 	"test/storage"
 )
@@ -17,13 +18,13 @@ func NewBasketProductRepo(db *pgxpool.Pool) storage.IBasketProductStorage {
 	return basketProductRepo{db: db}
 }
 
-func (b basketProductRepo) Create(product models.CreateBasketProduct) (string, error) {
+func (b basketProductRepo) Create(ctx context.Context, product models.CreateBasketProduct) (string, error) {
 	id := uuid.New()
 	query := `insert into basket_products(id, basket_id, product_id, quantity) 
 					values($1, $2, $3, $4)`
 
 	fmt.Println("id", id)
-	if _, err := b.db.Exec(context.Background(), query,
+	if _, err := b.db.Exec(ctx, query,
 		id,
 		product.BasketID,
 		product.ProductID,
@@ -34,11 +35,11 @@ func (b basketProductRepo) Create(product models.CreateBasketProduct) (string, e
 	return id.String(), nil
 }
 
-func (b basketProductRepo) GetByID(key models.PrimaryKey) (models.BasketProduct, error) {
+func (b basketProductRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.BasketProduct, error) {
 	product := models.BasketProduct{}
 	query := `select id, basket_id, product_id, quantity from basket_products where id = $1`
 
-	if err := b.db.QueryRow(context.Background(), query, key.ID).Scan(
+	if err := b.db.QueryRow(ctx, query, key.ID).Scan(
 		&product.ID,
 		&product.BasketID,
 		&product.ProductID,
@@ -50,7 +51,7 @@ func (b basketProductRepo) GetByID(key models.PrimaryKey) (models.BasketProduct,
 	return product, nil
 }
 
-func (b basketProductRepo) GetList(request models.GetListRequest) (models.BasketProductResponse, error) {
+func (b basketProductRepo) GetList(ctx context.Context, request models.GetListRequest) (models.BasketProductResponse, error) {
 	var (
 		count             = 0
 		basketProducts    = []models.BasketProduct{}
@@ -65,7 +66,7 @@ func (b basketProductRepo) GetList(request models.GetListRequest) (models.Basket
 		countQuery += fmt.Sprintf(` where CAST(quantity AS TEXT) ilike '%%%s%%'`, search)
 	}
 
-	if err := b.db.QueryRow(context.Background(), countQuery).Scan(&count); err != nil {
+	if err := b.db.QueryRow(ctx, countQuery).Scan(&count); err != nil {
 		fmt.Println("error is while scanning count", err.Error())
 		return models.BasketProductResponse{}, err
 	}
@@ -76,7 +77,7 @@ func (b basketProductRepo) GetList(request models.GetListRequest) (models.Basket
 	}
 
 	query += ` LIMIT $1 OFFSET $2`
-	rows, err := b.db.Query(context.Background(), query, request.Limit, offset)
+	rows, err := b.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
 		fmt.Println("error is while selecting basket products", err.Error())
 		return models.BasketProductResponse{}, err
@@ -97,9 +98,9 @@ func (b basketProductRepo) GetList(request models.GetListRequest) (models.Basket
 	}, err
 }
 
-func (b basketProductRepo) Update(product models.UpdateBasketProduct) (string, error) {
+func (b basketProductRepo) Update(ctx context.Context, product models.UpdateBasketProduct) (string, error) {
 	query := `update basket_products set basket_id = $1, product_id = $2, quantity = $3 where id = $4`
-	if _, err := b.db.Exec(context.Background(), query,
+	if _, err := b.db.Exec(ctx, query,
 		&product.BasketID,
 		&product.ProductID,
 		&product.Quantity,
@@ -111,29 +112,54 @@ func (b basketProductRepo) Update(product models.UpdateBasketProduct) (string, e
 	return product.ID, nil
 }
 
-func (b basketProductRepo) Delete(key models.PrimaryKey) error {
+func (b basketProductRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
 	query := `delete from basket_products where id = $1`
 
-	if _, err := b.db.Exec(context.Background(), query, key.ID); err != nil {
+	if _, err := b.db.Exec(ctx, query, key.ID); err != nil {
 		fmt.Println("error is while deleting basket products", err.Error())
 		return err
 	}
 	return nil
 }
 
-func (b basketProductRepo) AddProducts(basketID string, products map[string]int) error {
+func (b basketProductRepo) AddProducts(ctx context.Context, basketID string, products map[string]int) error {
+	var (
+		insertStatements []string
+	)
 	query := `
-			insert into basket_products 
-			    (id, basket_id, product_id, quantity) 
-					values ($1, $2, $3, $4)
+		DO $$
+		BEGIN 
+           %s
+		END $$
 `
-
 	for productID, quantity := range products {
-		if _, err := b.db.Exec(context.Background(), query, uuid.New(), basketID, productID, quantity); err != nil {
-			fmt.Println("Error while adding product to basket_products table", err.Error())
-			return err
-		}
+		insertStatements = append(insertStatements, fmt.Sprintf(`insert into basket_products (id, basket_id, product_id, quantity)
+                      values ('%s', '%s', '%s', %d) ;`, uuid.New(), basketID, productID, quantity))
+	}
+
+	finalQuery := fmt.Sprintf(query, strings.Join(insertStatements, "\n"))
+
+	if _, err := b.db.Exec(ctx, finalQuery); err != nil {
+		fmt.Println("error is while inserting to basket products", err.Error())
+		return err
 	}
 
 	return nil
 }
+
+//func (b basketProductRepo) AddProducts(basketID string, products map[string]int) error {
+//	query := `
+//			insert into basket_products
+//			    (id, basket_id, product_id, quantity)
+//					values ($1, $2, $3, $4)
+//`
+//
+//	for productID, quantity := range products {
+//		if _, err := b.db.Exec(context.Background(), query, uuid.New(), basketID, productID, quantity); err != nil {
+//			fmt.Println("Error while adding product to basket_products table", err.Error())
+//			return err
+//		}
+//	}
+//
+//	return nil
+//}

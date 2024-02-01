@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -28,13 +29,13 @@ func (h Handler) CreateBasket(c *gin.Context) {
 		return
 	}
 
-	id, err := h.storage.Basket().Create(createBasket)
+	id, err := h.storage.Basket().Create(context.Background(), createBasket)
 	if err != nil {
 		handleResponse(c, "error is while creating basket", http.StatusInternalServerError, err)
 		return
 	}
 
-	res, err := h.storage.Basket().GetByID(models.PrimaryKey{ID: id})
+	res, err := h.storage.Basket().GetByID(context.Background(), models.PrimaryKey{ID: id})
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
@@ -60,7 +61,7 @@ func (h Handler) GetBasket(c *gin.Context) {
 
 	uid := c.Param("id")
 
-	basket, err := h.storage.Basket().GetByID(models.PrimaryKey{ID: uid})
+	basket, err := h.storage.Basket().GetByID(context.Background(), models.PrimaryKey{ID: uid})
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err)
 		return
@@ -106,7 +107,7 @@ func (h Handler) GetBasketList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	baskets, err := h.storage.Basket().GetList(models.GetListRequest{
+	baskets, err := h.storage.Basket().GetList(context.Background(), models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -143,13 +144,13 @@ func (h Handler) UpdateBasket(c *gin.Context) {
 
 	updatedBasket.ID = uid
 
-	if _, err := h.storage.Basket().Update(updatedBasket); err != nil {
+	if _, err := h.storage.Basket().Update(context.Background(), updatedBasket); err != nil {
 		handleResponse(c, "error is while updating basket", http.StatusInternalServerError, err)
 		return
 	}
 
 	ids := models.PrimaryKey{ID: uid}
-	res, err := h.storage.Basket().GetByID(ids)
+	res, err := h.storage.Basket().GetByID(context.Background(), ids)
 	if err != nil {
 		fmt.Println("error is while getting by id", err.Error())
 		return
@@ -174,7 +175,7 @@ func (h Handler) DeleteBasket(c *gin.Context) {
 	uid := c.Param("id")
 
 	basketID := models.PrimaryKey{ID: uid}
-	if err := h.storage.Basket().Delete(basketID); err != nil {
+	if err := h.storage.Basket().Delete(context.Background(), basketID); err != nil {
 		handleResponse(c, "error is while deleting basket", http.StatusInternalServerError, err)
 		return
 	}

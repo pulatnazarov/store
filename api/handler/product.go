@@ -28,13 +28,13 @@ func (h Handler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	id, err := h.storage.Product().Create(product)
+	id, err := h.storage.Product().Create(context.Background(), product)
 	if err != nil {
 		handleResponse(c, "error is while creating product", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	createdProduct, err := h.storage.Product().GetByID(models.PrimaryKey{ID: id})
+	createdProduct, err := h.storage.Product().GetByID(context.Background(), models.PrimaryKey{ID: id})
 	if err != nil {
 		handleResponse(c, "error is while getting by id product", http.StatusInternalServerError, err.Error())
 		return
@@ -58,7 +58,7 @@ func (h Handler) CreateProduct(c *gin.Context) {
 func (h Handler) GetProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	product, err := h.storage.Product().GetByID(models.PrimaryKey{ID: uid})
+	product, err := h.storage.Product().GetByID(context.Background(), models.PrimaryKey{ID: uid})
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
@@ -104,7 +104,7 @@ func (h Handler) GetProductList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	products, err := h.storage.Product().GetList(models.GetListRequest{
+	products, err := h.storage.Product().GetList(context.Background(), models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -143,13 +143,13 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 
 	product.ID = uid
 
-	id, err := h.storage.Product().Update(product)
+	id, err := h.storage.Product().Update(context.Background(), product)
 	if err != nil {
 		handleResponse(c, "error is while updating product", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	updatedProduct, err := h.storage.Product().GetByID(models.PrimaryKey{ID: id})
+	updatedProduct, err := h.storage.Product().GetByID(context.Background(), models.PrimaryKey{ID: id})
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
@@ -173,7 +173,7 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 func (h Handler) DeleteProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	if err := h.storage.Product().Delete(models.PrimaryKey{ID: uid}); err != nil {
+	if err := h.storage.Product().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
 		handleResponse(c, "error is while delete", http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -201,13 +201,13 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	selectedProducts, productPrices, err := h.storage.Product().Search(request.Products)
+	selectedProducts, productPrices, err := h.storage.Product().Search(context.Background(), request.Products)
 	if err != nil {
 		handleResponse(c, "error while searching products", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	basket, err := h.storage.Basket().GetByID(models.PrimaryKey{
+	basket, err := h.storage.Basket().GetByID(context.Background(), models.PrimaryKey{
 		ID: request.BasketID,
 	})
 	if err != nil {
@@ -215,7 +215,7 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	customer, err := h.storage.User().GetByID(models.PrimaryKey{
+	customer, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
 		ID: basket.CustomerID,
 	})
 	if err != nil {
@@ -245,12 +245,12 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	if err = h.storage.Product().TakeProducts(basketProducts); err != nil {
+	if err = h.storage.Product().TakeProducts(context.Background(), basketProducts); err != nil {
 		handleResponse(c, "error while taking products", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if err = h.storage.BasketProduct().AddProducts(basket.ID, basketProducts); err != nil {
+	if err = h.storage.BasketProduct().AddProducts(context.Background(), basket.ID, basketProducts); err != nil {
 		handleResponse(c, "error while adding products", http.StatusInternalServerError, err.Error())
 		return
 	}

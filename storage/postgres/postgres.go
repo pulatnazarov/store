@@ -51,7 +51,9 @@ func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
 	}
 
 	if err = m.Up(); err != nil {
+		fmt.Println("here up")
 		if !strings.Contains(err.Error(), "no change") {
+			fmt.Println("in !strings")
 			version, dirty, err := m.Version()
 			if err != nil {
 				fmt.Println("err in checking version and dirty", err.Error())

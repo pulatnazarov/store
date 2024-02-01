@@ -19,11 +19,11 @@ func NewUserRepo(db *pgxpool.Pool) storage.IUserStorage {
 	}
 }
 
-func (u *userRepo) Create(createUser models.CreateUser) (string, error) {
+func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (string, error) {
 
 	uid := uuid.New()
 
-	if _, err := u.db.Exec(context.Background(), `insert into 
+	if _, err := u.db.Exec(ctx, `insert into 
 			users values ($1, $2, $3, $4, $5, $6)
 			`,
 		uid,
@@ -40,13 +40,13 @@ func (u *userRepo) Create(createUser models.CreateUser) (string, error) {
 	return uid.String(), nil
 }
 
-func (u *userRepo) GetByID(pKey models.PrimaryKey) (models.User, error) {
+func (u *userRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.User, error) {
 	user := models.User{}
 
 	query := `
 		select id, full_name, phone, cash from users where id = $1 and user_role = 'customer'
 `
-	if err := u.db.QueryRow(context.Background(), query, pKey.ID).Scan(
+	if err := u.db.QueryRow(ctx, query, pKey.ID).Scan(
 		&user.ID,
 		&user.FullName,
 		&user.Phone,
@@ -59,7 +59,7 @@ func (u *userRepo) GetByID(pKey models.PrimaryKey) (models.User, error) {
 	return user, nil
 }
 
-func (u *userRepo) GetList(request models.GetListRequest) (models.UsersResponse, error) {
+func (u *userRepo) GetList(ctx context.Context, request models.GetListRequest) (models.UsersResponse, error) {
 	var (
 		users             = []models.User{}
 		count             = 0
@@ -76,7 +76,7 @@ func (u *userRepo) GetList(request models.GetListRequest) (models.UsersResponse,
 		countQuery += fmt.Sprintf(` and (phone ilike '%%%s%%' or full_name ilike '%%%s%%')`, search, search)
 	}
 
-	if err := u.db.QueryRow(context.Background(), countQuery).Scan(&count); err != nil {
+	if err := u.db.QueryRow(ctx, countQuery).Scan(&count); err != nil {
 		fmt.Println("error while scanning count of users", err.Error())
 		return models.UsersResponse{}, err
 	}
@@ -93,7 +93,7 @@ func (u *userRepo) GetList(request models.GetListRequest) (models.UsersResponse,
 
 	query += ` LIMIT $1 OFFSET $2`
 
-	rows, err := u.db.Query(context.Background(), query, request.Limit, offset)
+	rows, err := u.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
 		fmt.Println("error while query rows", err.Error())
 		return models.UsersResponse{}, err
@@ -121,13 +121,13 @@ func (u *userRepo) GetList(request models.GetListRequest) (models.UsersResponse,
 	}, nil
 }
 
-func (u *userRepo) Update(request models.UpdateUser) (string, error) {
+func (u *userRepo) Update(ctx context.Context, request models.UpdateUser) (string, error) {
 	query := `
 		update users 
 			set full_name = $1, phone = $2, cash = $3
 				where user_role = 'customer' and id = $4`
 
-	if _, err := u.db.Exec(context.Background(), query, request.FullName, request.Phone, request.Cash, request.ID); err != nil {
+	if _, err := u.db.Exec(ctx, query, request.FullName, request.Phone, request.Cash, request.ID); err != nil {
 		fmt.Println("error while updating user data", err.Error())
 		return "", err
 	}
@@ -135,12 +135,12 @@ func (u *userRepo) Update(request models.UpdateUser) (string, error) {
 	return request.ID, nil
 }
 
-func (u *userRepo) Delete(request models.PrimaryKey) error {
+func (u *userRepo) Delete(ctx context.Context, request models.PrimaryKey) error {
 	query := `
 		delete from users
 			where id = $1
 `
-	if _, err := u.db.Exec(context.Background(), query, request.ID); err != nil {
+	if _, err := u.db.Exec(ctx, query, request.ID); err != nil {
 		fmt.Println("error while deleting user by id", err.Error())
 		return err
 	}
@@ -148,14 +148,14 @@ func (u *userRepo) Delete(request models.PrimaryKey) error {
 	return nil
 }
 
-func (u *userRepo) GetPassword(id string) (string, error) {
+func (u *userRepo) GetPassword(ctx context.Context, id string) (string, error) {
 	password := ""
 
 	query := `
 		select password from users 
 		                where user_role = 'customer' and id = $1`
 
-	if err := u.db.QueryRow(context.Background(), query, id).Scan(&password); err != nil {
+	if err := u.db.QueryRow(ctx, query, id).Scan(&password); err != nil {
 		fmt.Println("Error while scanning password from users", err.Error())
 		return "", err
 	}
@@ -163,13 +163,13 @@ func (u *userRepo) GetPassword(id string) (string, error) {
 	return password, nil
 }
 
-func (u *userRepo) UpdatePassword(request models.UpdateUserPassword) error {
+func (u *userRepo) UpdatePassword(ctx context.Context, request models.UpdateUserPassword) error {
 	query := `
 		update users 
 				set password = $1
 					where id = $2 and user_role = 'customer'`
 
-	if _, err := u.db.Exec(context.Background(), query, request.NewPassword, request.ID); err != nil {
+	if _, err := u.db.Exec(ctx, query, request.NewPassword, request.ID); err != nil {
 		fmt.Println("error while updating password for user", err.Error())
 		return err
 	}
