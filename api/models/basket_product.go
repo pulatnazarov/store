@@ -5,6 +5,8 @@ type BasketProduct struct {
 	BasketID  string `json:"basket_id"`
 	ProductID string `json:"product_id"`
 	Quantity  int    `json:"quantity"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 type CreateBasketProduct struct {
@@ -15,7 +17,6 @@ type CreateBasketProduct struct {
 
 type UpdateBasketProduct struct {
 	ID        string `json:"-"`
-	BasketID  string `json:"basket_id"`
 	ProductID string `json:"product_id"`
 	Quantity  int    `json:"quantity"`
 }

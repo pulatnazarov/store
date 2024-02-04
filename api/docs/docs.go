@@ -547,6 +547,272 @@ const docTemplate = `{
                 }
             }
         },
+        "/branch": {
+            "post": {
+                "description": "create a new branch",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branch"
+                ],
+                "summary": "Create a new branch",
+                "parameters": [
+                    {
+                        "description": "branch",
+                        "name": "branch",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateBranch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Branch"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/branch/{id}": {
+            "get": {
+                "description": "get branch by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branch"
+                ],
+                "summary": "Get branch by id",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "branch_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Branch"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "update branch",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branch"
+                ],
+                "summary": "Update branch",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "branch_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "branch",
+                        "name": "branch",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.UpdateBranch"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Branch"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "delete branch",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branch"
+                ],
+                "summary": "Delete branch",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "branch_id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/branches": {
+            "get": {
+                "description": "get branch list",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "branch"
+                ],
+                "summary": "Get branch list",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.BranchResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/categories": {
             "get": {
                 "description": "get category list",
@@ -1459,6 +1725,9 @@ const docTemplate = `{
         "models.Basket": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
                 "customer_id": {
                     "type": "string"
                 },
@@ -1467,6 +1736,9 @@ const docTemplate = `{
                 },
                 "total_sum": {
                     "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -1474,6 +1746,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "basket_id": {
+                    "type": "string"
+                },
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -1484,6 +1759,9 @@ const docTemplate = `{
                 },
                 "quantity": {
                     "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -1515,13 +1793,56 @@ const docTemplate = `{
                 }
             }
         },
-        "models.Category": {
+        "models.Branch": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
                 "id": {
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.BranchResponse": {
+            "type": "object",
+            "properties": {
+                "branches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Branch"
+                    }
+                },
+                "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Category": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 }
             }
@@ -1565,6 +1886,20 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateBranch": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
+                }
+            }
+        },
         "models.CreateCategory": {
             "type": "object",
             "properties": {
@@ -1576,6 +1911,9 @@ const docTemplate = `{
         "models.CreateProduct": {
             "type": "object",
             "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
                 "category_id": {
                     "type": "string"
                 },
@@ -1619,7 +1957,13 @@ const docTemplate = `{
         "models.Product": {
             "type": "object",
             "properties": {
+                "branch_id": {
+                    "type": "string"
+                },
                 "category_id": {
+                    "type": "string"
+                },
+                "created_at": {
                     "type": "string"
                 },
                 "id": {
@@ -1636,6 +1980,9 @@ const docTemplate = `{
                 },
                 "quantity": {
                     "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
                 }
             }
         },
@@ -1655,6 +2002,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "basket_id": {
+                    "type": "string"
+                },
+                "branch_id": {
                     "type": "string"
                 },
                 "products": {
@@ -1679,14 +2029,25 @@ const docTemplate = `{
         "models.UpdateBasketProduct": {
             "type": "object",
             "properties": {
-                "basket_id": {
-                    "type": "string"
-                },
                 "product_id": {
                     "type": "string"
                 },
                 "quantity": {
                     "type": "integer"
+                }
+            }
+        },
+        "models.UpdateBranch": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone_number": {
+                    "type": "string"
                 }
             }
         },
@@ -1702,9 +2063,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "category_id": {
-                    "type": "string"
-                },
-                "id": {
                     "type": "string"
                 },
                 "name": {
@@ -1728,9 +2086,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "full_name": {
-                    "type": "string"
-                },
-                "id": {
                     "type": "string"
                 },
                 "phone": {
@@ -1758,6 +2113,9 @@ const docTemplate = `{
                 "cash": {
                     "type": "integer"
                 },
+                "created_at": {
+                    "type": "string"
+                },
                 "full_name": {
                     "type": "string"
                 },
@@ -1768,6 +2126,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phone": {
+                    "type": "string"
+                },
+                "updated_at": {
                     "type": "string"
                 },
                 "user_type": {

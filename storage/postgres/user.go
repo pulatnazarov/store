@@ -25,7 +25,7 @@ func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (st
 	uid := uuid.New()
 
 	if _, err := u.db.Exec(ctx, `insert into 
-			users values ($1, $2, $3, $4, $5, $6)
+			users values ($1, $2, $3, $4, $5, $6, $7)
 			`,
 		uid,
 		createUser.FullName,
@@ -33,6 +33,7 @@ func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (st
 		createUser.Password,
 		createUser.UserType,
 		createUser.Cash,
+		createUser.BranchID,
 	); err != nil {
 		fmt.Println("error while inserting data", err.Error())
 		return "", err
@@ -46,15 +47,17 @@ func (u *userRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.
 	user := models.User{}
 
 	query := `
-		select id, full_name, phone, cash, created_at, updated_at from users where id = $1 and deleted_at = 0 and user_role = 'customer'
+		select id, full_name, phone, cash, branch_id, created_at, updated_at 
+						from users where id = $1 and deleted_at = 0 and user_role = 'customer'
 `
 	if err := u.db.QueryRow(ctx, query, pKey.ID).Scan(
 		&user.ID,       //0
 		&user.FullName, //1
 		&user.Phone,    //2
 		&user.Cash,     //3
-		&createdAt,     //4
-		&updatedAt,     //5
+		&user.BranchID,
+		&createdAt, //4
+		&updatedAt, //5
 	); err != nil {
 		fmt.Println("error while scanning user", err.Error())
 		return models.User{}, err
@@ -73,19 +76,20 @@ func (u *userRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.
 
 func (u *userRepo) GetList(ctx context.Context, request models.GetListRequest) (models.UsersResponse, error) {
 	var (
-		users             = []models.User{}
-		count             = 0
-		countQuery, query string
-		page              = request.Page
-		offset            = (page - 1) * request.Limit
-		search            = request.Search
+		users                = []models.User{}
+		count                = 0
+		countQuery, query    string
+		page                 = request.Page
+		offset               = (page - 1) * request.Limit
+		search               = request.Search
+		createdAt, updatedAt = sql.NullTime{}, sql.NullString{}
 	)
 
 	countQuery = `
 		SELECT count(1) from users where user_role = 'customer' and deleted_at = 0 `
 
 	if search != "" {
-		countQuery += fmt.Sprintf(` and (phone ilike '%%%s%%' or full_name ilike '%%%s%%')`, search, search)
+		countQuery += fmt.Sprintf(` and (phone ilike '%s' or full_name ilike '%s')`, search, search)
 	}
 
 	if err := u.db.QueryRow(ctx, countQuery).Scan(&count); err != nil {
@@ -94,16 +98,16 @@ func (u *userRepo) GetList(ctx context.Context, request models.GetListRequest) (
 	}
 
 	query = `
-		SELECT id, full_name, phone, cash
+		SELECT id, full_name, phone, cash, branch_id, created_at, updated_at
 			FROM users
 			    WHERE user_role = 'customer' and deleted_at = 0
 			    `
 
 	if search != "" {
-		query += fmt.Sprintf(` and (phone ilike '%%%s%%' or full_name ilike '%%%s%%') `, search, search)
+		query += fmt.Sprintf(` and (phone ilike '%s' or full_name ilike '%s') `, search, search)
 	}
 
-	query += ` LIMIT $1 OFFSET $2`
+	query += ` order by created_at desc LIMIT $1 OFFSET $2`
 
 	rows, err := u.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
@@ -119,11 +123,20 @@ func (u *userRepo) GetList(ctx context.Context, request models.GetListRequest) (
 			&user.FullName,
 			&user.Phone,
 			&user.Cash,
+			&user.BranchID,
+			&createdAt,
+			&updatedAt,
 		); err != nil {
 			fmt.Println("error while scanning row", err.Error())
 			return models.UsersResponse{}, err
 		}
+		if createdAt.Valid {
+			user.CreatedAt = createdAt.Time
+		}
 
+		if updatedAt.Valid {
+			user.UpdatedAt = updatedAt.String
+		}
 		users = append(users, user)
 	}
 
@@ -188,7 +201,7 @@ func (u *userRepo) UpdatePassword(ctx context.Context, request models.UpdateUser
 }
 
 func (u *userRepo) UpdateCustomerCash(ctx context.Context, id string, sum int) error {
-	query := `update customer set cash = cash - $1 where id = $2`
+	query := `update users set cash = cash - $1 where id = $2`
 
 	if _, err := u.db.Exec(ctx, query, sum, id); err != nil {
 		fmt.Println("error while updating customer cash", err.Error())

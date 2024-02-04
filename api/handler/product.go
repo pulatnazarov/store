@@ -28,15 +28,9 @@ func (h Handler) CreateProduct(c *gin.Context) {
 		return
 	}
 
-	id, err := h.storage.Product().Create(context.Background(), product)
+	createdProduct, err := h.services.Product().Create(context.Background(), product)
 	if err != nil {
 		handleResponse(c, "error is while creating product", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	createdProduct, err := h.storage.Product().GetByID(context.Background(), models.PrimaryKey{ID: id})
-	if err != nil {
-		handleResponse(c, "error is while getting by id product", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -58,7 +52,7 @@ func (h Handler) CreateProduct(c *gin.Context) {
 func (h Handler) GetProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	product, err := h.storage.Product().GetByID(context.Background(), models.PrimaryKey{ID: uid})
+	product, err := h.services.Product().Get(context.Background(), models.PrimaryKey{ID: uid})
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
@@ -104,7 +98,7 @@ func (h Handler) GetProductList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	products, err := h.storage.Product().GetList(context.Background(), models.GetListRequest{
+	products, err := h.services.Product().GetList(context.Background(), models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -143,15 +137,9 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 
 	product.ID = uid
 
-	id, err := h.storage.Product().Update(context.Background(), product)
+	updatedProduct, err := h.services.Product().Update(context.Background(), product)
 	if err != nil {
 		handleResponse(c, "error is while updating product", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	updatedProduct, err := h.storage.Product().GetByID(context.Background(), models.PrimaryKey{ID: id})
-	if err != nil {
-		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -173,7 +161,7 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 func (h Handler) DeleteProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	if err := h.storage.Product().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
+	if err := h.services.Product().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
 		handleResponse(c, "error is while delete", http.StatusInternalServerError, err.Error())
 		return
 	}
@@ -201,66 +189,20 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	selectedProducts, productPrices, err := h.storage.Product().Search(context.Background(), request.Products)
+	productSell, err := h.services.Product().StartSellNew(context.Background(), request)
 	if err != nil {
-		handleResponse(c, "error while searching products", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	basket, err := h.storage.Basket().GetByID(context.Background(), models.PrimaryKey{
-		ID: request.BasketID,
-	})
-	if err != nil {
-		handleResponse(c, "error while searching products", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	customer, err := h.storage.User().GetByID(context.Background(), models.PrimaryKey{
-		ID: basket.CustomerID,
-	})
-	if err != nil {
-		handleResponse(c, "error while getting customer by id", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	totalSum, profit := 0, float32(0.0)
-	basketProducts := map[string]int{}
-
-	for productID, price := range selectedProducts {
-		customerQuantity := request.Products[productID]
-		totalSum += price * customerQuantity
-
-		// profit logic
-		profit += float32(customerQuantity * (price - productPrices[productID]))
-		basketProducts[productID] = customerQuantity
-	}
-
-	if customer.Cash < uint(totalSum) {
-		handleResponse(c, "not enough customer cash", http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if err = h.storage.User().UpdateCustomerCash(context.Background(), customer.ID, totalSum); err != nil {
-		handleResponse(c, "error while updating customer cash with total sum", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if err = h.storage.Product().TakeProducts(context.Background(), basketProducts); err != nil {
-		handleResponse(c, "error while taking products", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if err = h.storage.BasketProduct().AddProducts(context.Background(), basket.ID, basketProducts); err != nil {
-		handleResponse(c, "error while adding products", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if err = h.storage.Store().AddProfit(context.Background(), profit, customer.BranchID); err != nil {
-		handleResponse(c, "error while adding amount to profit", http.StatusInternalServerError, err.Error())
+		handleResponse(c, "error is while start sell new", http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// dealer
+
+	if err = h.services.Dealer().Delivery(context.Background(), productSell); err != nil {
+		handleResponse(c, "error is while delivery products", http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	// prixod
 	// check
 	// report
 

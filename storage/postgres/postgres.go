@@ -51,9 +51,7 @@ func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
 	}
 
 	if err = m.Up(); err != nil {
-		fmt.Println("here up")
 		if !strings.Contains(err.Error(), "no change") {
-			fmt.Println("in !strings")
 			version, dirty, err := m.Version()
 			if err != nil {
 				fmt.Println("err in checking version and dirty", err.Error())
@@ -104,4 +102,12 @@ func (s Store) BasketProduct() storage.IBasketProductStorage {
 
 func (s Store) Store() storage.IStoreStorage {
 	return NewStoreRepo(s.pool)
+}
+
+func (s Store) Branch() storage.IBranchStorage {
+	return NewBranchRepo(s.pool)
+}
+
+func (s Store) Dealer() storage.IDealerStorage {
+	return NewDealerRepo(s.pool)
 }

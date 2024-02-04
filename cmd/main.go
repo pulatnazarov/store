@@ -21,7 +21,7 @@ func main() {
 
 	services := service.New(pgStore)
 
-	server := api.New(services, pgStore)
+	server := api.New(services)
 
 	if err = server.Run("localhost:8080"); err != nil {
 		panic(err)

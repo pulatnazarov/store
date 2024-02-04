@@ -28,15 +28,9 @@ func (h Handler) CreateBasketProduct(c *gin.Context) {
 		return
 	}
 
-	id, err := h.storage.BasketProduct().Create(context.Background(), basketProduct)
+	createdBasketProduct, err := h.services.BasketProduct().Create(context.Background(), basketProduct)
 	if err != nil {
 		handleResponse(c, "error is while creating basket product", http.StatusInternalServerError, err)
-		return
-	}
-
-	createdBasketProduct, err := h.storage.BasketProduct().GetByID(context.Background(), models.PrimaryKey{ID: id})
-	if err != nil {
-		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -58,13 +52,13 @@ func (h Handler) CreateBasketProduct(c *gin.Context) {
 func (h Handler) GetBasketProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	basketProduct, err := h.storage.BasketProduct().GetByID(context.Background(), models.PrimaryKey{ID: uid})
+	resp, err := h.services.BasketProduct().Get(context.Background(), models.PrimaryKey{ID: uid})
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, basketProduct)
+	handleResponse(c, "", http.StatusOK, resp)
 }
 
 // GetBasketProductList godoc
@@ -104,13 +98,13 @@ func (h Handler) GetBasketProductList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	basketProducts, err := h.storage.BasketProduct().GetList(context.Background(), models.GetListRequest{
+	resp, err := h.services.BasketProduct().GetList(context.Background(), models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
 	})
 
-	handleResponse(c, "", http.StatusOK, basketProducts)
+	handleResponse(c, "", http.StatusOK, resp)
 }
 
 // UpdateBasketProduct godoc
@@ -136,19 +130,14 @@ func (h Handler) UpdateBasketProduct(c *gin.Context) {
 	}
 
 	basketProduct.ID = uid
-	id, err := h.storage.BasketProduct().Update(context.Background(), basketProduct)
+
+	resp, err := h.services.BasketProduct().Update(context.Background(), basketProduct)
 	if err != nil {
 		handleResponse(c, "error is while updating basket", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	updatedBasketProduct, err := h.storage.BasketProduct().GetByID(context.Background(), models.PrimaryKey{ID: id})
-	if err != nil {
-		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	handleResponse(c, "", http.StatusOK, updatedBasketProduct)
+	handleResponse(c, "", http.StatusOK, resp)
 }
 
 // DeleteBasketProduct godoc
@@ -166,7 +155,7 @@ func (h Handler) UpdateBasketProduct(c *gin.Context) {
 func (h Handler) DeleteBasketProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	if err := h.storage.BasketProduct().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
+	if err := h.services.BasketProduct().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
 		handleResponse(c, "error is while deleting", http.StatusInternalServerError, err.Error())
 		return
 	}
