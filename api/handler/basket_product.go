@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 	"strconv"
 	"test/api/models"
@@ -71,6 +72,7 @@ func (h Handler) GetBasketProduct(c *gin.Context) {
 // @Param        page query string false "page"
 // @Param        limit query string false "limit"
 // @Param        search query string false "search"
+// @Param 	  	 basket_id query string false "basket_id"
 // @Success      201  {object}  models.BasketProductResponse
 // @Failure      400  {object}  models.Response
 // @Failure      404  {object}  models.Response
@@ -80,6 +82,7 @@ func (h Handler) GetBasketProductList(c *gin.Context) {
 		page, limit int
 		search      string
 		err         error
+		basketID    string
 	)
 
 	pageStr := c.DefaultQuery("page", "1")
@@ -98,10 +101,22 @@ func (h Handler) GetBasketProductList(c *gin.Context) {
 
 	search = c.Query("search")
 
+	bID := c.Query("basket_id")
+	if bID != "" {
+		bUID, err := uuid.Parse(bID)
+		if err != nil {
+			handleResponse(c, "error in basket id", http.StatusBadRequest, err.Error())
+			return
+		}
+
+		basketID = bUID.String()
+	}
+
 	resp, err := h.services.BasketProduct().GetList(context.Background(), models.GetListRequest{
-		Page:   page,
-		Limit:  limit,
-		Search: search,
+		Page:     page,
+		Limit:    limit,
+		Search:   search,
+		BasketID: basketID,
 	})
 
 	handleResponse(c, "", http.StatusOK, resp)

@@ -17,6 +17,7 @@ type branchRepo struct {
 func NewBranchRepo(db *pgxpool.Pool) storage.IBranchStorage {
 	return branchRepo{db: db}
 }
+
 func (b branchRepo) Create(ctx context.Context, branch models.CreateBranch) (string, error) {
 	branchID := uuid.New()
 

@@ -43,7 +43,7 @@ func (s *storeRepo) GetStoreBudget(ctx context.Context, branchID string) (float3
 	return budget, nil
 }
 
-func (s *storeRepo) RemoveDeliveredSum(ctx context.Context, totalSum float32, branchID string) error {
+func (s *storeRepo) WithdrawalDeliveredSum(ctx context.Context, totalSum float32, branchID string) error {
 	query := `update store set budget = budget - $1 where branch_id = $2 `
 	if rowsAffected, err := s.db.Exec(ctx, query, &totalSum, &branchID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {

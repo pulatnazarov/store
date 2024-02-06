@@ -80,6 +80,10 @@ func (b *basketProductRepo) GetList(ctx context.Context, request models.GetListR
 		countQuery += fmt.Sprintf(` and CAST(quantity AS TEXT) = '%s'`, search)
 	}
 
+	if request.BasketID != "" {
+		countQuery += fmt.Sprintf(" and basket_id = '%s'", request.BasketID)
+	}
+
 	if err := b.db.QueryRow(ctx, countQuery).Scan(&count); err != nil {
 		fmt.Println("error is while scanning count", err.Error())
 		return models.BasketProductResponse{}, err
@@ -90,7 +94,12 @@ func (b *basketProductRepo) GetList(ctx context.Context, request models.GetListR
 		query += fmt.Sprintf(` and CAST(quantity AS TEXT) = '%s'`, search)
 	}
 
+	if request.BasketID != "" {
+		query += fmt.Sprintf(" and basket_id = '%s'", request.BasketID)
+	}
+
 	query += ` order by created_at desc LIMIT $1 OFFSET $2`
+
 	rows, err := b.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
 		fmt.Println("error is while selecting basket products", err.Error())

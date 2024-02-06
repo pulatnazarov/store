@@ -55,6 +55,16 @@ func New(services service.IServiceManager) *gin.Engine {
 	r.PUT("/branch/:id", h.UpdateBranch)
 	r.DELETE("/branch/:id", h.DeleteBranch)
 
+	r.POST("/income", h.CreateIncome) // create
+	//r.GET("/income/:id")              // get by id
+	//r.GET("/incomes")                 // get list
+	//r.DELETE("/income/:id")           // delete
+
+	r.POST("/income_products", h.CreateIncomeProducts) // create multiple
+	//r.GET("/income_products")   // get income products (filter => by income_id)
+	//r.PUT("/income_product")    // update multiple
+	//r.DELETE("/income_product") // delete multiple
+
 	r.POST("/sell-new", h.StartSellNew)
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

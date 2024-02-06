@@ -111,3 +111,11 @@ func (s Store) Branch() storage.IBranchStorage {
 func (s Store) Dealer() storage.IDealerStorage {
 	return NewDealerRepo(s.pool)
 }
+
+func (s Store) Income() storage.IIncomeStorage {
+	return NewIncomeRepo(s.pool)
+}
+
+func (s Store) IncomeProduct() storage.IIncomeProductStorage {
+	return NewIncomeProductRepo(s.pool)
+}

@@ -15,6 +15,8 @@ type IStorage interface {
 	Store() IStoreStorage
 	Branch() IBranchStorage
 	Dealer() IDealerStorage
+	Income() IIncomeStorage
+	IncomeProduct() IIncomeProductStorage
 }
 
 type IUserStorage interface {
@@ -66,7 +68,7 @@ type IBasketProductStorage interface {
 type IStoreStorage interface {
 	AddProfit(ctx context.Context, profit float32, branchID string) error
 	GetStoreBudget(context.Context, string) (float32, error)
-	RemoveDeliveredSum(context.Context, float32, string) error
+	WithdrawalDeliveredSum(context.Context, float32, string) error
 }
 
 type IDealerStorage interface {
@@ -79,4 +81,12 @@ type IBranchStorage interface {
 	GetList(context.Context, models.GetListRequest) (models.BranchResponse, error)
 	Update(context.Context, models.UpdateBranch) (string, error)
 	Delete(context.Context, models.PrimaryKey) error
+}
+
+type IIncomeStorage interface {
+	Create(ctx context.Context) (models.Income, error)
+}
+
+type IIncomeProductStorage interface {
+	CreateMultiple(context.Context, models.CreateIncomeProducts) error
 }

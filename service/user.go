@@ -18,7 +18,6 @@ func NewUserService(storage storage.IStorage) userService {
 	return userService{
 		storage: storage,
 	}
-
 }
 
 func (u userService) Create(ctx context.Context, createUser models.CreateUser) (models.User, error) {

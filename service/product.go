@@ -129,13 +129,9 @@ func (p productService) StartSellNew(ctx context.Context, request models.SellReq
 		return models.ProductSell{}, err
 	}
 
-	if productSell.NotEnoughProducts != nil || productSell.NewProducts != nil {
-		return productSell, nil
-	}
-
 	//prixod
 	//check
 	//report
 
-	return models.ProductSell{}, nil
+	return productSell, nil
 }

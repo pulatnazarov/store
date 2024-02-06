@@ -456,6 +456,12 @@ const docTemplate = `{
                         "description": "search",
                         "name": "search",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "basket_id",
+                        "name": "basket_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -1056,6 +1062,98 @@ const docTemplate = `{
                         "description": "Created",
                         "schema": {
                             "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/income": {
+            "post": {
+                "description": "create a new income",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income"
+                ],
+                "summary": "Creates a new income",
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Income"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/models.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/income_products": {
+            "post": {
+                "description": "create a new income products",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "income_product"
+                ],
+                "summary": "Creates a new income products",
+                "parameters": [
+                    {
+                        "description": "income_products",
+                        "name": "income_products",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateIncomeProducts"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "400": {
@@ -1908,6 +2006,34 @@ const docTemplate = `{
                 }
             }
         },
+        "models.CreateIncomeProduct": {
+            "type": "object",
+            "properties": {
+                "income_id": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.CreateIncomeProducts": {
+            "type": "object",
+            "properties": {
+                "income_products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.CreateIncomeProduct"
+                    }
+                }
+            }
+        },
         "models.CreateProduct": {
             "type": "object",
             "properties": {
@@ -1951,6 +2077,20 @@ const docTemplate = `{
                 },
                 "user_type": {
                     "type": "string"
+                }
+            }
+        },
+        "models.Income": {
+            "type": "object",
+            "properties": {
+                "external_id": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "total_sum": {
+                    "type": "integer"
                 }
             }
         },

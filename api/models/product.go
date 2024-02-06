@@ -36,12 +36,11 @@ type ProductResponse struct {
 }
 
 type ProductSell struct {
-	SelectedProducts  SellRequest    `json:"selected_products"`
-	ProductPrices     map[string]int `json:"product_prices"`
-	NotEnoughProducts map[string]int `json:"not_enough_products"`
-	Prices            map[string]int `json:"prices"`
-	NewProducts       map[string]int `json:"new_products"`
-	ProductsBranchID  string         `json:"products_branch_id"`
+	SelectedProducts       SellRequest    `json:"selected_products"`
+	ProductPrices          map[string]int `json:"product_prices"`
+	NotEnoughProducts      map[string]int `json:"not_enough_products"`
+	NotEnoughProductPrices map[string]int `json:"prices"`
+	ProductsBranchID       string         `json:"products_branch_id"`
 }
 
 type SellRequest struct {

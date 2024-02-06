@@ -119,6 +119,24 @@ definitions:
       name:
         type: string
     type: object
+  models.CreateIncomeProduct:
+    properties:
+      income_id:
+        type: string
+      price:
+        type: integer
+      product_id:
+        type: string
+      quantity:
+        type: integer
+    type: object
+  models.CreateIncomeProducts:
+    properties:
+      income_products:
+        items:
+          $ref: '#/definitions/models.CreateIncomeProduct'
+        type: array
+    type: object
   models.CreateProduct:
     properties:
       branch_id:
@@ -148,6 +166,15 @@ definitions:
         type: string
       user_type:
         type: string
+    type: object
+  models.Income:
+    properties:
+      external_id:
+        type: string
+      id:
+        type: string
+      total_sum:
+        type: integer
     type: object
   models.Product:
     properties:
@@ -570,6 +597,10 @@ paths:
         in: query
         name: search
         type: string
+      - description: basket_id
+        in: query
+        name: basket_id
+        type: string
       produces:
       - application/json
       responses:
@@ -982,6 +1013,66 @@ paths:
       summary: Update category
       tags:
       - category
+  /income:
+    post:
+      consumes:
+      - application/json
+      description: create a new income
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Income'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Creates a new income
+      tags:
+      - income
+  /income_products:
+    post:
+      consumes:
+      - application/json
+      description: create a new income products
+      parameters:
+      - description: income_products
+        in: body
+        name: income_products
+        schema:
+          $ref: '#/definitions/models.CreateIncomeProducts'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Creates a new income products
+      tags:
+      - income_product
   /product:
     post:
       consumes:

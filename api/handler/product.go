@@ -202,7 +202,7 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	// prixod
+	// income
 	// check
 	// report
 

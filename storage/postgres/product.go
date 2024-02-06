@@ -180,12 +180,11 @@ func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]
 		selectedProducts = models.SellRequest{
 			Products: map[string]int{},
 		}
-		products          = make([]string, len(customerProductIDs))
-		productPrices     = make(map[string]int, 0)
-		notEnoughProducts = make(map[string]int)
-		productsBranchID  string
-		newProducts       = make(map[string]int)
-		prices            = make(map[string]int)
+		products               = make([]string, len(customerProductIDs))
+		selectedProductPrices  = make(map[string]int, 0)
+		notEnoughProducts      = make(map[string]int)
+		productsBranchID       string
+		notEnoughProductPrices = make(map[string]int)
 	)
 
 	for key := range customerProductIDs {
@@ -222,23 +221,19 @@ func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]
 
 		if customerProductIDs[productID] <= quantity {
 			selectedProducts.Products[productID] = price
-			productPrices[productID] = originalPrice
-
+			selectedProductPrices[productID] = originalPrice
 		} else if customerProductIDs[productID] > quantity || quantity == 0 {
 			notEnoughProducts[productID] = customerProductIDs[productID]
-			prices[productID] = originalPrice
-		} else {
-			newProducts[productID] = customerProductIDs[productID]
+			notEnoughProductPrices[productID] = originalPrice
 		}
 	}
 
 	return models.ProductSell{
-		SelectedProducts:  selectedProducts,
-		ProductPrices:     productPrices,
-		NotEnoughProducts: notEnoughProducts,
-		Prices:            prices,
-		ProductsBranchID:  productsBranchID,
-		NewProducts:       newProducts,
+		SelectedProducts:       selectedProducts,
+		ProductPrices:          selectedProductPrices,
+		NotEnoughProducts:      notEnoughProducts,
+		NotEnoughProductPrices: notEnoughProductPrices,
+		ProductsBranchID:       productsBranchID,
 	}, nil
 }
 
@@ -271,12 +266,8 @@ func (p *productRepo) AddDeliveredProducts(ctx context.Context, products models.
 
 	var (
 		updatedStatements []string
-		//	updateQuery       string
-		//insertStatements []string
-		//insertQuery      string
 	)
 
-	//case 1
 	query := `
 					DO $$
 					BEGIN
@@ -300,32 +291,6 @@ func (p *productRepo) AddDeliveredProducts(ctx context.Context, products models.
 			return err
 		}
 	}
-
-	//case 2
-	//if products.NewProducts != nil {
-	//	insertQuery = `insert into products(id, name, price,original_price, quantity, category_id, branch_id)
-	//										values ($1, $2, $3, $4, $5, 'f3b401e7-8414-4820-809c-46c6c88705aa', $7) ;`
-	//	for productID, quantity := range products.NewProducts {
-	//		insertStatements = append(insertStatements, fmt.Sprintf(insertQuery,
-	//			productID,
-	//			products.NewProductPrices[productID]*2, // price
-	//			products.NewProductPrices[productID],   // original_price
-	//			quantity,
-	//			branchID,
-	//		))
-	//	}
-	//
-	//	finalQueryInsert := fmt.Sprintf(`DO $$ BEGIN %s END $$`, strings.Join(insertStatements, "\n"))
-	//
-	//	if rowsAffected, err := p.db.Exec(ctx, finalQueryInsert); err != nil {
-	//		if r := rowsAffected.RowsAffected(); r == 0 {
-	//			fmt.Println("error is while rows affected", err.Error())
-	//			return err
-	//		}
-	//		fmt.Println("error is while inserting new delivered products", err.Error())
-	//		return err
-	//	}
-	//}
 
 	return nil
 }
