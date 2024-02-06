@@ -13,6 +13,8 @@ type IStorage interface {
 	Basket() IBasketStorage
 	BasketProduct() IBasketProductStorage
 	Store() IStoreStorage
+	Branch() IBranchStorage
+	Dealer() IDealerStorage
 }
 
 type IUserStorage interface {
@@ -40,8 +42,9 @@ type IProductStorage interface {
 	GetList(context.Context, models.GetListRequest) (models.ProductResponse, error)
 	Update(context.Context, models.UpdateProduct) (string, error)
 	Delete(context.Context, models.PrimaryKey) error
-	Search(context.Context, map[string]int) (map[string]int, map[string]int, error)
+	Search(context.Context, map[string]int) (models.ProductSell, error)
 	TakeProducts(context.Context, map[string]int) error
+	AddDeliveredProducts(context.Context, models.DeliverProducts, string) error
 }
 type IBasketStorage interface {
 	Create(context.Context, models.CreateBasket) (string, error)
@@ -62,4 +65,18 @@ type IBasketProductStorage interface {
 
 type IStoreStorage interface {
 	AddProfit(ctx context.Context, profit float32, branchID string) error
+	GetStoreBudget(context.Context, string) (float32, error)
+	RemoveDeliveredSum(context.Context, float32, string) error
+}
+
+type IDealerStorage interface {
+	AddSum(context.Context, int) error
+}
+
+type IBranchStorage interface {
+	Create(context.Context, models.CreateBranch) (string, error)
+	GetByID(context.Context, models.PrimaryKey) (models.Branch, error)
+	GetList(context.Context, models.GetListRequest) (models.BranchResponse, error)
+	Update(context.Context, models.UpdateBranch) (string, error)
+	Delete(context.Context, models.PrimaryKey) error
 }

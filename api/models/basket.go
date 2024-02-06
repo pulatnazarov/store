@@ -4,6 +4,8 @@ type Basket struct {
 	ID         string `json:"id"`
 	CustomerID string `json:"customer_id"`
 	TotalSum   uint   `json:"total_sum"`
+	CreatedAt  string `json:"created_at"`
+	UpdatedAt  string `json:"updated_at"`
 }
 
 type CreateBasket struct {

@@ -7,15 +7,14 @@ import (
 	_ "test/api/docs"
 	"test/api/handler"
 	"test/service"
-	"test/storage"
 )
 
 // New ...
 // @title           Swagger Example API
 // @version         1.0
 // @description     This is a sample server celler server.
-func New(services service.IServiceManager, store storage.IStorage) *gin.Engine {
-	h := handler.New(services, store)
+func New(services service.IServiceManager) *gin.Engine {
+	h := handler.New(services)
 
 	r := gin.New()
 
@@ -49,6 +48,12 @@ func New(services service.IServiceManager, store storage.IStorage) *gin.Engine {
 	r.GET("/basketProducts", h.GetBasketProductList)
 	r.PUT("/basketProduct/:id", h.UpdateBasketProduct)
 	r.DELETE("/basketProduct/:id", h.DeleteBasketProduct)
+
+	r.POST("/branch", h.CreateBranch)
+	r.GET("/branch/:id", h.GetBranch)
+	r.GET("/branches", h.GetBranchList)
+	r.PUT("/branch/:id", h.UpdateBranch)
+	r.DELETE("/branch/:id", h.DeleteBranch)
 
 	r.POST("/sell-new", h.StartSellNew)
 

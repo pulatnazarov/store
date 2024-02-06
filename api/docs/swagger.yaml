@@ -1,16 +1,22 @@
 definitions:
   models.Basket:
     properties:
+      created_at:
+        type: string
       customer_id:
         type: string
       id:
         type: string
       total_sum:
         type: integer
+      updated_at:
+        type: string
     type: object
   models.BasketProduct:
     properties:
       basket_id:
+        type: string
+      created_at:
         type: string
       id:
         type: string
@@ -18,6 +24,8 @@ definitions:
         type: string
       quantity:
         type: integer
+      updated_at:
+        type: string
     type: object
   models.BasketProductResponse:
     properties:
@@ -37,11 +45,39 @@ definitions:
       count:
         type: integer
     type: object
-  models.Category:
+  models.Branch:
     properties:
+      address:
+        type: string
+      created_at:
+        type: string
       id:
         type: string
       name:
+        type: string
+      phone_number:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  models.BranchResponse:
+    properties:
+      branches:
+        items:
+          $ref: '#/definitions/models.Branch'
+        type: array
+      count:
+        type: integer
+    type: object
+  models.Category:
+    properties:
+      created_at:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      updated_at:
         type: string
     type: object
   models.CategoryResponse:
@@ -69,6 +105,15 @@ definitions:
       quantity:
         type: integer
     type: object
+  models.CreateBranch:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      phone_number:
+        type: string
+    type: object
   models.CreateCategory:
     properties:
       name:
@@ -76,6 +121,8 @@ definitions:
     type: object
   models.CreateProduct:
     properties:
+      branch_id:
+        type: string
       category_id:
         type: string
       name:
@@ -104,7 +151,11 @@ definitions:
     type: object
   models.Product:
     properties:
+      branch_id:
+        type: string
       category_id:
+        type: string
+      created_at:
         type: string
       id:
         type: string
@@ -116,6 +167,8 @@ definitions:
         type: integer
       quantity:
         type: integer
+      updated_at:
+        type: string
     type: object
   models.Response:
     properties:
@@ -128,6 +181,8 @@ definitions:
   models.SellRequest:
     properties:
       basket_id:
+        type: string
+      branch_id:
         type: string
       products:
         additionalProperties:
@@ -143,12 +198,19 @@ definitions:
     type: object
   models.UpdateBasketProduct:
     properties:
-      basket_id:
-        type: string
       product_id:
         type: string
       quantity:
         type: integer
+    type: object
+  models.UpdateBranch:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      phone_number:
+        type: string
     type: object
   models.UpdateCategory:
     properties:
@@ -158,8 +220,6 @@ definitions:
   models.UpdateProduct:
     properties:
       category_id:
-        type: string
-      id:
         type: string
       name:
         type: string
@@ -175,8 +235,6 @@ definitions:
       cash:
         type: integer
       full_name:
-        type: string
-      id:
         type: string
       phone:
         type: string
@@ -194,6 +252,8 @@ definitions:
         type: string
       cash:
         type: integer
+      created_at:
+        type: string
       full_name:
         type: string
       id:
@@ -201,6 +261,8 @@ definitions:
       password:
         type: string
       phone:
+        type: string
+      updated_at:
         type: string
       user_type:
         type: string
@@ -570,6 +632,181 @@ paths:
       summary: Get basket list
       tags:
       - basket
+  /branch:
+    post:
+      consumes:
+      - application/json
+      description: create a new branch
+      parameters:
+      - description: branch
+        in: body
+        name: branch
+        schema:
+          $ref: '#/definitions/models.CreateBranch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Branch'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Create a new branch
+      tags:
+      - branch
+  /branch/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete branch
+      parameters:
+      - description: branch_id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Delete branch
+      tags:
+      - branch
+    get:
+      consumes:
+      - application/json
+      description: get branch by id
+      parameters:
+      - description: branch_id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Branch'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get branch by id
+      tags:
+      - branch
+    put:
+      consumes:
+      - application/json
+      description: update branch
+      parameters:
+      - description: branch_id
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: branch
+        in: body
+        name: branch
+        schema:
+          $ref: '#/definitions/models.UpdateBranch'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Branch'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Update branch
+      tags:
+      - branch
+  /branches:
+    get:
+      consumes:
+      - application/json
+      description: get branch list
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: search
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.BranchResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get branch list
+      tags:
+      - branch
   /categories:
     get:
       consumes:

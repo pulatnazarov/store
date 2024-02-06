@@ -52,9 +52,9 @@ func (h Handler) CreateCategory(c *gin.Context) {
 func (h Handler) GetCategory(c *gin.Context) {
 	uid := c.Param("id")
 
-	category, err := h.storage.Category().GetByID(context.Background(), models.PrimaryKey{ID: uid})
+	category, err := h.services.Category().Get(context.Background(), models.PrimaryKey{ID: uid})
 	if err != nil {
-		handleResponse(c, "eror is while getting by id", http.StatusInternalServerError, err.Error())
+		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -98,7 +98,7 @@ func (h Handler) GetCategoryList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	categories, err := h.storage.Category().GetList(context.Background(), models.GetListRequest{
+	categories, err := h.services.Category().GetList(context.Background(), models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -136,13 +136,7 @@ func (h Handler) UpdateCategory(c *gin.Context) {
 
 	category.ID = uid
 
-	id, err := h.storage.Category().Update(context.Background(), category)
-	if err != nil {
-		handleResponse(c, "error is while updating", http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	updatedCategory, err := h.storage.Category().GetByID(context.Background(), models.PrimaryKey{ID: id})
+	updatedCategory, err := h.services.Category().Update(context.Background(), category)
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
@@ -166,7 +160,7 @@ func (h Handler) UpdateCategory(c *gin.Context) {
 func (h Handler) DeleteCategory(c *gin.Context) {
 	uid := c.Param("id")
 
-	if err := h.storage.Category().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
+	if err := h.services.Category().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
 		handleResponse(c, "error is while delete", http.StatusInternalServerError, err.Error())
 		return
 	}
