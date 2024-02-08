@@ -18,3 +18,20 @@ type CreateIncomeProduct struct {
 type CreateIncomeProducts struct {
 	IncomeProducts []CreateIncomeProduct `json:"income_products"`
 }
+
+type IncomeProductsResponse struct {
+	IncomeProducts []IncomeProduct
+	Count          int
+}
+
+type UpdateIncomeProducts struct {
+	IncomeProducts []IncomeProduct
+}
+
+type IncomeProducts struct {
+	IncomeProducts []IncomeProduct
+}
+
+type DeleteIncomeProducts struct {
+	IDs []PrimaryKey
+}

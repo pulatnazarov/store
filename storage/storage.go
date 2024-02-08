@@ -84,9 +84,15 @@ type IBranchStorage interface {
 }
 
 type IIncomeStorage interface {
-	Create(ctx context.Context) (models.Income, error)
+	Create(context.Context) (models.Income, error)
+	GetByID(context.Context, models.PrimaryKey) (models.Income, error)
+	GetList(context.Context, models.GetListRequest) (models.IncomesResponse, error)
+	Delete(context.Context, models.PrimaryKey) error
 }
 
 type IIncomeProductStorage interface {
 	CreateMultiple(context.Context, models.CreateIncomeProducts) error
+	GetList(context.Context, models.GetListRequest) (models.IncomeProductsResponse, error)
+	UpdateMultiple(context.Context, models.UpdateIncomeProducts) error
+	DeleteMultiple(context.Context, models.DeleteIncomeProducts) error
 }
