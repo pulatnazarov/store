@@ -2,20 +2,12 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"github.com/go-playground/assert/v2"
-	"os"
 	"test/api/models"
 	"test/config"
 	"test/pkg/helper"
 	"testing"
 )
-
-func TestMain(t *testing.M) {
-	extCode := t.Run()
-	fmt.Println("ext Code ", extCode)
-	os.Exit(extCode)
-}
 
 func TestUserRepo_Create(t *testing.T) {
 	cfg := config.Load()
