@@ -47,6 +47,7 @@ type IProductStorage interface {
 	Search(context.Context, map[string]int) (models.ProductSell, error)
 	TakeProducts(context.Context, map[string]int) error
 	AddDeliveredProducts(context.Context, models.DeliverProducts, string) error
+	GetListByIDs(context.Context, []string) (models.ProductResponse, error)
 }
 type IBasketStorage interface {
 	Create(context.Context, models.CreateBasket) (string, error)

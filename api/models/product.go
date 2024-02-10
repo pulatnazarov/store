@@ -31,8 +31,8 @@ type UpdateProduct struct {
 }
 
 type ProductResponse struct {
-	Product []Product
-	Count   int
+	Products []Product
+	Count    int
 }
 
 type ProductSell struct {
@@ -41,6 +41,7 @@ type ProductSell struct {
 	NotEnoughProducts      map[string]int `json:"not_enough_products"`
 	NotEnoughProductPrices map[string]int `json:"prices"`
 	ProductsBranchID       string         `json:"products_branch_id"`
+	Check                  Check          `json:"check"`
 }
 
 type SellRequest struct {
@@ -53,4 +54,9 @@ type DeliverProducts struct {
 	NotEnoughProducts map[string]int `json:"not_enough_products"`
 	NewProducts       map[string]int `json:"new_products"`
 	NewProductPrices  map[string]int `json:"new_product_prices"`
+}
+
+type Check struct {
+	Products []Product `json:"products"`
+	TotalSum int       `json:"total_sum"`
 }

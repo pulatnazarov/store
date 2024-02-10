@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"test/api/models"
 	"test/storage"
@@ -74,6 +75,11 @@ func (p productService) Delete(ctx context.Context, key models.PrimaryKey) error
 }
 
 func (p productService) StartSellNew(ctx context.Context, request models.SellRequest) (models.ProductSell, error) {
+	check := models.Check{
+		Products: make([]models.Product, 0),
+		TotalSum: 0,
+	}
+
 	productSell, err := p.storage.Product().Search(ctx, request.Products)
 	if err != nil {
 		fmt.Println("error in service layer while searching product", err.Error())
@@ -129,8 +135,37 @@ func (p productService) StartSellNew(ctx context.Context, request models.SellReq
 		return models.ProductSell{}, err
 	}
 
-	//prixod
+	// dealer
+
 	//check
+	productIDs := []string{}
+	for productID := range productSell.SelectedProducts.Products {
+		productIDs = append(productIDs, productID)
+	}
+
+	productsResp, err := p.storage.Product().GetListByIDs(ctx, productIDs)
+	if err != nil {
+		fmt.Println("error in service layer while getting products by ids", err.Error())
+		return models.ProductSell{}, err
+	}
+
+	js, _ := json.Marshal(productsResp.Products)
+
+	json.Unmarshal(js, &check.Products)
+
+	totalSum = 0
+	for i, checkProduct := range check.Products {
+		quantity := request.Products[checkProduct.ID]
+
+		check.Products[i].Quantity = quantity
+
+		totalSum += quantity * checkProduct.Price
+	}
+
+	check.TotalSum = totalSum
+
+	productSell.Check = check
+
 	//report
 
 	return productSell, nil

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"test/api/models"
+	"time"
 )
 
 // CreateUser godoc
@@ -30,7 +31,9 @@ func (h Handler) CreateUser(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.User().Create(context.Background(), createUser)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	resp, err := h.services.User().Create(ctx, createUser)
 	if err != nil {
 		handleResponse(c, "error while creating user", http.StatusInternalServerError, err.Error())
 		return
@@ -62,7 +65,9 @@ func (h Handler) GetUser(c *gin.Context) {
 		return
 	}
 
-	user, err := h.services.User().GetUser(context.Background(), models.PrimaryKey{
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	user, err := h.services.User().GetUser(ctx, models.PrimaryKey{
 		ID: id.String(),
 	})
 	if err != nil {
@@ -110,7 +115,9 @@ func (h Handler) GetUserList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	resp, err := h.services.User().GetUsers(context.Background(), models.GetListRequest{
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	resp, err := h.services.User().GetUsers(ctx, models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -152,7 +159,9 @@ func (h Handler) UpdateUser(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.User().Update(context.Background(), updateUser)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	resp, err := h.services.User().Update(ctx, updateUser)
 	if err != nil {
 		handleResponse(c, "error while updating user", http.StatusInternalServerError, err.Error())
 		return
@@ -181,7 +190,9 @@ func (h Handler) DeleteUser(c *gin.Context) {
 		return
 	}
 
-	if err = h.services.User().Delete(context.Background(), models.PrimaryKey{
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	if err = h.services.User().Delete(ctx, models.PrimaryKey{
 		ID: id.String(),
 	}); err != nil {
 		handleResponse(c, "error while deleting user by id", http.StatusInternalServerError, err.Error())
@@ -220,7 +231,9 @@ func (h Handler) UpdateUserPassword(c *gin.Context) {
 
 	updateUserPassword.ID = uid.String()
 
-	if err = h.services.User().UpdatePassword(context.Background(), updateUserPassword); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	if err = h.services.User().UpdatePassword(ctx, updateUserPassword); err != nil {
 		handleResponse(c, "error while updating user password", http.StatusInternalServerError, err.Error())
 		return
 	}

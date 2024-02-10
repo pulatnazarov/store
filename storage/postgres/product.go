@@ -138,8 +138,8 @@ func (p *productRepo) GetList(ctx context.Context, request models.GetListRequest
 		products = append(products, product)
 	}
 	return models.ProductResponse{
-		Product: products,
-		Count:   count,
+		Products: products,
+		Count:    count,
 	}, err
 }
 
@@ -293,4 +293,36 @@ func (p *productRepo) AddDeliveredProducts(ctx context.Context, products models.
 	}
 
 	return nil
+}
+
+func (p *productRepo) GetListByIDs(ctx context.Context, productIDs []string) (models.ProductResponse, error) {
+	productsResp := models.ProductResponse{
+		Products: make([]models.Product, 0),
+		Count:    0,
+	}
+
+	query := `select id, name, price from products where id::varchar = ANY($1)`
+
+	rows, err := p.db.Query(ctx, query, pq.Array(productIDs))
+	if err != nil {
+		fmt.Println("Error while getting products by product ids", err.Error())
+		return models.ProductResponse{}, err
+	}
+
+	for rows.Next() {
+		product := models.Product{}
+
+		if err = rows.Scan(
+			&product.ID,
+			&product.Name,
+			&product.Price,
+		); err != nil {
+			fmt.Println("Error while scanning rows one by one", err.Error())
+			return models.ProductResponse{}, err
+		}
+
+		productsResp.Products = append(productsResp.Products, product)
+	}
+
+	return productsResp, nil
 }

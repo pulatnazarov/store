@@ -177,7 +177,7 @@ func (h Handler) DeleteProduct(c *gin.Context) {
 // @Accept       json
 // @Produce      json
 // @Param 		 sell_request body models.SellRequest false "sell_request"
-// @Success      200  {object}  models.Response
+// @Success      200  {object}  models.Check
 // @Failure      400  {object}  models.Response
 // @Failure      404  {object}  models.Response
 // @Failure      500  {object}  models.Response
@@ -196,15 +196,12 @@ func (h Handler) StartSellNew(c *gin.Context) {
 	}
 
 	// dealer
-
 	if err = h.services.Dealer().Delivery(context.Background(), productSell); err != nil {
 		handleResponse(c, "error is while delivery products", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	// income
-	// check
 	// report
 
-	handleResponse(c, "successfully finished the purchase", http.StatusOK, "success")
+	handleResponse(c, "successfully finished the purchase", http.StatusOK, productSell.Check)
 }

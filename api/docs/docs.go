@@ -1786,7 +1786,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/models.Response"
+                            "$ref": "#/definitions/models.Check"
                         }
                     },
                     "400": {
@@ -2271,6 +2271,20 @@ const docTemplate = `{
                     }
                 },
                 "count": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Check": {
+            "type": "object",
+            "properties": {
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Product"
+                    }
+                },
+                "total_sum": {
                     "type": "integer"
                 }
             }
