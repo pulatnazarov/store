@@ -2,12 +2,20 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-playground/assert/v2"
+	"os"
 	"test/api/models"
 	"test/config"
 	"test/pkg/helper"
 	"testing"
 )
+
+func TestMain(t *testing.M) {
+	extCode := t.Run()
+	fmt.Println("ext Code ", extCode)
+	os.Exit(extCode)
+}
 
 func TestUserRepo_Create(t *testing.T) {
 	cfg := config.Load()
@@ -65,34 +73,68 @@ func TestUserRepo_GetByID(t *testing.T) {
 		t.Errorf("error while creating user error: %v", err)
 	}
 
-	user, err := pgStore.User().GetByID(context.Background(), models.PrimaryKey{
-		ID: userID,
+	t.Run("success", func(t *testing.T) {
+		user, err := pgStore.User().GetByID(context.Background(), models.PrimaryKey{
+			ID: userID,
+		})
+		if err != nil {
+			t.Errorf("error while getting user by id error: %v", err)
+		}
+
+		if user.ID != userID {
+			t.Errorf("expected: %q, but got %q", userID, user.ID)
+		}
+
+		if user.FullName == "" {
+			t.Error("expected some full name, but got nothing")
+		}
+
+		if user.Phone == "" {
+			t.Error("expected some full name, but got nothing")
+		} else if len(user.Phone) >= 14 || len(user.Phone) <= 12 {
+			t.Errorf("expected phone length: 13, but got %d, user id is %s", len(user.Phone), user.ID)
+		}
+
+		if user.Cash < 0 {
+			t.Errorf("expected > 0, but got %d", user.Cash)
+		}
+
+		if user.BranchID == "" {
+			t.Error("expected some branch id, but got nothing")
+		}
 	})
-	if err != nil {
-		t.Errorf("error while getting user by id error: %v", err)
-	}
 
-	if user.ID != userID {
-		t.Errorf("expected: %q, but got %q", userID, user.ID)
-	}
+	t.Run("failure", func(t *testing.T) {
+		userID = ""
+		user, err := pgStore.User().GetByID(context.Background(), models.PrimaryKey{
+			ID: userID,
+		})
+		if err != nil {
+			t.Errorf("error while getting user by id error: %v", err)
+		}
 
-	if user.FullName == "" {
-		t.Error("expected some full name, but got nothing")
-	}
+		if user.ID != userID {
+			t.Errorf("expected: %q, but got %q", userID, user.ID)
+		}
 
-	if user.Phone == "" {
-		t.Error("expected some full name, but got nothing")
-	} else if len(user.Phone) >= 14 || len(user.Phone) <= 12 {
-		t.Errorf("expected phone length: 13, but got %d", len(user.Phone))
-	}
+		if user.FullName == "" {
+			t.Error("expected some full name, but got nothing")
+		}
 
-	if user.Cash < 0 {
-		t.Errorf("expected > 0, but got %d", user.Cash)
-	}
+		if user.Phone == "" {
+			t.Error("expected some full name, but got nothing")
+		} else if len(user.Phone) >= 14 || len(user.Phone) <= 12 {
+			t.Errorf("expected phone length: 13, but got %d, user id is %s", len(user.Phone), user.ID)
+		}
 
-	if user.BranchID == "" {
-		t.Error("expected some branch id, but got nothing")
-	}
+		if user.Cash < 0 {
+			t.Errorf("expected > 0, but got %d", user.Cash)
+		}
+
+		if user.BranchID == "" {
+			t.Error("expected some branch id, but got nothing")
+		}
+	})
 }
 
 func TestUserRepo_GetList(t *testing.T) {
