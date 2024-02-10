@@ -33,7 +33,7 @@ var (
 	}
 )
 
-func GenerateName() string {
+func GenerateFullName() string {
 	rand.Seed(time.Now().UnixNano())
 
 	firstName := firstNames[rand.Intn(len(firstNames))]

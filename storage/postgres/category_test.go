@@ -47,19 +47,19 @@ func TestCategoryRepo_GetByID(t *testing.T) {
 		Name: "category_name_2",
 	}
 
-	catigoryID, err := pgStore.Category().Create(context.Background(), createCategory)
+	categoryID, err := pgStore.Category().Create(context.Background(), createCategory)
 	if err != nil {
 		t.Errorf("error while creating user error: %v", err)
 	}
 
-	catigory, err := pgStore.Category().GetByID(context.Background(), models.PrimaryKey{
-		ID: catigoryID,
+	category, err := pgStore.Category().GetByID(context.Background(), models.PrimaryKey{
+		ID: categoryID,
 	})
 	if err != nil {
 		t.Errorf("error while getting primary key : %v", err)
 	}
 
-	assert.Equal(t, catigory.ID, catigoryID)
+	assert.Equal(t, category.ID, categoryID)
 }
 
 func TestCategoryRepo_GetList(t *testing.T) {
@@ -112,10 +112,6 @@ func TestCategoryRepo_Update(t *testing.T) {
 		t.Errorf("error while creating category error: %v", err)
 	}
 
-	if err != nil {
-		t.Errorf("error while getting category error: %v", err)
-	}
-
 	assert.Equal(t, categoryID, categoryUpdateID)
 }
 
@@ -126,6 +122,7 @@ func TestCategoryRepo_Delete(t *testing.T) {
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
+
 	createCategory := models.CreateCategory{
 		Name: "name4",
 	}
@@ -134,6 +131,7 @@ func TestCategoryRepo_Delete(t *testing.T) {
 	if err != nil {
 		t.Errorf("error while creating category error: %v", err)
 	}
+
 	if err := pgStore.Category().Delete(context.Background(), models.PrimaryKey{categoryID}); err != nil {
 		t.Errorf("Error deleting category: %v", err)
 	}
