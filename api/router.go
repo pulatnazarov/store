@@ -10,6 +10,7 @@ import (
 	"net/http"
 	_ "test/api/docs"
 	"test/api/handler"
+	"test/pkg/logger"
 	"test/service"
 	"time"
 )
@@ -18,8 +19,8 @@ import (
 // @title           Swagger Example API
 // @version         1.0
 // @description     This is a sample server celler server.
-func New(services service.IServiceManager) *gin.Engine {
-	h := handler.New(services)
+func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
+	h := handler.New(services, log)
 
 	r := gin.New()
 

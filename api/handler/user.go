@@ -61,7 +61,7 @@ func (h Handler) GetUser(c *gin.Context) {
 
 	id, err := uuid.Parse(uid)
 	if err != nil {
-		handleResponse(c, "invalid uuid type", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "invalid uuid type", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -127,7 +127,7 @@ func (h Handler) GetUserList(c *gin.Context) {
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, resp)
+	handleResponseNew(c, h.log, "success!", http.StatusOK, resp)
 }
 
 // UpdateUser godoc

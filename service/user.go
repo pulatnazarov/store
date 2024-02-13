@@ -7,23 +7,27 @@ import (
 	"github.com/jackc/pgx/v5"
 	"test/api/models"
 	"test/pkg/check"
+	"test/pkg/logger"
 	"test/storage"
 )
 
 type userService struct {
 	storage storage.IStorage
+	log     logger.ILogger
 }
 
-func NewUserService(storage storage.IStorage) userService {
+func NewUserService(storage storage.IStorage, log logger.ILogger) userService {
 	return userService{
 		storage: storage,
+		log:     log,
 	}
 }
 
 func (u userService) Create(ctx context.Context, createUser models.CreateUser) (models.User, error) {
+	u.log.Info("User create service layer", logger.Any("createUser", createUser))
 	pKey, err := u.storage.User().Create(ctx, createUser)
 	if err != nil {
-		fmt.Println("ERROR in service layer while creating user", err.Error())
+		u.log.Error("error while creating user", logger.Error(err))
 		return models.User{}, err
 	}
 
@@ -47,10 +51,11 @@ func (u userService) GetUser(ctx context.Context, pKey models.PrimaryKey) (model
 }
 
 func (u userService) GetUsers(ctx context.Context, request models.GetListRequest) (models.UsersResponse, error) {
+	u.log.Info("Get user list service layer", logger.Any("request", request))
 	usersResponse, err := u.storage.User().GetList(ctx, request)
 	if err != nil {
 		if !errors.Is(err, pgx.ErrNoRows) {
-			fmt.Println("ERROR in service layer while getting users list", err.Error())
+			u.log.Error("error while getting users list", logger.Error(err))
 			return models.UsersResponse{}, err
 		}
 	}

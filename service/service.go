@@ -1,6 +1,7 @@
 package service
 
 import (
+	"test/pkg/logger"
 	"test/storage"
 )
 
@@ -28,10 +29,10 @@ type Service struct {
 	incomeProductService incomeProductService
 }
 
-func New(storage storage.IStorage) Service {
+func New(storage storage.IStorage, log logger.ILogger) Service {
 	services := Service{}
 
-	services.userService = NewUserService(storage)
+	services.userService = NewUserService(storage, log)
 	services.categoryService = NewCategoryService(storage)
 	services.basketService = NewBasketService(storage)
 	services.basketProductService = NewBasketProductService(storage)

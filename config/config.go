@@ -14,6 +14,9 @@ type Config struct {
 	PostgresUser     string
 	PostgresPassword string
 	PostgresDB       string
+
+	ServiceName string
+	LoggerLevel string
 }
 
 func Load() Config {
@@ -28,6 +31,9 @@ func Load() Config {
 	cfg.PostgresUser = cast.ToString(getOrReturnDefault("POSTGRES_USER", "postgres"))
 	cfg.PostgresPassword = cast.ToString(getOrReturnDefault("POSTGRES_PASSWORD", "9"))
 	cfg.PostgresDB = cast.ToString(getOrReturnDefault("POSTGRES_DB", "store"))
+
+	cfg.ServiceName = cast.ToString(getOrReturnDefault("SERVICE_NAME", "store"))
+	cfg.LoggerLevel = cast.ToString(getOrReturnDefault("LOGGER_LEVEL", "debug"))
 
 	return cfg
 }
