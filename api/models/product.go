@@ -28,6 +28,7 @@ type UpdateProduct struct {
 	OriginalPrice int    `json:"original_price"`
 	Quantity      int    `json:"quantity"`
 	CategoryID    string `json:"category_id"`
+	
 }
 
 type ProductResponse struct {
@@ -59,4 +60,17 @@ type DeliverProducts struct {
 type Check struct {
 	Products []Product `json:"products"`
 	TotalSum int       `json:"total_sum"`
+}
+
+type ProductCase struct {
+	ID            string `json:"id"`
+	Name          string `json:"name"`
+	Price         int    `json:"price"`
+	OriginalPrice int    `json:"original_price"`
+	Quantity      int    `json:"quantity"`
+	CategoryID    string `json:"category_id"`
+	BranchID      string `json:"branch_id"`
+	CreatedAt     string `json:"created_at"`
+	UpdatedAt     string `json:"updated_at"`
+	Want          interface{}
 }

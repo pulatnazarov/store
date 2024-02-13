@@ -3,9 +3,10 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"test/config"
 	"test/storage"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	_ "github.com/golang-migrate/migrate/v4/database"          //database is needed for migration
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" //postgres is used for database
@@ -42,31 +43,31 @@ func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
 	}
 
 	// migration
-	//m, err := migrate.New("file://migrations/postgres/", url)
-	//if err != nil {
-	//	fmt.Println("error while migrating", err.Error())
-	//	return nil, err
-	//}
-	//
-	//if err = m.Up(); err != nil {
-	//	if !strings.Contains(err.Error(), "no change") {
-	//		version, dirty, err := m.Version()
-	//		if err != nil {
-	//			fmt.Println("err in checking version and dirty", err.Error())
-	//			return nil, err
-	//		}
-	//
-	//		if dirty {
-	//			version--
-	//			if err = m.Force(int(version)); err != nil {
-	//				fmt.Println("ERR in making force", err.Error())
-	//				return nil, err
-	//			}
-	//		}
-	//		fmt.Println("ERROR in migrating", err.Error())
-	//		return nil, err
-	//	}
-	//}
+	// m, err := migrate.New("file://migrations/postgres/", url)
+	// if err != nil {
+	// 	fmt.Println("error while migrating", err.Error())
+	// 	return nil, err
+	// }
+
+	// if err = m.Up(); err != nil {
+	// 	if !strings.Contains(err.Error(), "no change") {
+	// 		version, dirty, err := m.Version()
+	// 		if err != nil {
+	// 			fmt.Println("err in checking version and dirty", err.Error())
+	// 			return nil, err
+	// 		}
+
+	// 		if dirty {
+	// 			version--
+	// 			if err = m.Force(int(version)); err != nil {
+	// 				fmt.Println("ERR in making force", err.Error())
+	// 				return nil, err
+	// 			}
+	// 		}
+	// 		fmt.Println("ERROR in migrating", err.Error())
+	// 		return nil, err
+	// 	}
+	// }
 
 	return Store{
 		pool: pool,
