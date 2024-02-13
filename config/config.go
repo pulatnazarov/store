@@ -2,10 +2,10 @@ package config
 
 import (
 	"fmt"
+	"github.com/spf13/cast"
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/spf13/cast"
 )
 
 type Config struct {
