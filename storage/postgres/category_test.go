@@ -79,7 +79,7 @@ func TestCategoryRepo_GetList(t *testing.T) {
 	}
 
 	if len(categoryResp.Category) != 7 {
-		t.Errorf("expected 16, but got: %d", len(categoryResp.Category))
+		t.Errorf("expected 7, but got: %d", len(categoryResp.Category))
 	}
 
 	assert.Equal(t, len(categoryResp.Category), 7)
