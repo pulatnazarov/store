@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"test/api/models"
+	"time"
 )
 
 // CreateProduct godoc
@@ -189,14 +190,18 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	productSell, err := h.services.Product().StartSellNew(context.Background(), request)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
+	defer cancel()
+
+	productSell, err := h.services.Product().StartSellNew(ctx, request)
 	if err != nil {
 		handleResponse(c, "error is while start sell new", http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// dealer
-	if err = h.services.Dealer().Delivery(context.Background(), productSell); err != nil {
+
+	if err = h.services.Dealer().Delivery(ctx, productSell); err != nil {
 		handleResponse(c, "error is while delivery products", http.StatusInternalServerError, err.Error())
 		return
 	}

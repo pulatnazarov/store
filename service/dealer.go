@@ -47,7 +47,8 @@ func (d dealerService) Delivery(ctx context.Context, sell models.ProductSell) er
 		return err
 	}
 
-	if err = d.storage.Dealer().AddSum(ctx, totalSum); err != nil {
+	dealerID := "1cfd84e6-72cb-4135-a802-85d10e4183ea"
+	if err = d.storage.Dealer().AddSum(ctx, totalSum, dealerID); err != nil {
 		fmt.Println("error in service layer while add sum to dealer", err.Error())
 		return err
 	}
