@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"test/api/models"
+	"time"
 )
 
 // CreateBranch godoc
@@ -28,7 +29,10 @@ func (h Handler) CreateBranch(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.services.Branch().Create(context.Background(), branch)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	resp, err := h.services.Branch().Create(ctx, branch)
 	if err != nil {
 		handleResponse(c, "error is while creating branch", http.StatusInternalServerError, err.Error())
 		return
@@ -52,7 +56,10 @@ func (h Handler) CreateBranch(c *gin.Context) {
 func (h Handler) GetBranch(c *gin.Context) {
 	uid := c.Param("id")
 
-	branch, err := h.services.Branch().Get(context.Background(), uid)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	branch, err := h.services.Branch().Get(ctx, uid)
 	if err != nil {
 		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
@@ -98,7 +105,10 @@ func (h Handler) GetBranchList(c *gin.Context) {
 
 	search = c.Query("search")
 
-	branches, err := h.services.Branch().GetList(context.Background(), models.GetListRequest{
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	branches, err := h.services.Branch().GetList(ctx, models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
@@ -135,7 +145,10 @@ func (h Handler) UpdateBranch(c *gin.Context) {
 
 	branch.ID = uid
 
-	updatedBranch, err := h.services.Branch().Update(context.Background(), branch)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	updatedBranch, err := h.services.Branch().Update(ctx, branch)
 	if err != nil {
 		handleResponse(c, "error is while updating branch", http.StatusInternalServerError, err.Error())
 		return
@@ -159,7 +172,10 @@ func (h Handler) UpdateBranch(c *gin.Context) {
 func (h Handler) DeleteBranch(c *gin.Context) {
 	uid := c.Param("id")
 
-	if err := h.services.Branch().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+
+	if err := h.services.Branch().Delete(ctx, models.PrimaryKey{ID: uid}); err != nil {
 		handleResponse(c, "error is while delting branch", http.StatusInternalServerError, err.Error())
 		return
 	}
