@@ -24,7 +24,7 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 
 	r := gin.New()
 
-	r.Use(authenticateMiddleware)
+	//r.Use(authenticateMiddleware)
 	r.Use(gin.Logger())
 
 	{

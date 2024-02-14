@@ -8,6 +8,7 @@ import (
 	"test/api/models"
 	"test/pkg/check"
 	"test/pkg/logger"
+	"test/pkg/security"
 	"test/storage"
 )
 
@@ -25,6 +26,14 @@ func NewUserService(storage storage.IStorage, log logger.ILogger) userService {
 
 func (u userService) Create(ctx context.Context, createUser models.CreateUser) (models.User, error) {
 	u.log.Info("User create service layer", logger.Any("createUser", createUser))
+
+	password, err := security.HashPassword(createUser.Password)
+	if err != nil {
+		u.log.Error("error while hashing password", logger.Error(err))
+		return models.User{}, err
+	}
+	createUser.Password = password
+
 	pKey, err := u.storage.User().Create(ctx, createUser)
 	if err != nil {
 		u.log.Error("error while creating user", logger.Error(err))
