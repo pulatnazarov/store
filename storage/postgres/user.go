@@ -7,16 +7,19 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"test/api/models"
+	"test/pkg/logger"
 	"test/storage"
 )
 
 type userRepo struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log logger.ILogger
 }
 
-func NewUserRepo(db *pgxpool.Pool) storage.IUserStorage {
+func NewUserRepo(db *pgxpool.Pool, log logger.ILogger) storage.IUserStorage {
 	return &userRepo{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
@@ -35,7 +38,7 @@ func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (st
 		createUser.Cash,
 		createUser.BranchID,
 	); err != nil {
-		fmt.Println("error while inserting data", err.Error())
+		u.log.Error("error while inserting data", logger.Error(err))
 		return "", err
 	}
 
@@ -59,7 +62,7 @@ func (u *userRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.
 		&createdAt, //4
 		&updatedAt, //5
 	); err != nil {
-		fmt.Println("error while scanning user", err.Error())
+		u.log.Error("error while scanning user", logger.Error(err))
 		return models.User{}, err
 	}
 

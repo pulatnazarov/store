@@ -3,8 +3,11 @@ package postgres
 import (
 	"context"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
 	"test/config"
+	"test/pkg/logger"
 	"test/storage"
 
 	_ "github.com/golang-migrate/migrate/v4/database"          //database is needed for migration
@@ -15,9 +18,10 @@ import (
 
 type Store struct {
 	pool *pgxpool.Pool
+	log  logger.ILogger
 }
 
-func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
+func New(ctx context.Context, cfg config.Config, log logger.ILogger) (storage.IStorage, error) {
 	url := fmt.Sprintf(
 		`postgres://%s:%s@%s:%s/%s?sslmode=disable`,
 		cfg.PostgresUser,
@@ -29,7 +33,7 @@ func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
 
 	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
-		fmt.Println("error while parsing config", err.Error())
+		log.Error("error while parsing config", logger.Error(err))
 		return nil, err
 	}
 
@@ -37,39 +41,39 @@ func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) {
 
 	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
-		fmt.Println("error while connecting to db", err.Error())
+		log.Error("error while connecting to db", logger.Error(err))
 		return nil, err
 	}
 
 	// migration
-	//m, err := migrate.New("file://migrations/postgres/", url)
-	//if err != nil {
-	//	fmt.Println("error while migrating", err.Error())
-	//	return nil, err
-	//}
-	//
-	//if err = m.Up(); err != nil {
-	//	if !strings.Contains(err.Error(), "no change") {
-	//		version, dirty, err := m.Version()
-	//		if err != nil {
-	//			fmt.Println("err in checking version and dirty", err.Error())
-	//			return nil, err
-	//		}
-	//
-	//		if dirty {
-	//			version--
-	//			if err = m.Force(int(version)); err != nil {
-	//				fmt.Println("ERR in making force", err.Error())
-	//				return nil, err
-	//			}
-	//		}
-	//		fmt.Println("ERROR in migrating", err.Error())
-	//		return nil, err
-	//	}
-	//}
+	m, err := migrate.New("file://migrations/postgres/", url)
+	if err != nil {
+		log.Error("error while migrating", logger.Error(err))
+		return nil, err
+	}
+
+	if err = m.Up(); err != nil {
+		if !strings.Contains(err.Error(), "no change") {
+			version, dirty, err := m.Version()
+			if err != nil {
+				log.Error("err in checking version and dirty", logger.Error(err))
+				return nil, err
+			}
+
+			if dirty {
+				version--
+				if err = m.Force(int(version)); err != nil {
+					log.Error("ERR in making force", logger.Error(err))
+					return nil, err
+				}
+			}
+			return nil, err
+		}
+	}
 
 	return Store{
 		pool: pool,
+		log:  log,
 	}, nil
 }
 
@@ -78,7 +82,7 @@ func (s Store) Close() {
 }
 
 func (s Store) User() storage.IUserStorage {
-	return NewUserRepo(s.pool)
+	return NewUserRepo(s.pool, s.log)
 }
 
 func (s Store) Category() storage.ICategoryStorage {
