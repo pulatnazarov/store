@@ -28,6 +28,7 @@ type IUserStorage interface {
 	GetPassword(context.Context, string) (string, error)
 	UpdatePassword(context.Context, models.UpdateUserPassword) error
 	UpdateCustomerCash(context.Context, string, int) error
+	GetCustomerCredentialsByLogin(context.Context, string) (string, error)
 }
 
 type ICategoryStorage interface {

@@ -49,29 +49,36 @@ func New(ctx context.Context, cfg config.Config, log logger.ILogger) (storage.IS
 	//migration
 	m, err := migrate.New("file://migrations/postgres/", url)
 	if err != nil {
-		fmt.Println("error while migrating", err.Error())
+		log.Error("error while migrating", logger.Error(err))
 		return nil, err
 	}
 
+	log.Info("???? came")
+
 	if err = m.Up(); err != nil {
+		log.Warning("migration up", logger.Error(err))
 		if !strings.Contains(err.Error(), "no change") {
+			fmt.Println("entered")
 			version, dirty, err := m.Version()
+			log.Info("version and dirty", logger.Any("version", version), logger.Any("dirty", dirty))
 			if err != nil {
-				fmt.Println("err in checking version and dirty", err.Error())
+				log.Error("err in checking version and dirty", logger.Error(err))
 				return nil, err
 			}
 
 			if dirty {
 				version--
 				if err = m.Force(int(version)); err != nil {
-					fmt.Println("ERR in making force", err.Error())
+					log.Error("ERR in making force", logger.Error(err))
 					return nil, err
 				}
 			}
-			fmt.Println("ERROR in migrating", err.Error())
+			log.Warning("WARNING in migrating", logger.Error(err))
 			return nil, err
 		}
 	}
+
+	log.Info("!!!!! came here")
 
 	return Store{
 		pool: pool,

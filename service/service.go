@@ -15,6 +15,7 @@ type IServiceManager interface {
 	Dealer() dealerService
 	Income() incomeService
 	IncomeProduct() incomeProductService
+	AuthService() authService
 }
 
 type Service struct {
@@ -27,6 +28,7 @@ type Service struct {
 	dealerService        dealerService
 	incomeService        incomeService
 	incomeProductService incomeProductService
+	authService          authService
 }
 
 func New(storage storage.IStorage, log logger.ILogger) Service {
@@ -41,6 +43,7 @@ func New(storage storage.IStorage, log logger.ILogger) Service {
 	services.dealerService = NewDealerService(storage, log)
 	services.incomeService = NewIncomeService(storage, log)
 	services.incomeProductService = NewIncomeProductService(storage, log)
+	services.authService = NewAuthService(storage, log)
 
 	return services
 }
@@ -79,4 +82,8 @@ func (s Service) Income() incomeService {
 
 func (s Service) IncomeProduct() incomeProductService {
 	return s.incomeProductService
+}
+
+func (s Service) AuthService() authService {
+	return s.authService
 }

@@ -213,3 +213,18 @@ func (u *userRepo) UpdateCustomerCash(ctx context.Context, id string, sum int) e
 
 	return nil
 }
+
+func (u *userRepo) GetCustomerCredentialsByLogin(ctx context.Context, login string) (string, error) {
+	password := ""
+
+	query := `
+		select password from users 
+		                where user_role = 'customer' and login = $1`
+
+	if err := u.db.QueryRow(ctx, query, login).Scan(&password); err != nil {
+		fmt.Println("Error while scanning password from users", err.Error())
+		return "", err
+	}
+
+	return password, nil
+}

@@ -25,17 +25,17 @@ func (h Handler) CreateIncomeProducts(c *gin.Context) {
 	var incomeProducts = models.CreateIncomeProducts{}
 
 	if err := c.ShouldBindJSON(&incomeProducts); err != nil {
-		handleResponseNew(c, h.log, "error while binding json", http.StatusBadRequest, err.Error())
+		handleResponse(c, h.log, "error while binding json", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err := h.services.IncomeProduct().CreateMultiple(context.Background(), incomeProducts)
 	if err != nil {
-		handleResponseNew(c, h.log, "error while creating incomeProducts", http.StatusInternalServerError, err.Error())
+		handleResponse(c, h.log, "error while creating incomeProducts", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponseNew(c, h.log, "", http.StatusCreated, "created")
+	handleResponse(c, h.log, "", http.StatusCreated, "created")
 }
 
 // GetIncomeProductsList godoc
@@ -62,14 +62,14 @@ func (h Handler) GetIncomeProductsList(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	page, err = strconv.Atoi(pageStr)
 	if err != nil {
-		handleResponseNew(c, h.log, "error is while converting pageStr", http.StatusBadRequest, err)
+		handleResponse(c, h.log, "error is while converting pageStr", http.StatusBadRequest, err)
 		return
 	}
 
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err = strconv.Atoi(limitStr)
 	if err != nil {
-		handleResponseNew(c, h.log, "error is while converting limitStr", http.StatusBadRequest, err)
+		handleResponse(c, h.log, "error is while converting limitStr", http.StatusBadRequest, err)
 		return
 	}
 
@@ -84,7 +84,7 @@ func (h Handler) GetIncomeProductsList(c *gin.Context) {
 		return
 	}
 
-	handleResponseNew(c, h.log, "", http.StatusOK, resp)
+	handleResponse(c, h.log, "", http.StatusOK, resp)
 }
 
 // UpdateIncomeProducts godoc
@@ -102,16 +102,16 @@ func (h Handler) GetIncomeProductsList(c *gin.Context) {
 func (h Handler) UpdateIncomeProducts(c *gin.Context) {
 	body := models.UpdateIncomeProducts{}
 	if err := c.ShouldBindJSON(&body); err != nil {
-		handleResponseNew(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
+		handleResponse(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	if err := h.services.IncomeProduct().UpdateMultiple(context.Background(), body); err != nil {
-		handleResponseNew(c, h.log, "error is while updating multiple income products", http.StatusInternalServerError, err.Error())
+		handleResponse(c, h.log, "error is while updating multiple income products", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponseNew(c, h.log, "success", http.StatusOK, "success")
+	handleResponse(c, h.log, "success", http.StatusOK, "success")
 }
 
 // DeleteIncomeProducts godoc
@@ -129,12 +129,12 @@ func (h Handler) UpdateIncomeProducts(c *gin.Context) {
 func (h Handler) DeleteIncomeProducts(c *gin.Context) {
 	body := models.DeleteIncomeProducts{}
 	if err := c.ShouldBindJSON(&body); err != nil {
-		handleResponseNew(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
+		handleResponse(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
 	}
 	if err := h.services.IncomeProduct().DeleteMultiple(context.Background(), body); err != nil {
-		handleResponseNew(c, h.log, "error is deleting income product", http.StatusInternalServerError, err.Error())
+		handleResponse(c, h.log, "error is deleting income product", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponseNew(c, h.log, "success", http.StatusOK, "income products deleted!")
+	handleResponse(c, h.log, "success", http.StatusOK, "income products deleted!")
 }
