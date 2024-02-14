@@ -2,30 +2,32 @@ package postgres
 
 import (
 	"context"
-	"fmt"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"test/pkg/logger"
 	"test/storage"
 )
 
 type storeRepo struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log logger.ILogger
 }
 
-func NewStoreRepo(db *pgxpool.Pool) storage.IStoreStorage {
+func NewStoreRepo(db *pgxpool.Pool, log logger.ILogger) storage.IStoreStorage {
 	return &storeRepo{
-		db: db,
+		db:  db,
+		log: log,
 	}
 }
 
 func (s *storeRepo) AddProfit(ctx context.Context, profit float32, branchID string) error {
 	rowsAffected, err := s.db.Exec(ctx, `update store set profit = profit + $1, updated_at = now() where branch_id = $2`, profit, branchID)
 	if err != nil {
-		fmt.Println("Error while adding profit to store", err.Error())
+		s.log.Error("Error while adding profit to store", logger.Error(err))
 		return err
 	}
 
 	if n := rowsAffected.RowsAffected(); n == 0 {
-		fmt.Println("Error in rows affected", err.Error())
+		s.log.Error("Error in rows affected", logger.Error(err))
 		return err
 	}
 
@@ -36,7 +38,7 @@ func (s *storeRepo) GetStoreBudget(ctx context.Context, branchID string) (float3
 	var budget float32
 	query := `select budget from store where branch_id = $1`
 	if err := s.db.QueryRow(ctx, query, branchID).Scan(&budget); err != nil {
-		fmt.Println("error is while getting store budget", err.Error())
+		s.log.Error("error is while getting store budget", logger.Error(err))
 		return 0, err
 	}
 
@@ -47,10 +49,10 @@ func (s *storeRepo) WithdrawalDeliveredSum(ctx context.Context, totalSum float32
 	query := `update store set budget = budget - $1 where branch_id = $2 `
 	if rowsAffected, err := s.db.Exec(ctx, query, &totalSum, &branchID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is while rows affected", err.Error())
+			s.log.Error("error is while rows affected", logger.Error(err))
 			return err
 		}
-		fmt.Println("error is while updating budget", err.Error())
+		s.log.Error("error is while updating budget", logger.Error(err))
 		return err
 	}
 

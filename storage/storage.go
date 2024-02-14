@@ -73,7 +73,8 @@ type IStoreStorage interface {
 }
 
 type IDealerStorage interface {
-	AddSum(context.Context, int) error
+	AddSum(context.Context, int, string) error
+	Get(context.Context, models.PrimaryKey) (models.Dealer, error)
 }
 
 type IBranchStorage interface {

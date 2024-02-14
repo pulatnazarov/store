@@ -75,7 +75,7 @@ func (u userService) GetUsers(ctx context.Context, request models.GetListRequest
 func (u userService) Update(ctx context.Context, updateUser models.UpdateUser) (models.User, error) {
 	pKey, err := u.storage.User().Update(ctx, updateUser)
 	if err != nil {
-		fmt.Println("ERROR in service layer while updating updateUser", err.Error())
+		u.log.Error("ERROR in service layer while updating updateUser", logger.Error(err))
 		return models.User{}, err
 	}
 
@@ -83,7 +83,7 @@ func (u userService) Update(ctx context.Context, updateUser models.UpdateUser) (
 		ID: pKey,
 	})
 	if err != nil {
-		fmt.Println("ERROR in service layer while getting user after update", err.Error())
+		u.log.Error("ERROR in service layer while getting user after update", logger.Error(err))
 		return models.User{}, err
 	}
 
@@ -98,22 +98,22 @@ func (u userService) Delete(ctx context.Context, key models.PrimaryKey) error {
 func (u userService) UpdatePassword(ctx context.Context, request models.UpdateUserPassword) error {
 	oldPassword, err := u.storage.User().GetPassword(ctx, request.ID)
 	if err != nil {
-		fmt.Println("ERROR in service layer while getting user password", err.Error())
+		u.log.Error("ERROR in service layer while getting user password", logger.Error(err))
 		return err
 	}
 
 	if oldPassword != request.OldPassword {
-		fmt.Println("ERROR in service old password is not correct")
+		u.log.Error("ERROR in service old password is not correct")
 		return errors.New("old password did not match")
 	}
 
 	if err = check.ValidatePassword(request.NewPassword); err != nil {
-		fmt.Println("ERROR in service layer new password is weak", err.Error())
+		u.log.Error("ERROR in service layer new password is weak", logger.Error(err))
 		return err
 	}
 
 	if err = u.storage.User().UpdatePassword(context.Background(), request); err != nil {
-		fmt.Println("ERROR in service layer while updating password", err.Error())
+		u.log.Error("ERROR in service layer while updating password", logger.Error(err))
 		return err
 	}
 

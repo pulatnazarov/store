@@ -25,17 +25,17 @@ func (h Handler) CreateBasketProduct(c *gin.Context) {
 	basketProduct := models.CreateBasketProduct{}
 
 	if err := c.ShouldBindJSON(&basketProduct); err != nil {
-		handleResponse(c, "error is while reading body", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	createdBasketProduct, err := h.services.BasketProduct().Create(context.Background(), basketProduct)
 	if err != nil {
-		handleResponse(c, "error is while creating basket product", http.StatusInternalServerError, err)
+		handleResponseNew(c, h.log, "error is while creating basket product", http.StatusInternalServerError, err)
 		return
 	}
 
-	handleResponse(c, "", http.StatusCreated, createdBasketProduct)
+	handleResponseNew(c, h.log, "", http.StatusCreated, createdBasketProduct)
 }
 
 // GetBasketProduct godoc
@@ -55,11 +55,11 @@ func (h Handler) GetBasketProduct(c *gin.Context) {
 
 	resp, err := h.services.BasketProduct().Get(context.Background(), models.PrimaryKey{ID: uid})
 	if err != nil {
-		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, resp)
+	handleResponseNew(c, h.log, "", http.StatusOK, resp)
 }
 
 // GetBasketProductList godoc
@@ -88,14 +88,14 @@ func (h Handler) GetBasketProductList(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	page, err = strconv.Atoi(pageStr)
 	if err != nil {
-		handleResponse(c, "error is while converting page", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while converting page", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err = strconv.Atoi(limitStr)
 	if err != nil {
-		handleResponse(c, "error is while converting page", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while converting page", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h Handler) GetBasketProductList(c *gin.Context) {
 	if bID != "" {
 		bUID, err := uuid.Parse(bID)
 		if err != nil {
-			handleResponse(c, "error in basket id", http.StatusBadRequest, err.Error())
+			handleResponseNew(c, h.log, "error in basket id", http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -119,7 +119,7 @@ func (h Handler) GetBasketProductList(c *gin.Context) {
 		BasketID: basketID,
 	})
 
-	handleResponse(c, "", http.StatusOK, resp)
+	handleResponseNew(c, h.log, "", http.StatusOK, resp)
 }
 
 // UpdateBasketProduct godoc
@@ -140,7 +140,7 @@ func (h Handler) UpdateBasketProduct(c *gin.Context) {
 	uid := c.Param("id")
 
 	if err := c.ShouldBindJSON(&basketProduct); err != nil {
-		handleResponse(c, "error is while reading from body", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while reading from body", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -148,11 +148,11 @@ func (h Handler) UpdateBasketProduct(c *gin.Context) {
 
 	resp, err := h.services.BasketProduct().Update(context.Background(), basketProduct)
 	if err != nil {
-		handleResponse(c, "error is while updating basket", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while updating basket", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, resp)
+	handleResponseNew(c, h.log, "", http.StatusOK, resp)
 }
 
 // DeleteBasketProduct godoc
@@ -171,9 +171,9 @@ func (h Handler) DeleteBasketProduct(c *gin.Context) {
 	uid := c.Param("id")
 
 	if err := h.services.BasketProduct().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
-		handleResponse(c, "error is while deleting", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while deleting", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, "basket product deleted!")
+	handleResponseNew(c, h.log, "", http.StatusOK, "basket product deleted!")
 }

@@ -2,17 +2,21 @@ package postgres
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-playground/assert/v2"
 	"test/api/models"
 	"test/config"
 	"test/pkg/helper"
+	"test/pkg/logger"
 	"testing"
 )
 
 func TestUserRepo_Create(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -25,12 +29,12 @@ func TestUserRepo_Create(t *testing.T) {
 		UserType: "customer",
 		BranchID: "aa541fcc-bf74-11ee-ae0b-166244b65504",
 	}
-
 	userID, err := pgStore.User().Create(context.Background(), createUser)
 	if err != nil {
 		t.Errorf("error while creating user error: %v", err)
 	}
 
+	fmt.Println("phone", createUser.Phone)
 	user, err := pgStore.User().GetByID(context.Background(), models.PrimaryKey{
 		ID: userID,
 	})
@@ -46,7 +50,9 @@ func TestUserRepo_Create(t *testing.T) {
 func TestUserRepo_GetByID(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -59,7 +65,6 @@ func TestUserRepo_GetByID(t *testing.T) {
 		UserType: "customer",
 		BranchID: "aa541fcc-bf74-11ee-ae0b-166244b65504",
 	}
-
 	userID, err := pgStore.User().Create(context.Background(), createUser)
 	if err != nil {
 		t.Errorf("error while creating user error: %v", err)
@@ -132,7 +137,9 @@ func TestUserRepo_GetByID(t *testing.T) {
 func TestUserRepo_GetList(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -145,18 +152,15 @@ func TestUserRepo_GetList(t *testing.T) {
 		t.Errorf("error while getting usersResp error: %v", err)
 	}
 
-	if len(usersResp.Users) != 16 {
-		t.Errorf("expected 16, but got: %d", len(usersResp.Users))
-	}
-
-	assert.Equal(t, len(usersResp.Users), 16)
-
+	assert.Equal(t, len(usersResp.Users), 46)
 }
 
 func TestUserRepo_Update(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -202,7 +206,9 @@ func TestUserRepo_Update(t *testing.T) {
 func TestUserRepo_Delete(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}

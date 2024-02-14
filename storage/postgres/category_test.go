@@ -132,7 +132,7 @@ func TestCategoryRepo_Delete(t *testing.T) {
 		t.Errorf("error while creating category error: %v", err)
 	}
 
-	if err := pgStore.Category().Delete(context.Background(), models.PrimaryKey{categoryID}); err != nil {
+	if err := pgStore.Category().Delete(context.Background(), models.PrimaryKey{ID: categoryID}); err != nil {
 		t.Errorf("Error deleting category: %v", err)
 	}
 }

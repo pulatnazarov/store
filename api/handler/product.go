@@ -2,10 +2,12 @@ package handler
 
 import (
 	"context"
-	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"test/api/models"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // CreateProduct godoc
@@ -23,18 +25,21 @@ import (
 func (h Handler) CreateProduct(c *gin.Context) {
 	product := models.CreateProduct{}
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*2)
+	defer cancel()
+
 	if err := c.ShouldBindJSON(&product); err != nil {
-		handleResponse(c, "error is while reading body", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
-	createdProduct, err := h.services.Product().Create(context.Background(), product)
+	createdProduct, err := h.services.Product().Create(ctx, product)
 	if err != nil {
-		handleResponse(c, "error is while creating product", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while creating product", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusCreated, createdProduct)
+	handleResponseNew(c, h.log, "", http.StatusCreated, createdProduct)
 }
 
 // GetProduct godoc
@@ -52,13 +57,15 @@ func (h Handler) CreateProduct(c *gin.Context) {
 func (h Handler) GetProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	product, err := h.services.Product().Get(context.Background(), models.PrimaryKey{ID: uid})
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*2)
+	defer cancel()
+	product, err := h.services.Product().Get(ctx, models.PrimaryKey{ID: uid})
 	if err != nil {
-		handleResponse(c, "error is while getting by id", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, product)
+	handleResponseNew(c, h.log, "", http.StatusOK, product)
 }
 
 // GetProductList godoc
@@ -82,34 +89,36 @@ func (h Handler) GetProductList(c *gin.Context) {
 		err         error
 	)
 
+	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*2)
+	defer cancel()
 	pageStr := c.DefaultQuery("page", "1")
 	page, err = strconv.Atoi(pageStr)
 	if err != nil {
-		handleResponse(c, "error is while converting page", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while converting page", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err = strconv.Atoi(limitStr)
 	if err != nil {
-		handleResponse(c, "error is while converting limit", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while converting limit", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	search = c.Query("search")
 
-	products, err := h.services.Product().GetList(context.Background(), models.GetListRequest{
+	products, err := h.services.Product().GetList(ctx, models.GetListRequest{
 		Page:   page,
 		Limit:  limit,
 		Search: search,
 	})
 
 	if err != nil {
-		handleResponse(c, "error is while getting list", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while getting list", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, products)
+	handleResponseNew(c, h.log, "", http.StatusOK, products)
 }
 
 // UpdateProduct godoc
@@ -129,21 +138,22 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 	uid := c.Param("id")
 
 	product := models.UpdateProduct{}
-
+	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*2)
+	defer cancel()
 	if err := c.ShouldBindJSON(&product); err != nil {
-		handleResponse(c, "error is while reading body", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	product.ID = uid
 
-	updatedProduct, err := h.services.Product().Update(context.Background(), product)
+	updatedProduct, err := h.services.Product().Update(ctx, product)
 	if err != nil {
-		handleResponse(c, "error is while updating product", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while updating product", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, updatedProduct)
+	handleResponseNew(c, h.log, "", http.StatusOK, updatedProduct)
 }
 
 // DeleteProduct godoc
@@ -161,12 +171,14 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 func (h Handler) DeleteProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	if err := h.services.Product().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
-		handleResponse(c, "error is while delete", http.StatusInternalServerError, err.Error())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*2)
+	defer cancel()
+	if err := h.services.Product().Delete(ctx, models.PrimaryKey{ID: uid}); err != nil {
+		handleResponseNew(c, h.log, "error is while delete", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, "product deleted")
+	handleResponseNew(c, h.log, "", http.StatusOK, "product deleted")
 }
 
 // StartSellNew godoc
@@ -185,23 +197,27 @@ func (h Handler) StartSellNew(c *gin.Context) {
 	request := models.SellRequest{}
 
 	if err := c.ShouldBindJSON(&request); err != nil {
-		handleResponse(c, "error while reading body", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
-	productSell, err := h.services.Product().StartSellNew(context.Background(), request)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
+	defer cancel()
+
+	productSell, err := h.services.Product().StartSellNew(ctx, request)
 	if err != nil {
-		handleResponse(c, "error is while start sell new", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while start sell new", http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// dealer
-	if err = h.services.Dealer().Delivery(context.Background(), productSell); err != nil {
-		handleResponse(c, "error is while delivery products", http.StatusInternalServerError, err.Error())
+
+	if err = h.services.Dealer().Delivery(ctx, productSell); err != nil {
+		handleResponseNew(c, h.log, "error is while delivery products", http.StatusInternalServerError, err.Error())
 		return
 	}
 
 	// report
 
-	handleResponse(c, "successfully finished the purchase", http.StatusOK, productSell.Check)
+	handleResponseNew(c, h.log, "successfully finished the purchase", http.StatusOK, productSell.Check)
 }

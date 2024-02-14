@@ -22,11 +22,11 @@ import (
 func (h Handler) CreateIncome(c *gin.Context) {
 	resp, err := h.services.Income().Create(context.Background())
 	if err != nil {
-		handleResponse(c, "error while creating income", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error while creating income", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusCreated, resp)
+	handleResponseNew(c, h.log, "", http.StatusCreated, resp)
 }
 
 // GetIncome godoc
@@ -45,11 +45,11 @@ func (h Handler) GetIncome(c *gin.Context) {
 	uid := c.Param("id")
 	resp, err := h.services.Income().Get(context.Background(), models.PrimaryKey{ID: uid})
 	if err != nil {
-		handleResponse(c, "error is while getting income by id", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while getting income by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, resp)
+	handleResponseNew(c, h.log, "", http.StatusOK, resp)
 }
 
 // GetIncomeList godoc
@@ -76,14 +76,14 @@ func (h Handler) GetIncomeList(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	page, err = strconv.Atoi(pageStr)
 	if err != nil {
-		handleResponse(c, "error is while converting pageStr", http.StatusBadRequest, err)
+		handleResponseNew(c, h.log, "error is while converting pageStr", http.StatusBadRequest, err)
 		return
 	}
 
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err = strconv.Atoi(limitStr)
 	if err != nil {
-		handleResponse(c, "error is while converting limitStr", http.StatusBadRequest, err)
+		handleResponseNew(c, h.log, "error is while converting limitStr", http.StatusBadRequest, err)
 		return
 	}
 
@@ -94,10 +94,10 @@ func (h Handler) GetIncomeList(c *gin.Context) {
 		Search: search,
 	})
 	if err != nil {
-		handleResponse(c, "error is while getting incomes list", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error is while getting incomes list", http.StatusInternalServerError, err.Error())
 		return
 	}
-	handleResponse(c, "", http.StatusOK, resp)
+	handleResponseNew(c, h.log, "", http.StatusOK, resp)
 }
 
 // DeleteIncome godoc
@@ -116,9 +116,9 @@ func (h Handler) DeleteIncome(c *gin.Context) {
 	uid := c.Param("id")
 
 	if err := h.services.Income().Delete(context.Background(), models.PrimaryKey{ID: uid}); err != nil {
-		handleResponse(c, "error is while deleting basket", http.StatusInternalServerError, err)
+		handleResponseNew(c, h.log, "error is while deleting basket", http.StatusInternalServerError, err)
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, nil)
+	handleResponseNew(c, h.log, "", http.StatusOK, nil)
 }

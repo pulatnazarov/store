@@ -33,14 +33,14 @@ func New(storage storage.IStorage, log logger.ILogger) Service {
 	services := Service{}
 
 	services.userService = NewUserService(storage, log)
-	services.categoryService = NewCategoryService(storage)
-	services.basketService = NewBasketService(storage)
-	services.basketProductService = NewBasketProductService(storage)
-	services.productService = NewProductService(storage)
-	services.branchService = NewBranchService(storage)
-	services.dealerService = NewDealerService(storage)
-	services.incomeService = NewIncomeService(storage)
-	services.incomeProductService = NewIncomeProductService(storage)
+	services.categoryService = NewCategoryService(storage, log)
+	services.basketService = NewBasketService(storage, log)
+	services.basketProductService = NewBasketProductService(storage, log)
+	services.productService = NewProductService(storage, log)
+	services.branchService = NewBranchService(storage, log)
+	services.dealerService = NewDealerService(storage, log)
+	services.incomeService = NewIncomeService(storage, log)
+	services.incomeProductService = NewIncomeProductService(storage, log)
 
 	return services
 }
