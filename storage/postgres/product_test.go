@@ -15,7 +15,8 @@ import (
 
 func TestProductRepo_Create(t *testing.T) {
 	cfg := config.Load()
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -53,7 +54,8 @@ func TestProductRepo_Create(t *testing.T) {
 
 func TestProductRepo_GetByID(t *testing.T) {
 	cfg := config.Load()
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -230,7 +232,8 @@ func TestProductRepo_Update(t *testing.T) {
 
 func TestProductRepo_Delete(t *testing.T) {
 	cfg := config.Load()
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}
@@ -265,7 +268,8 @@ func TestProductRepo_Search(t *testing.T) {
 func TestProductRepo_TakeProducts(t *testing.T) {
 
 	cfg := config.Load()
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Fatal("error while connecting to db ", err)
 	}
@@ -306,7 +310,8 @@ func TestProductRepo_TakeProducts(t *testing.T) {
 
 func TestProductRepo_AddDeliveredpRoducts(t *testing.T) {
 	cfg := config.Load()
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}
@@ -334,7 +339,8 @@ func TestProductRepo_AddDeliveredpRoducts(t *testing.T) {
 func TestProductRepo_GetListByIDs(t *testing.T) {
 
 	cfg := config.Load()
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}
