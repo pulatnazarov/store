@@ -7,6 +7,7 @@ import (
 	"test/api/models"
 	"test/config"
 	"test/pkg/helper"
+	"test/pkg/logger"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
@@ -148,12 +149,13 @@ func TestProductRepo_GetByID(t *testing.T) {
 
 func TestProductRepo_GetList(t *testing.T) {
 	cfg := config.Load()
-	pgSTore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connecting db %q", err)
 	}
 
-	products, err := pgSTore.Product().GetList(context.Background(), models.GetListRequest{
+	products, err := pgStore.Product().GetList(context.Background(), models.GetListRequest{
 		Page:  1,
 		Limit: 1000,
 	})
@@ -170,12 +172,13 @@ func TestProductRepo_GetList(t *testing.T) {
 
 func TestProductRepo_Update(t *testing.T) {
 	cfg := config.Load()
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}
 
-	createproduct := models.CreateProduct{
+	createProduct := models.CreateProduct{
 		Name:          helper.GenerateProductName(),
 		Price:         int(helper.GenerateRandomPrice(10.0, 100.0)),
 		OriginalPrice: int(helper.GenerateRandomPrice(2.0, 9.0)),
@@ -183,7 +186,7 @@ func TestProductRepo_Update(t *testing.T) {
 		CategoryID:    "123e4567-e89b-12d3-a456-426614174001",
 	}
 
-	productid, err := pgStore.Product().Create(context.Background(), createproduct)
+	productID, err := pgStore.Product().Create(context.Background(), createProduct)
 	if err != nil {
 		t.Error("erro while creating product in tetsing", err)
 	}
@@ -192,8 +195,8 @@ func TestProductRepo_Update(t *testing.T) {
 		t.Errorf("error while creating product %v", err)
 	}
 
-	updateproduct := models.UpdateProduct{
-		ID:            productid,
+	updateProduct := models.UpdateProduct{
+		ID:            productID,
 		Name:          helper.GenerateProductName(),
 		Price:         int(helper.GenerateRandomPrice(10.0, 100.0)),
 		OriginalPrice: int(helper.GenerateRandomPrice(2.0, 9.0)),
@@ -201,7 +204,7 @@ func TestProductRepo_Update(t *testing.T) {
 		CategoryID:    "123e4567-e89b-12d3-a456-426614174001",
 	}
 
-	productupdateid, err := pgStore.Product().Update(context.Background(), updateproduct)
+	productupdateid, err := pgStore.Product().Update(context.Background(), updateProduct)
 	if err != nil {
 		t.Error("error updatinf product in testing", err)
 	}
@@ -217,11 +220,11 @@ func TestProductRepo_Update(t *testing.T) {
 	}
 
 	assert.Equal(t, product.ID, productupdateid)
-	assert.Equal(t, product.Name, updateproduct.Name)
-	assert.Equal(t, product.Price, updateproduct.Price)
-	assert.Equal(t, product.OriginalPrice, updateproduct.OriginalPrice)
-	assert.Equal(t, product.CategoryID, updateproduct.CategoryID)
-	assert.Equal(t, product.Quantity, updateproduct.Quantity)
+	assert.Equal(t, product.Name, updateProduct.Name)
+	assert.Equal(t, product.Price, updateProduct.Price)
+	assert.Equal(t, product.OriginalPrice, updateProduct.OriginalPrice)
+	assert.Equal(t, product.CategoryID, updateProduct.CategoryID)
+	assert.Equal(t, product.Quantity, updateProduct.Quantity)
 
 }
 
