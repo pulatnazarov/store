@@ -10,6 +10,7 @@ import (
 func TestDealerRepo_AddSum(t *testing.T) {
 	cfg := config.Load()
 
+	// some logger
 	pgStore, err := New(context.Background(), cfg)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
