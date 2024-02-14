@@ -8,15 +8,20 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 	"strings"
 	"test/api/models"
+	"test/pkg/logger"
 	"test/storage"
 )
 
 type basketProductRepo struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log logger.ILogger
 }
 
-func NewBasketProductRepo(db *pgxpool.Pool) storage.IBasketProductStorage {
-	return &basketProductRepo{db: db}
+func NewBasketProductRepo(db *pgxpool.Pool, log logger.ILogger) storage.IBasketProductStorage {
+	return &basketProductRepo{
+		db:  db,
+		log: log,
+	}
 }
 
 func (b *basketProductRepo) Create(ctx context.Context, product models.CreateBasketProduct) (string, error) {
@@ -30,7 +35,7 @@ func (b *basketProductRepo) Create(ctx context.Context, product models.CreateBas
 		product.BasketID,
 		product.ProductID,
 		product.Quantity); err != nil {
-		fmt.Println("error is while insert", err.Error())
+		b.log.Error("error is while insert", logger.Error(err))
 		return "", err
 	}
 	return id.String(), nil
@@ -49,7 +54,7 @@ func (b *basketProductRepo) GetByID(ctx context.Context, key models.PrimaryKey) 
 		&createdAt,
 		&updatedAt,
 	); err != nil {
-		fmt.Println("error is while selecting by id", err.Error())
+		b.log.Error("error is while selecting by id", logger.Error(err))
 		return models.BasketProduct{}, err
 	}
 
@@ -85,7 +90,7 @@ func (b *basketProductRepo) GetList(ctx context.Context, request models.GetListR
 	}
 
 	if err := b.db.QueryRow(ctx, countQuery).Scan(&count); err != nil {
-		fmt.Println("error is while scanning count", err.Error())
+		b.log.Error("error is while scanning count", logger.Error(err))
 		return models.BasketProductResponse{}, err
 	}
 
@@ -102,7 +107,7 @@ func (b *basketProductRepo) GetList(ctx context.Context, request models.GetListR
 
 	rows, err := b.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
-		fmt.Println("error is while selecting basket products", err.Error())
+		b.log.Error("error is while selecting basket products", logger.Error(err))
 		return models.BasketProductResponse{}, err
 	}
 
@@ -116,7 +121,7 @@ func (b *basketProductRepo) GetList(ctx context.Context, request models.GetListR
 			&createdAt,
 			&updatedAt,
 		); err != nil {
-			fmt.Println("error is while scanning basket products", err.Error())
+			b.log.Error("error is while scanning basket products", logger.Error(err))
 			return models.BasketProductResponse{}, err
 		}
 		if createdAt.Valid {
@@ -142,10 +147,10 @@ func (b *basketProductRepo) Update(ctx context.Context, product models.UpdateBas
 		&product.Quantity,
 		&product.ID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			b.log.Error("error is in rows affected", logger.Error(err))
 			return "", err
 		}
-		fmt.Println("error is while updating basket_products", err.Error())
+		b.log.Error("error is while updating basket_products", logger.Error(err))
 		return "", err
 	}
 
@@ -157,10 +162,10 @@ func (b *basketProductRepo) Delete(ctx context.Context, key models.PrimaryKey) e
 
 	if rowsAffected, err := b.db.Exec(ctx, query, key.ID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			b.log.Error("error is in rows affected", logger.Error(err))
 			return err
 		}
-		fmt.Println("error is while deleting basket products", err.Error())
+		b.log.Error("error is while deleting basket products", logger.Error(err))
 		return err
 	}
 	return nil
@@ -184,7 +189,7 @@ func (b *basketProductRepo) AddProducts(ctx context.Context, basketID string, pr
 	finalQuery := fmt.Sprintf(query, strings.Join(insertStatements, "\n"))
 
 	if _, err := b.db.Exec(ctx, finalQuery); err != nil {
-		fmt.Println("error is while inserting to basket products", err.Error())
+		b.log.Error("error is while inserting to basket products", logger.Error(err))
 		return err
 	}
 

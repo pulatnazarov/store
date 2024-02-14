@@ -7,15 +7,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"test/api/models"
+	"test/pkg/logger"
 	"test/storage"
 )
 
 type branchRepo struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log logger.ILogger
 }
 
-func NewBranchRepo(db *pgxpool.Pool) storage.IBranchStorage {
-	return branchRepo{db: db}
+func NewBranchRepo(db *pgxpool.Pool, log logger.ILogger) storage.IBranchStorage {
+	return branchRepo{
+		db:  db,
+		log: log,
+	}
 }
 
 func (b branchRepo) Create(ctx context.Context, branch models.CreateBranch) (string, error) {
@@ -31,20 +36,20 @@ func (b branchRepo) Create(ctx context.Context, branch models.CreateBranch) (str
 		branch.PhoneNumber,
 	); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is rows affected", err.Error())
+			b.log.Error("error is rows affected", logger.Error(err))
 			return "", err
 		}
-		fmt.Println("error is while inserting branch data", err.Error())
+		b.log.Error("error is while inserting branch data", logger.Error(err))
 		return "", err
 	}
 
 	storeQuery := `insert into store(id, branch_id, profit, budget) values($1, $2, 0, 1000.0)`
 	if rowsAffected, err := b.db.Exec(ctx, storeQuery, uuid.New(), branchID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			b.log.Error("error is in rows affected", logger.Error(err))
 			return "", err
 		}
-		fmt.Println("error is while inserting store data", err.Error())
+		b.log.Error("error is while inserting store data", logger.Error(err))
 		return "", err
 	}
 
@@ -64,7 +69,7 @@ func (b branchRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.
 		&branch.PhoneNumber,
 		&createdAt,
 		&updatedAt); err != nil {
-		fmt.Println("error is while selecting by id", err.Error())
+		b.log.Error("error is while selecting by id", logger.Error(err))
 		return models.Branch{}, err
 	}
 
@@ -97,7 +102,7 @@ func (b branchRepo) GetList(ctx context.Context, request models.GetListRequest) 
 	}
 
 	if err := b.db.QueryRow(ctx, countQuery).Scan(&count); err != nil {
-		fmt.Println("error is while scanning count", err.Error())
+		b.log.Error("error is while scanning count", logger.Error(err))
 		return models.BranchResponse{}, err
 	}
 
@@ -111,7 +116,7 @@ func (b branchRepo) GetList(ctx context.Context, request models.GetListRequest) 
 	query += ` order by created_at desc LIMIT $1 OFFSET $2 `
 	rows, err := b.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
-		fmt.Println("error is while selecting * from branches", err.Error())
+		b.log.Error("error is while selecting * from branches", logger.Error(err))
 		return models.BranchResponse{}, err
 	}
 
@@ -124,7 +129,7 @@ func (b branchRepo) GetList(ctx context.Context, request models.GetListRequest) 
 			&branch.PhoneNumber,
 			&createdAt,
 			&updatedAt); err != nil {
-			fmt.Println("error is while scanning branch", err.Error())
+			b.log.Error("error is while scanning branch", logger.Error(err))
 			return models.BranchResponse{}, err
 		}
 		if createdAt.Valid {
@@ -152,10 +157,10 @@ func (b branchRepo) Update(ctx context.Context, branch models.UpdateBranch) (str
 		&branch.PhoneNumber,
 		&branch.ID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			b.log.Error("error is in rows affected", logger.Error(err))
 			return "", err
 		}
-		fmt.Println("error is while updating branch", err.Error())
+		b.log.Error("error is while updating branch", logger.Error(err))
 		return "", err
 	}
 
@@ -166,10 +171,10 @@ func (b branchRepo) Delete(ctx context.Context, key models.PrimaryKey) error {
 
 	if rowsAffected, err := b.db.Exec(ctx, query, key.ID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			b.log.Error("error is in rows affected", logger.Error(err))
 			return err
 		}
-		fmt.Println("error is while deleting branches", err.Error())
+		b.log.Error("error is while deleting branches", logger.Error(err))
 		return err
 	}
 	return nil

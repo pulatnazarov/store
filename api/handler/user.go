@@ -27,7 +27,7 @@ func (h Handler) CreateUser(c *gin.Context) {
 	createUser := models.CreateUser{}
 
 	if err := c.ShouldBindJSON(&createUser); err != nil {
-		handleResponse(c, "error while reading body from client", http.StatusBadRequest, err)
+		handleResponseNew(c, h.log, "error while reading body from client", http.StatusBadRequest, err)
 		return
 	}
 
@@ -35,11 +35,11 @@ func (h Handler) CreateUser(c *gin.Context) {
 	defer cancel()
 	resp, err := h.services.User().Create(ctx, createUser)
 	if err != nil {
-		handleResponse(c, "error while creating user", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error while creating user", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusCreated, resp)
+	handleResponseNew(c, h.log, "", http.StatusCreated, resp)
 }
 
 // GetUser godoc
@@ -71,11 +71,11 @@ func (h Handler) GetUser(c *gin.Context) {
 		ID: id.String(),
 	})
 	if err != nil {
-		handleResponse(c, "error while getting user by id", http.StatusInternalServerError, err)
+		handleResponseNew(c, h.log, "error while getting user by id", http.StatusInternalServerError, err)
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, user)
+	handleResponseNew(c, h.log, "", http.StatusOK, user)
 }
 
 // GetUserList godoc
@@ -102,14 +102,14 @@ func (h Handler) GetUserList(c *gin.Context) {
 	pageStr := c.DefaultQuery("page", "1")
 	page, err = strconv.Atoi(pageStr)
 	if err != nil {
-		handleResponse(c, "error while parsing page", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error while parsing page", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	limitStr := c.DefaultQuery("limit", "10")
 	limit, err = strconv.Atoi(limitStr)
 	if err != nil {
-		handleResponse(c, "error while parsing limit", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error while parsing limit", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -123,7 +123,7 @@ func (h Handler) GetUserList(c *gin.Context) {
 		Search: search,
 	})
 	if err != nil {
-		handleResponse(c, "error while getting users", http.StatusInternalServerError, err)
+		handleResponseNew(c, h.log, "error while getting users", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -148,14 +148,14 @@ func (h Handler) UpdateUser(c *gin.Context) {
 
 	uid := c.Param("id")
 	if uid == "" {
-		handleResponse(c, "invalid uuid", http.StatusBadRequest, errors.New("uuid is not valid"))
+		handleResponseNew(c, h.log, "invalid uuid", http.StatusBadRequest, errors.New("uuid is not valid"))
 		return
 	}
 
 	updateUser.ID = uid
 
 	if err := c.ShouldBindJSON(&updateUser); err != nil {
-		handleResponse(c, "error while reading body", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -163,11 +163,11 @@ func (h Handler) UpdateUser(c *gin.Context) {
 	defer cancel()
 	resp, err := h.services.User().Update(ctx, updateUser)
 	if err != nil {
-		handleResponse(c, "error while updating user", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error while updating user", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, resp)
+	handleResponseNew(c, h.log, "", http.StatusOK, resp)
 }
 
 // DeleteUser godoc
@@ -186,7 +186,7 @@ func (h Handler) DeleteUser(c *gin.Context) {
 	uid := c.Param("id")
 	id, err := uuid.Parse(uid)
 	if err != nil {
-		handleResponse(c, "uuid is not valid", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "uuid is not valid", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -195,11 +195,11 @@ func (h Handler) DeleteUser(c *gin.Context) {
 	if err = h.services.User().Delete(ctx, models.PrimaryKey{
 		ID: id.String(),
 	}); err != nil {
-		handleResponse(c, "error while deleting user by id", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error while deleting user by id", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, "data successfully deleted")
+	handleResponseNew(c, h.log, "", http.StatusOK, "data successfully deleted")
 }
 
 // UpdateUserPassword godoc
@@ -219,13 +219,13 @@ func (h Handler) UpdateUserPassword(c *gin.Context) {
 	updateUserPassword := models.UpdateUserPassword{}
 
 	if err := c.ShouldBindJSON(&updateUserPassword); err != nil {
-		handleResponse(c, "error while reading body", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error while reading body", http.StatusBadRequest, err.Error())
 		return
 	}
 
 	uid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		handleResponse(c, "error while parsing uuid", http.StatusBadRequest, err.Error())
+		handleResponseNew(c, h.log, "error while parsing uuid", http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -234,9 +234,9 @@ func (h Handler) UpdateUserPassword(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	if err = h.services.User().UpdatePassword(ctx, updateUserPassword); err != nil {
-		handleResponse(c, "error while updating user password", http.StatusInternalServerError, err.Error())
+		handleResponseNew(c, h.log, "error while updating user password", http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	handleResponse(c, "", http.StatusOK, "password successfully updated")
+	handleResponseNew(c, h.log, "", http.StatusOK, "password successfully updated")
 }

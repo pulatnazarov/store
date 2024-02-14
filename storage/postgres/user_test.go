@@ -7,13 +7,16 @@ import (
 	"test/api/models"
 	"test/config"
 	"test/pkg/helper"
+	"test/pkg/logger"
 	"testing"
 )
 
 func TestUserRepo_Create(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -47,7 +50,9 @@ func TestUserRepo_Create(t *testing.T) {
 func TestUserRepo_GetByID(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -132,7 +137,9 @@ func TestUserRepo_GetByID(t *testing.T) {
 func TestUserRepo_GetList(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -151,7 +158,9 @@ func TestUserRepo_GetList(t *testing.T) {
 func TestUserRepo_Update(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -197,7 +206,9 @@ func TestUserRepo_Update(t *testing.T) {
 func TestUserRepo_Delete(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}

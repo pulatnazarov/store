@@ -44,32 +44,32 @@ func New(ctx context.Context, cfg config.Config, log logger.ILogger) (storage.IS
 		return nil, err
 	}
 
-	// migration
-	// m, err := migrate.New("file://migrations/postgres/", url)
-	// if err != nil {
-	// 	fmt.Println("error while migrating", err.Error())
-	// 	return nil, err
-	// }
-
-	// if err = m.Up(); err != nil {
-	// 	if !strings.Contains(err.Error(), "no change") {
-	// 		version, dirty, err := m.Version()
-	// 		if err != nil {
-	// 			fmt.Println("err in checking version and dirty", err.Error())
-	// 			return nil, err
-	// 		}
-
-	// 		if dirty {
-	// 			version--
-	// 			if err = m.Force(int(version)); err != nil {
-	// 				fmt.Println("ERR in making force", err.Error())
-	// 				return nil, err
-	// 			}
-	// 		}
-	// 		fmt.Println("ERROR in migrating", err.Error())
-	// 		return nil, err
-	// 	}
-	// }
+	//migration
+	//m, err := migrate.New("file://migrations/postgres/", url)
+	//if err != nil {
+	//	fmt.Println("error while migrating", err.Error())
+	//	return nil, err
+	//}
+	//
+	//if err = m.Up(); err != nil {
+	//	if !strings.Contains(err.Error(), "no change") {
+	//		version, dirty, err := m.Version()
+	//		if err != nil {
+	//			fmt.Println("err in checking version and dirty", err.Error())
+	//			return nil, err
+	//		}
+	//
+	//		if dirty {
+	//			version--
+	//			if err = m.Force(int(version)); err != nil {
+	//				fmt.Println("ERR in making force", err.Error())
+	//				return nil, err
+	//			}
+	//		}
+	//		fmt.Println("ERROR in migrating", err.Error())
+	//		return nil, err
+	//	}
+	//}
 
 	return Store{
 		pool: pool,
@@ -86,38 +86,38 @@ func (s Store) User() storage.IUserStorage {
 }
 
 func (s Store) Category() storage.ICategoryStorage {
-	return NewCategoryRepo(s.pool)
+	return NewCategoryRepo(s.pool, s.log)
 }
 
 func (s Store) Product() storage.IProductStorage {
-	return NewProductRepo(s.pool)
+	return NewProductRepo(s.pool, s.log)
 }
 
 func (s Store) Basket() storage.IBasketStorage {
-	return NewBasketRepo(s.pool)
+	return NewBasketRepo(s.pool, s.log)
 
 }
 
 func (s Store) BasketProduct() storage.IBasketProductStorage {
-	return NewBasketProductRepo(s.pool)
+	return NewBasketProductRepo(s.pool, s.log)
 }
 
 func (s Store) Store() storage.IStoreStorage {
-	return NewStoreRepo(s.pool)
+	return NewStoreRepo(s.pool, s.log)
 }
 
 func (s Store) Branch() storage.IBranchStorage {
-	return NewBranchRepo(s.pool)
+	return NewBranchRepo(s.pool, s.log)
 }
 
 func (s Store) Dealer() storage.IDealerStorage {
-	return NewDealerRepo(s.pool)
+	return NewDealerRepo(s.pool, s.log)
 }
 
 func (s Store) Income() storage.IIncomeStorage {
-	return NewIncomeRepo(s.pool)
+	return NewIncomeRepo(s.pool, s.log)
 }
 
 func (s Store) IncomeProduct() storage.IIncomeProductStorage {
-	return NewIncomeProductRepo(s.pool)
+	return NewIncomeProductRepo(s.pool, s.log)
 }

@@ -7,15 +7,20 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"test/api/models"
+	"test/pkg/logger"
 	"test/storage"
 )
 
 type categoryRepo struct {
-	db *pgxpool.Pool
+	db  *pgxpool.Pool
+	log logger.ILogger
 }
 
-func NewCategoryRepo(db *pgxpool.Pool) storage.ICategoryStorage {
-	return &categoryRepo{db: db}
+func NewCategoryRepo(db *pgxpool.Pool, log logger.ILogger) storage.ICategoryStorage {
+	return &categoryRepo{
+		db:  db,
+		log: log,
+	}
 }
 func (c *categoryRepo) Create(ctx context.Context, category models.CreateCategory) (string, error) {
 	id := uuid.New()
@@ -23,10 +28,10 @@ func (c *categoryRepo) Create(ctx context.Context, category models.CreateCategor
 
 	if rowsAffected, err := c.db.Exec(ctx, query, id, category.Name); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			c.log.Error("error is in rows affected", logger.Error(err))
 			return "", err
 		}
-		fmt.Println("error is while creating category", err.Error())
+		c.log.Error("error is while creating category", logger.Error(err))
 		return "", err
 	}
 
@@ -39,7 +44,7 @@ func (c *categoryRepo) GetByID(ctx context.Context, key models.PrimaryKey) (mode
 
 	query := `select id, name, created_at, updated_at from categories where id = $1 and deleted_at = 0`
 	if err := c.db.QueryRow(ctx, query, key.ID).Scan(&category.ID, &category.Name, &createdAt, &updatedAt); err != nil {
-		fmt.Println("error is while getting by id", err.Error())
+		c.log.Error("error is while getting by id", logger.Error(err))
 		return models.Category{}, err
 	}
 	if createdAt.Valid {
@@ -70,7 +75,7 @@ func (c *categoryRepo) GetList(ctx context.Context, request models.GetListReques
 	}
 
 	if err := c.db.QueryRow(ctx, countQuery).Scan(&count); err != nil {
-		fmt.Println("error is while scanning count", err.Error())
+		c.log.Error("error is while scanning count", logger.Error(err))
 		return models.CategoryResponse{}, err
 	}
 
@@ -84,14 +89,14 @@ func (c *categoryRepo) GetList(ctx context.Context, request models.GetListReques
 
 	rows, err := c.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
-		fmt.Println("error is while selecting categories", err.Error())
+		c.log.Error("error is while selecting categories", logger.Error(err))
 		return models.CategoryResponse{}, err
 	}
 
 	for rows.Next() {
 		cat := models.Category{}
 		if err = rows.Scan(&cat.ID, &cat.Name, &createdAt, &updatedAt); err != nil {
-			fmt.Println("error is while scanning category", err.Error())
+			c.log.Error("error is while scanning category", logger.Error(err))
 			return models.CategoryResponse{}, err
 		}
 		if createdAt.Valid {
@@ -113,10 +118,10 @@ func (c *categoryRepo) Update(ctx context.Context, category models.UpdateCategor
 
 	if rowsAffected, err := c.db.Exec(ctx, query, &category.Name, &category.ID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			c.log.Error("error is in rows affected", logger.Error(err))
 			return "", err
 		}
-		fmt.Println("error is while updating category", err.Error())
+		c.log.Error("error is while updating category", logger.Error(err))
 		return "", err
 	}
 	return category.ID, nil
@@ -127,10 +132,10 @@ func (c *categoryRepo) Delete(ctx context.Context, key models.PrimaryKey) error 
 
 	if rowsAffected, err := c.db.Exec(ctx, query, key.ID); err != nil {
 		if r := rowsAffected.RowsAffected(); r == 0 {
-			fmt.Println("error is in rows affected", err.Error())
+			c.log.Error("error is in rows affected", logger.Error(err))
 			return err
 		}
-		fmt.Println("error is while deleting category", err.Error())
+		c.log.Error("error is while deleting category", logger.Error(err))
 		return err
 	}
 	return nil

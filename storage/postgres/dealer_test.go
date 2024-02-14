@@ -4,14 +4,16 @@ import (
 	"context"
 	"test/api/models"
 	"test/config"
+	"test/pkg/logger"
 	"testing"
 )
 
 func TestDealerRepo_AddSum(t *testing.T) {
 	cfg := config.Load()
 
-	// some logger
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -76,7 +78,9 @@ func TestDealerRepo_AddSum(t *testing.T) {
 func TestDealerRepo_Get(t *testing.T) {
 	cfg := config.Load()
 
-	pgStore, err := New(context.Background(), cfg)
+	log := logger.New(cfg.ServiceName)
+
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
