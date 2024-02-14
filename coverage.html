@@ -1,0 +1,1832 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>postgres: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">test/storage/postgres/basket.go (0.0%)</option>
+				
+				<option value="file1">test/storage/postgres/basket_product.go (0.0%)</option>
+				
+				<option value="file2">test/storage/postgres/branch.go (0.0%)</option>
+				
+				<option value="file3">test/storage/postgres/category.go (58.7%)</option>
+				
+				<option value="file4">test/storage/postgres/dealer.go (0.0%)</option>
+				
+				<option value="file5">test/storage/postgres/income.go (0.0%)</option>
+				
+				<option value="file6">test/storage/postgres/income_product.go (0.0%)</option>
+				
+				<option value="file7">test/storage/postgres/postgres.go (45.5%)</option>
+				
+				<option value="file8">test/storage/postgres/product.go (58.6%)</option>
+				
+				<option value="file9">test/storage/postgres/store.go (0.0%)</option>
+				
+				<option value="file10">test/storage/postgres/user.go (36.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package postgres
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "test/api/models"
+        "test/storage"
+)
+
+type basketRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewBasketRepo(db *pgxpool.Pool) storage.IBasketStorage <span class="cov0" title="0">{
+        return &amp;basketRepo{db: db}
+}</span>
+
+func (b *basketRepo) Create(ctx context.Context, basket models.CreateBasket) (string, error) <span class="cov0" title="0">{
+        id := uuid.New()
+
+        query := `insert into baskets(id, customer_id, total_sum) values($1, $2, $3)`
+        if rowsAffected, err := b.db.Exec(ctx, query, id, basket.CustomerID, basket.TotalSum); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while inserting basket data", err.Error())
+                return "", err</span>
+        }
+
+        <span class="cov0" title="0">return id.String(), nil</span>
+}
+
+func (b *basketRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Basket, error) <span class="cov0" title="0">{
+        var createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        basket := models.Basket{}
+
+        if err := b.db.QueryRow(ctx, `select id, customer_id, total_sum, created_at, updated_at from baskets where id = $1 and deleted_at = 0 `,
+                key.ID).Scan(&amp;basket.ID,
+                &amp;basket.CustomerID,
+                &amp;basket.TotalSum,
+                &amp;createdAt,
+                &amp;updatedAt,
+        ); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting basket", err.Error())
+                return models.Basket{}, err
+        }</span>
+
+        <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                basket.CreatedAt = createdAt.String
+        }</span>
+
+        <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                basket.UpdatedAt = updatedAt.String
+        }</span>
+
+        <span class="cov0" title="0">return basket, nil</span>
+}
+
+func (b *basketRepo) GetList(ctx context.Context, req models.GetListRequest) (models.BasketResponse, error) <span class="cov0" title="0">{
+        var (
+                baskets              = []models.Basket{}
+                count                = 0
+                query, countQuery    string
+                page                 = req.Page
+                offset               = (page - 1) * req.Limit
+                search               = req.Search
+                createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        )
+
+        countQuery = `select count(1) from baskets where deleted_at = 0 `
+
+        if search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and CAST(total_sum AS TEXT) ilike '%%%s%%'`, search)
+        }</span>
+        <span class="cov0" title="0">if err := b.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting count", err.Error())
+                return models.BasketResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">query = `select id, customer_id, total_sum, created_at, updated_at from baskets where deleted_at = 0`
+
+        if search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and CAST(total_sum AS TEXT) ilike '%%%s%%'`, search)
+        }</span>
+
+        <span class="cov0" title="0">query += ` order by created_at desc LIMIT $1 OFFSET $2`
+        rows, err := b.db.Query(ctx, query, req.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting baskets", err.Error())
+                return models.BasketResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">for rows.Next() </span><span class="cov0" title="0">{
+                basket := models.Basket{}
+                if err = rows.Scan(&amp;basket.ID, &amp;basket.CustomerID, &amp;basket.TotalSum, &amp;createdAt, &amp;updatedAt); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error is while scanning data", err.Error())
+                        return models.BasketResponse{}, err
+                }</span>
+
+                <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                        basket.CreatedAt = createdAt.String
+                }</span>
+
+                <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                        basket.UpdatedAt = updatedAt.String
+                }</span>
+
+                <span class="cov0" title="0">baskets = append(baskets, basket)</span>
+
+        }
+
+        <span class="cov0" title="0">return models.BasketResponse{
+                Baskets: baskets,
+                Count:   count,
+        }, nil</span>
+}
+
+func (b *basketRepo) Update(ctx context.Context, basket models.UpdateBasket) (string, error) <span class="cov0" title="0">{
+        bas := models.Basket{}
+
+        if rowsAffected, err := b.db.Exec(ctx, `update baskets set customer_id = $1, total_sum = $2, updated_at = now() where id = $3 `,
+                &amp;basket.CustomerID,
+                &amp;basket.TotalSum,
+                &amp;basket.ID,
+        ); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">return "", err</span>
+        }
+
+        <span class="cov0" title="0">if err := b.db.QueryRow(ctx, `select id, customer_id, total_sum from baskets where id = $1`,
+                basket.ID).Scan(&amp;bas.ID, &amp;bas.CustomerID, &amp;bas.TotalSum); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting ", err.Error())
+                return "", err
+        }</span>
+        <span class="cov0" title="0">return bas.ID, nil</span>
+}
+
+func (b *basketRepo) Delete(ctx context.Context, key models.PrimaryKey) error <span class="cov0" title="0">{
+        query := `update baskets set deleted_at = extract(epoch from current_timestamp) where id = $1`
+        if rowsAffected, err := b.db.Exec(ctx, query, key.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package postgres
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "strings"
+        "test/api/models"
+        "test/storage"
+)
+
+type basketProductRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewBasketProductRepo(db *pgxpool.Pool) storage.IBasketProductStorage <span class="cov0" title="0">{
+        return &amp;basketProductRepo{db: db}
+}</span>
+
+func (b *basketProductRepo) Create(ctx context.Context, product models.CreateBasketProduct) (string, error) <span class="cov0" title="0">{
+        id := uuid.New()
+        query := `insert into basket_products(id, basket_id, product_id, quantity) 
+                                        values($1, $2, $3, $4)`
+
+        fmt.Println("id", id)
+        if _, err := b.db.Exec(ctx, query,
+                id,
+                product.BasketID,
+                product.ProductID,
+                product.Quantity); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while insert", err.Error())
+                return "", err
+        }</span>
+        <span class="cov0" title="0">return id.String(), nil</span>
+}
+
+func (b *basketProductRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.BasketProduct, error) <span class="cov0" title="0">{
+        var createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        product := models.BasketProduct{}
+        query := `select id, basket_id, product_id, quantity, created_at, updated_at from basket_products where id = $1 and deleted_at = 0`
+
+        if err := b.db.QueryRow(ctx, query, key.ID).Scan(
+                &amp;product.ID,
+                &amp;product.BasketID,
+                &amp;product.ProductID,
+                &amp;product.Quantity,
+                &amp;createdAt,
+                &amp;updatedAt,
+        ); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting by id", err.Error())
+                return models.BasketProduct{}, err
+        }</span>
+
+        <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                product.CreatedAt = createdAt.String
+        }</span>
+
+        <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                product.UpdatedAt = updatedAt.String
+        }</span>
+
+        <span class="cov0" title="0">return product, nil</span>
+}
+
+func (b *basketProductRepo) GetList(ctx context.Context, request models.GetListRequest) (models.BasketProductResponse, error) <span class="cov0" title="0">{
+        var (
+                count                = 0
+                basketProducts       = []models.BasketProduct{}
+                query, countQuery    string
+                page                 = request.Page
+                offset               = (page - 1) * request.Limit
+                search               = request.Search
+                createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        )
+
+        countQuery = `select count(1) from basket_products where deleted_at = 0 `
+        if search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and CAST(quantity AS TEXT) = '%s'`, search)
+        }</span>
+
+        <span class="cov0" title="0">if request.BasketID != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(" and basket_id = '%s'", request.BasketID)
+        }</span>
+
+        <span class="cov0" title="0">if err := b.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while scanning count", err.Error())
+                return models.BasketProductResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">query = `select id, basket_id, product_id, quantity, created_at, updated_at from basket_products where deleted_at = 0`
+        if search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and CAST(quantity AS TEXT) = '%s'`, search)
+        }</span>
+
+        <span class="cov0" title="0">if request.BasketID != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(" and basket_id = '%s'", request.BasketID)
+        }</span>
+
+        <span class="cov0" title="0">query += ` order by created_at desc LIMIT $1 OFFSET $2`
+
+        rows, err := b.db.Query(ctx, query, request.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting basket products", err.Error())
+                return models.BasketProductResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">for rows.Next() </span><span class="cov0" title="0">{
+                basketProd := models.BasketProduct{}
+                if err = rows.Scan(
+                        &amp;basketProd.ID,
+                        &amp;basketProd.BasketID,
+                        &amp;basketProd.ProductID,
+                        &amp;basketProd.Quantity,
+                        &amp;createdAt,
+                        &amp;updatedAt,
+                ); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error is while scanning basket products", err.Error())
+                        return models.BasketProductResponse{}, err
+                }</span>
+                <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                        basketProd.CreatedAt = createdAt.String
+                }</span>
+
+                <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                        basketProd.UpdatedAt = updatedAt.String
+                }</span>
+                <span class="cov0" title="0">basketProducts = append(basketProducts, basketProd)</span>
+        }
+
+        <span class="cov0" title="0">return models.BasketProductResponse{
+                BasketProducts: basketProducts,
+                Count:          count,
+        }, err</span>
+}
+
+func (b *basketProductRepo) Update(ctx context.Context, product models.UpdateBasketProduct) (string, error) <span class="cov0" title="0">{
+        query := `update basket_products set product_id = $1, quantity = $2, updated_at = now() where id = $3 `
+        if rowsAffected, err := b.db.Exec(ctx, query,
+                &amp;product.ProductID,
+                &amp;product.Quantity,
+                &amp;product.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while updating basket_products", err.Error())
+                return "", err</span>
+        }
+
+        <span class="cov0" title="0">return product.ID, nil</span>
+}
+
+func (b *basketProductRepo) Delete(ctx context.Context, key models.PrimaryKey) error <span class="cov0" title="0">{
+        query := `update basket_products set deleted_at = extract(epoch from current_timestamp) where id = $1`
+
+        if rowsAffected, err := b.db.Exec(ctx, query, key.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while deleting basket products", err.Error())
+                return err</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (b *basketProductRepo) AddProducts(ctx context.Context, basketID string, products map[string]int) error <span class="cov0" title="0">{
+        var (
+                insertStatements []string
+        )
+        query := `
+                DO $$
+                BEGIN 
+           %s
+                END $$
+`
+        for productID, quantity := range products </span><span class="cov0" title="0">{
+                insertStatements = append(insertStatements, fmt.Sprintf(`insert into basket_products (id, basket_id, product_id, quantity)
+                      values ('%s', '%s', '%s', %d) ;`, uuid.New(), basketID, productID, quantity))
+        }</span>
+
+        <span class="cov0" title="0">finalQuery := fmt.Sprintf(query, strings.Join(insertStatements, "\n"))
+
+        if _, err := b.db.Exec(ctx, finalQuery); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while inserting to basket products", err.Error())
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+//func (b basketProductRepo) AddProducts(basketID string, products map[string]int) error {
+//        query := `
+//                        insert into basket_products
+//                            (id, basket_id, product_id, quantity)
+//                                        values ($1, $2, $3, $4)
+//`
+//
+//        for productID, quantity := range products {
+//                if _, err := b.db.Exec(context.Background(), query, uuid.New(), basketID, productID, quantity); err != nil {
+//                        fmt.Println("Error while adding product to basket_products table", err.Error())
+//                        return err
+//                }
+//        }
+//
+//        return nil
+//}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package postgres
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "test/api/models"
+        "test/storage"
+)
+
+type branchRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewBranchRepo(db *pgxpool.Pool) storage.IBranchStorage <span class="cov0" title="0">{
+        return branchRepo{db: db}
+}</span>
+
+func (b branchRepo) Create(ctx context.Context, branch models.CreateBranch) (string, error) <span class="cov0" title="0">{
+        branchID := uuid.New()
+
+        query := `insert into branches (id, name, address, phone_number) 
+                                                                        values($1, $2, $3, $4)`
+
+        if rowsAffected, err := b.db.Exec(ctx, query,
+                branchID,
+                branch.Name,
+                branch.Address,
+                branch.PhoneNumber,
+        ); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while inserting branch data", err.Error())
+                return "", err</span>
+        }
+
+        <span class="cov0" title="0">storeQuery := `insert into store(id, branch_id, profit, budget) values($1, $2, 0, 1000.0)`
+        if rowsAffected, err := b.db.Exec(ctx, storeQuery, uuid.New(), branchID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while inserting store data", err.Error())
+                return "", err</span>
+        }
+
+        <span class="cov0" title="0">return branchID.String(), nil</span>
+}
+
+func (b branchRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Branch, error) <span class="cov0" title="0">{
+        var createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        branch := models.Branch{}
+        query := `select  id, name, address, phone_number, created_at, updated_at 
+                                        from branches where id = $1 and deleted_at = 0
+`
+        if err := b.db.QueryRow(ctx, query, key.ID).Scan(
+                &amp;branch.ID,
+                &amp;branch.Name,
+                &amp;branch.Address,
+                &amp;branch.PhoneNumber,
+                &amp;createdAt,
+                &amp;updatedAt); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting by id", err.Error())
+                return models.Branch{}, err
+        }</span>
+
+        <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                branch.CreatedAt = createdAt.String
+        }</span>
+
+        <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                branch.UpdatedAt = updatedAt.String
+        }</span>
+
+        <span class="cov0" title="0">return branch, nil</span>
+}
+
+func (b branchRepo) GetList(ctx context.Context, request models.GetListRequest) (models.BranchResponse, error) <span class="cov0" title="0">{
+        var (
+                count                = 0
+                branches             = []models.Branch{}
+                query, countQuery    string
+                page                 = request.Page
+                offset               = (page - 1) * request.Limit
+                search               = request.Search
+                createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        )
+
+        countQuery = `select count(1) from branches where deleted_at = 0 `
+
+        if search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and name ilike '%s'`, search)
+        }</span>
+
+        <span class="cov0" title="0">if err := b.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while scanning count", err.Error())
+                return models.BranchResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">query = `select id, name, address, phone_number, created_at, updated_at
+                                                        from branches where deleted_at = 0 
+`
+        if search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and name ilike '%s' `, search)
+        }</span>
+
+        <span class="cov0" title="0">query += ` order by created_at desc LIMIT $1 OFFSET $2 `
+        rows, err := b.db.Query(ctx, query, request.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting * from branches", err.Error())
+                return models.BranchResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">for rows.Next() </span><span class="cov0" title="0">{
+                branch := models.Branch{}
+                if err := rows.Scan(
+                        &amp;branch.ID,
+                        &amp;branch.Name,
+                        &amp;branch.Address,
+                        &amp;branch.PhoneNumber,
+                        &amp;createdAt,
+                        &amp;updatedAt); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error is while scanning branch", err.Error())
+                        return models.BranchResponse{}, err
+                }</span>
+                <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                        branch.CreatedAt = createdAt.String
+                }</span>
+
+                <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                        branch.UpdatedAt = updatedAt.String
+                }</span>
+                <span class="cov0" title="0">branches = append(branches, branch)</span>
+        }
+
+        <span class="cov0" title="0">return models.BranchResponse{
+                Branches: branches,
+                Count:    count,
+        }, err</span>
+}
+func (b branchRepo) Update(ctx context.Context, branch models.UpdateBranch) (string, error) <span class="cov0" title="0">{
+        query := `update branches set name = $1, address = $2, phone_number = $3, updated_at = Now() 
+                                                        where id = $4`
+
+        if rowsAffected, err := b.db.Exec(ctx, query,
+                &amp;branch.Name,
+                &amp;branch.Address,
+                &amp;branch.PhoneNumber,
+                &amp;branch.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while updating branch", err.Error())
+                return "", err</span>
+        }
+
+        <span class="cov0" title="0">return branch.ID, nil</span>
+}
+func (b branchRepo) Delete(ctx context.Context, key models.PrimaryKey) error <span class="cov0" title="0">{
+        query := `update branches set deleted_at = extract(epoch from current_timestamp) where id = $1`
+
+        if rowsAffected, err := b.db.Exec(ctx, query, key.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while deleting branches", err.Error())
+                return err</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package postgres
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "test/api/models"
+        "test/storage"
+)
+
+type categoryRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewCategoryRepo(db *pgxpool.Pool) storage.ICategoryStorage <span class="cov8" title="1">{
+        return &amp;categoryRepo{db: db}
+}</span>
+func (c *categoryRepo) Create(ctx context.Context, category models.CreateCategory) (string, error) <span class="cov8" title="1">{
+        id := uuid.New()
+        query := `insert into categories (id, name) values($1, $2)`
+
+        if rowsAffected, err := c.db.Exec(ctx, query, id, category.Name); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while creating category", err.Error())
+                return "", err</span>
+        }
+
+        <span class="cov8" title="1">return id.String(), nil</span>
+}
+
+func (c *categoryRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Category, error) <span class="cov8" title="1">{
+        createdAt, updatedAt := sql.NullString{}, sql.NullString{}
+        category := models.Category{}
+
+        query := `select id, name, created_at, updated_at from categories where id = $1 and deleted_at = 0`
+        if err := c.db.QueryRow(ctx, query, key.ID).Scan(&amp;category.ID, &amp;category.Name, &amp;createdAt, &amp;updatedAt); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while getting by id", err.Error())
+                return models.Category{}, err
+        }</span>
+        <span class="cov8" title="1">if createdAt.Valid </span><span class="cov8" title="1">{
+                category.CreatedAt = createdAt.String
+        }</span>
+
+        <span class="cov8" title="1">if updatedAt.Valid </span><span class="cov0" title="0">{
+                category.UpdatedAt = updatedAt.String
+        }</span>
+        <span class="cov8" title="1">return category, nil</span>
+}
+
+func (c *categoryRepo) GetList(ctx context.Context, request models.GetListRequest) (models.CategoryResponse, error) <span class="cov8" title="1">{
+        var (
+                query, countQuery    string
+                count                = 0
+                page                 = request.Page
+                offset               = (page - 1) * request.Limit
+                search               = request.Search
+                categories           = []models.Category{}
+                createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        )
+
+        countQuery = `select count(1) from categories where deleted_at = 0`
+
+        if search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and name ilike '%%%s%%'`, search)
+        }</span>
+
+        <span class="cov8" title="1">if err := c.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while scanning count", err.Error())
+                return models.CategoryResponse{}, err
+        }</span>
+
+        <span class="cov8" title="1">query = `select id, name, created_at, updated_at from categories where deleted_at = 0`
+
+        if search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and name ilike '%%%s%%' `, search)
+        }</span>
+
+        <span class="cov8" title="1">query += ` order by created_at desc LIMIT $1 OFFSET $2`
+
+        rows, err := c.db.Query(ctx, query, request.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting categories", err.Error())
+                return models.CategoryResponse{}, err
+        }</span>
+
+        <span class="cov8" title="1">for rows.Next() </span><span class="cov8" title="1">{
+                cat := models.Category{}
+                if err = rows.Scan(&amp;cat.ID, &amp;cat.Name, &amp;createdAt, &amp;updatedAt); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error is while scanning category", err.Error())
+                        return models.CategoryResponse{}, err
+                }</span>
+                <span class="cov8" title="1">if createdAt.Valid </span><span class="cov8" title="1">{
+                        cat.CreatedAt = createdAt.String
+                }</span>
+                <span class="cov8" title="1">if updatedAt.Valid </span><span class="cov8" title="1">{
+                        cat.UpdatedAt = updatedAt.String
+                }</span>
+                <span class="cov8" title="1">categories = append(categories, cat)</span>
+        }
+        <span class="cov8" title="1">return models.CategoryResponse{
+                Category: categories,
+                Count:    count,
+        }, err</span>
+}
+
+func (c *categoryRepo) Update(ctx context.Context, category models.UpdateCategory) (string, error) <span class="cov8" title="1">{
+        query := `update categories set name = $1, updated_at = now() where id = $2`
+
+        if rowsAffected, err := c.db.Exec(ctx, query, &amp;category.Name, &amp;category.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while updating category", err.Error())
+                return "", err</span>
+        }
+        <span class="cov8" title="1">return category.ID, nil</span>
+}
+
+func (c *categoryRepo) Delete(ctx context.Context, key models.PrimaryKey) error <span class="cov8" title="1">{
+        query := `update categories set deleted_at = extract(epoch from current_timestamp) where id = $1`
+
+        if rowsAffected, err := c.db.Exec(ctx, query, key.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while deleting category", err.Error())
+                return err</span>
+        }
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package postgres
+
+import (
+        "context"
+        "fmt"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "test/storage"
+)
+
+type dealerRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewDealerRepo(db *pgxpool.Pool) storage.IDealerStorage <span class="cov0" title="0">{
+        return &amp;dealerRepo{
+                db: db,
+        }
+}</span>
+
+func (d *dealerRepo) AddSum(ctx context.Context, totalSum int) error <span class="cov0" title="0">{
+        //ozini sum: ga qoshish kerak total sum -&gt; update
+        query := `update dealer set sum = sum + $1 where id = '1cfd84e6-72cb-4135-a802-85d10e4183ea'`
+        if rowsAffected, err := d.db.Exec(ctx, query, &amp;totalSum); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is while rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while updating dealer sum", err.Error())
+                return err</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package postgres
+
+import (
+        "errors"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "golang.org/x/net/context"
+        "test/api/models"
+        "test/pkg/helper"
+        "test/storage"
+)
+
+type incomeRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewIncomeRepo(db *pgxpool.Pool) storage.IIncomeStorage <span class="cov0" title="0">{
+        return &amp;incomeRepo{
+                db: db,
+        }
+}</span>
+
+func (i *incomeRepo) Create(ctx context.Context) (models.Income, error) <span class="cov0" title="0">{
+        var (
+                income = models.Income{}
+                extID  string
+        )
+
+        query := `select external_id from incomes order by external_id desc`
+
+        if err := i.db.QueryRow(ctx, query).Scan(
+                &amp;extID,
+        ); err != nil </span><span class="cov0" title="0">{
+                if !errors.Is(err, pgx.ErrNoRows) </span><span class="cov0" title="0">{
+                        fmt.Println("error while getting ext id ", err.Error())
+                        return models.Income{}, err
+                }</span>
+                <span class="cov0" title="0">extID = "I"</span>
+        }
+
+        <span class="cov0" title="0">if extID != "I" </span><span class="cov0" title="0">{
+                extID = helper.GenerateExternalID(extID)
+        }</span> else<span class="cov0" title="0"> {
+                extID = "I-0001"
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("ex", extID)
+
+        query = `insert into incomes values ($1, $2, $3) returning id, external_id`
+
+        fmt.Println("ext id ", extID)
+        if err := i.db.QueryRow(ctx, query, uuid.New(), extID, 0).Scan(
+                &amp;income.ID,
+                &amp;income.ExternalID,
+        ); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error while creating income ", err.Error())
+                return models.Income{}, err
+        }</span>
+
+        <span class="cov0" title="0">return income, nil</span>
+}
+
+func (i *incomeRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Income, error) <span class="cov0" title="0">{
+        income := models.Income{}
+        query := `select id, external_id, total_sum from incomes where id = $1 and deleted_at = 0`
+        if err := i.db.QueryRow(ctx, query, key.ID).Scan(
+                &amp;income.ID,
+                &amp;income.ExternalID,
+                &amp;income.TotalSum,
+        ); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting income by id", err.Error())
+                return models.Income{}, err
+        }</span>
+        <span class="cov0" title="0">return income, nil</span>
+}
+
+func (i *incomeRepo) GetList(ctx context.Context, request models.GetListRequest) (models.IncomesResponse, error) <span class="cov0" title="0">{
+        var (
+                page              = request.Page
+                offset            = (page - 1) * request.Limit
+                incomes           = []models.Income{}
+                query, countQuery string
+                count             int
+                search            = request.Search
+        )
+        countQuery = `select count(1) from incomes where deleted_at = 0`
+        if search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and external_id = '%s'`, search)
+        }</span>
+
+        <span class="cov0" title="0">if err := i.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while scanning count", err.Error())
+                return models.IncomesResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">query = `select id, external_id, total_sum from incomes where deleted_at = 0`
+        if search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and external_id = '%s'`, search)
+        }</span>
+        <span class="cov0" title="0">query += ` LIMIT $1 OFFSET $2`
+        rows, err := i.db.Query(ctx, query, request.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting all", err.Error())
+                return models.IncomesResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">for rows.Next() </span><span class="cov0" title="0">{
+                in := models.Income{}
+                if err = rows.Scan(
+                        &amp;in.ID,
+                        &amp;in.ExternalID,
+                        &amp;in.TotalSum,
+                ); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error is while scanning all", err.Error())
+                        return models.IncomesResponse{}, err
+                }</span>
+                <span class="cov0" title="0">incomes = append(incomes, in)</span>
+        }
+
+        <span class="cov0" title="0">return models.IncomesResponse{
+                Incomes: incomes,
+                Count:   count,
+        }, err</span>
+}
+
+func (i *incomeRepo) Delete(ctx context.Context, key models.PrimaryKey) error <span class="cov0" title="0">{
+        query := `update incomes set deleted_at = extract(epoch from current_timestamp) where id = $1`
+        if rowsAffected, err := i.db.Exec(ctx, query, key.ID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is while rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while delete income", err.Error())
+                return err</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package postgres
+
+import (
+        "context"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "strings"
+        "test/api/models"
+        "test/storage"
+)
+
+type incomeProductRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewIncomeProductRepo(db *pgxpool.Pool) storage.IIncomeProductStorage <span class="cov0" title="0">{
+        return &amp;incomeProductRepo{db: db}
+}</span>
+
+func (i *incomeProductRepo) CreateMultiple(ctx context.Context, request models.CreateIncomeProducts) error <span class="cov0" title="0">{
+        query := `insert into income_products (id, income_id, product_id, quantity, price) values `
+
+        for _, incomeProduct := range request.IncomeProducts </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(`('%s', '%s', '%s', %d, %d), `, uuid.New().String(),
+                        incomeProduct.IncomeID,
+                        incomeProduct.ProductID,
+                        incomeProduct.Quantity,
+                        incomeProduct.Price)
+        }</span>
+        <span class="cov0" title="0">query = query[:len(query)-2]
+
+        if _, err := i.db.Exec(ctx, query); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error while inserting income products ", err.Error())
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (i *incomeProductRepo) GetList(ctx context.Context, request models.GetListRequest) (models.IncomeProductsResponse, error) <span class="cov0" title="0">{
+        var (
+                page              = request.Page
+                offset            = (page - 1) * request.Limit
+                count             = 0
+                query, countQuery string
+                incomeProducts    = []models.IncomeProduct{}
+        )
+
+        countQuery = `select count(1) from income_products where deleted_at = 0`
+        if request.Search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and income_id = '%s'`, request.Search)
+        }</span>
+        <span class="cov0" title="0">if err := i.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while scanning count from income products", err.Error())
+                return models.IncomeProductsResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">query = `select id, income_id, product_id, quantity, price from income_products where deleted_at = 0 `
+        if request.Search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and income_id = '%s'`, request.Search)
+        }</span>
+        <span class="cov0" title="0">query += ` LIMIT $1 OFFSET $2`
+        rows, err := i.db.Query(ctx, query, request.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting all from income products", err.Error())
+                return models.IncomeProductsResponse{}, err
+        }</span>
+        <span class="cov0" title="0">for rows.Next() </span><span class="cov0" title="0">{
+                inp := models.IncomeProduct{}
+                if err = rows.Scan(&amp;inp.ID, &amp;inp.IncomeID, &amp;inp.ProductID, &amp;inp.Quantity, &amp;inp.Price); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error is while scanning all from income products", err.Error())
+                        return models.IncomeProductsResponse{}, err
+                }</span>
+                <span class="cov0" title="0">incomeProducts = append(incomeProducts, inp)</span>
+        }
+        <span class="cov0" title="0">return models.IncomeProductsResponse{
+                IncomeProducts: incomeProducts,
+                Count:          count,
+        }, err</span>
+}
+
+func (i *incomeProductRepo) UpdateMultiple(ctx context.Context, response models.UpdateIncomeProducts) error <span class="cov0" title="0">{
+        var (
+                updateStatements []string
+        )
+        query := `DO $$ BEGIN %s END $$`
+        for _, incomeProducts := range response.IncomeProducts </span><span class="cov0" title="0">{
+                updateStatements = append(updateStatements, fmt.Sprintf(`update income_products set income_id = '%s', product_id = '%s', quantity = %d, price = %d  where id = '%s' ;`,
+                        incomeProducts.IncomeID, incomeProducts.ProductID, incomeProducts.Quantity, incomeProducts.Price, incomeProducts.ID))
+        }</span>
+
+        <span class="cov0" title="0">finalQuery := fmt.Sprintf(query, strings.Join(updateStatements, "\n"))
+        if rowsAffected, err := i.db.Exec(ctx, finalQuery); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is while rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while updating income products", err.Error())
+                return err</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (i *incomeProductRepo) DeleteMultiple(ctx context.Context, response models.DeleteIncomeProducts) error <span class="cov0" title="0">{
+        var deleteStatements []string
+
+        query := `DO $$ BEGIN %s END $$`
+        for _, value := range response.IDs </span><span class="cov0" title="0">{
+                deleteStatements = append(deleteStatements, fmt.Sprintf(`update income_products set deleted_at = extract(epoch from current_timestamp) where id = '%s' ;`, value.ID))
+        }</span>
+
+        <span class="cov0" title="0">finalQuery := fmt.Sprintf(query, strings.Join(deleteStatements, "\n"))
+        if rowsAffected, err := i.db.Exec(ctx, finalQuery); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is while rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while deleting income products", err.Error())
+                return err</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package postgres
+
+import (
+        "context"
+        "fmt"
+        "test/config"
+        "test/storage"
+
+        "github.com/jackc/pgx/v5/pgxpool"
+
+        _ "github.com/golang-migrate/migrate/v4/database"          //database is needed for migration
+        _ "github.com/golang-migrate/migrate/v4/database/postgres" //postgres is used for database
+        _ "github.com/golang-migrate/migrate/v4/source/file"       //file is needed for migration url
+        _ "github.com/lib/pq"
+)
+
+type Store struct {
+        pool *pgxpool.Pool
+}
+
+func New(ctx context.Context, cfg config.Config) (storage.IStorage, error) <span class="cov8" title="1">{
+        url := fmt.Sprintf(
+                `postgres://%s:%s@%s:%s/%s?sslmode=disable`,
+                cfg.PostgresUser,
+                cfg.PostgresPassword,
+                cfg.PostgresHost,
+                cfg.PostgresPort,
+                cfg.PostgresDB,
+        )
+
+        poolConfig, err := pgxpool.ParseConfig(url)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error while parsing config", err.Error())
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">poolConfig.MaxConns = 100
+
+        pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error while connecting to db", err.Error())
+                return nil, err
+        }</span>
+
+        // migration
+        // m, err := migrate.New("file://migrations/postgres/", url)
+        // if err != nil {
+        //         fmt.Println("error while migrating", err.Error())
+        //         return nil, err
+        // }
+
+        // if err = m.Up(); err != nil {
+        //         if !strings.Contains(err.Error(), "no change") {
+        //                 version, dirty, err := m.Version()
+        //                 if err != nil {
+        //                         fmt.Println("err in checking version and dirty", err.Error())
+        //                         return nil, err
+        //                 }
+
+        //                 if dirty {
+        //                         version--
+        //                         if err = m.Force(int(version)); err != nil {
+        //                                 fmt.Println("ERR in making force", err.Error())
+        //                                 return nil, err
+        //                         }
+        //                 }
+        //                 fmt.Println("ERROR in migrating", err.Error())
+        //                 return nil, err
+        //         }
+        // }
+
+        <span class="cov8" title="1">return Store{
+                pool: pool,
+        }, nil</span>
+}
+
+func (s Store) Close() <span class="cov0" title="0">{
+        s.pool.Close()
+}</span>
+
+func (s Store) User() storage.IUserStorage <span class="cov8" title="1">{
+        return NewUserRepo(s.pool)
+}</span>
+
+func (s Store) Category() storage.ICategoryStorage <span class="cov8" title="1">{
+        return NewCategoryRepo(s.pool)
+}</span>
+
+func (s Store) Product() storage.IProductStorage <span class="cov8" title="1">{
+        return NewProductRepo(s.pool)
+}</span>
+
+func (s Store) Basket() storage.IBasketStorage <span class="cov0" title="0">{
+        return NewBasketRepo(s.pool)
+
+}</span>
+
+func (s Store) BasketProduct() storage.IBasketProductStorage <span class="cov0" title="0">{
+        return NewBasketProductRepo(s.pool)
+}</span>
+
+func (s Store) Store() storage.IStoreStorage <span class="cov0" title="0">{
+        return NewStoreRepo(s.pool)
+}</span>
+
+func (s Store) Branch() storage.IBranchStorage <span class="cov0" title="0">{
+        return NewBranchRepo(s.pool)
+}</span>
+
+func (s Store) Dealer() storage.IDealerStorage <span class="cov0" title="0">{
+        return NewDealerRepo(s.pool)
+}</span>
+
+func (s Store) Income() storage.IIncomeStorage <span class="cov0" title="0">{
+        return NewIncomeRepo(s.pool)
+}</span>
+
+func (s Store) IncomeProduct() storage.IIncomeProductStorage <span class="cov0" title="0">{
+        return NewIncomeProductRepo(s.pool)
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package postgres
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "github.com/lib/pq"
+        _ "github.com/lib/pq"
+        "strings"
+        "test/api/models"
+        "test/storage"
+)
+
+type productRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewProductRepo(db *pgxpool.Pool) storage.IProductStorage <span class="cov8" title="1">{
+        return &amp;productRepo{db: db}
+}</span>
+
+func (p *productRepo) Create(ctx context.Context, product models.CreateProduct) (string, error) <span class="cov8" title="1">{
+        id := uuid.New()
+        query := `insert into products(id, name, price, original_price, quantity, category_id, branch_id) 
+                                                values($1, $2, $3, $4, $5, $6, $7)`
+
+        if rowsAffected, err := p.db.Exec(ctx, query,
+                id,
+                product.Name,
+                product.Price,
+                product.OriginalPrice,
+                product.Quantity,
+                product.CategoryID,
+                product.BranchID); err != nil </span><span class="cov8" title="1">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov8" title="1">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return "", err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while inserting product", err.Error())
+                return "", err</span>
+        }
+
+        <span class="cov8" title="1">return id.String(), nil</span>
+}
+
+func (p *productRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Product, error) <span class="cov8" title="1">{
+        var createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        product := models.Product{}
+        query := `select id, name, price, original_price, quantity, category_id, branch_id, created_at, updated_at
+                                                        from products where id = $1 and deleted_at = 0`
+        if err := p.db.QueryRow(ctx, query, key.ID).Scan(
+                &amp;product.ID,
+                &amp;product.Name,
+                &amp;product.Price,
+                &amp;product.OriginalPrice,
+                &amp;product.Quantity,
+                &amp;product.CategoryID,
+                &amp;product.BranchID,
+                &amp;createdAt,
+                &amp;updatedAt); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("error is while selecting product by id", err.Error())
+                return models.Product{}, err
+        }</span>
+
+        <span class="cov8" title="1">if createdAt.Valid </span><span class="cov8" title="1">{
+                product.CreatedAt = createdAt.String
+        }</span>
+
+        <span class="cov8" title="1">if updatedAt.Valid </span><span class="cov0" title="0">{
+                product.UpdatedAt = updatedAt.String
+        }</span>
+        <span class="cov8" title="1">return product, nil</span>
+}
+
+func (p *productRepo) GetList(ctx context.Context, request models.GetListRequest) (models.ProductResponse, error) <span class="cov8" title="1">{
+        var (
+                products             = []models.Product{}
+                page                 = request.Page
+                offset               = (page - 1) * request.Limit
+                search               = request.Search
+                query, countQuery    string
+                count                = 0
+                createdAt, updatedAt = sql.NullString{}, sql.NullString{}
+        )
+
+        countQuery = `select count(1) from products where deleted_at = 0 `
+
+        if search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and (name ilike '%%%s%%' or 
+                        CAST(price AS TEXT) ilike '%s' or CAST(quantity AS TEXT) ilike '%s')`, search, search, search)
+        }</span>
+
+        <span class="cov8" title="1">if err := p.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while scanning count", err.Error())
+                return models.ProductResponse{}, err
+        }</span>
+
+        <span class="cov8" title="1">query = `select id, name, price, original_price, quantity, category_id, branch_id, created_at, updated_at
+                                                                from products where deleted_at = 0`
+
+        if search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and (name ilike '%%%s%%' or 
+                        CAST(price AS TEXT) ilike '%s' or CAST(quantity AS TEXT) ilike '%s')`, search, search, search)
+        }</span>
+
+        <span class="cov8" title="1">query += ` order by created_at desc LIMIT $1 OFFSET $2`
+
+        rows, err := p.db.Query(ctx, query, request.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while selecting products", err.Error())
+                return models.ProductResponse{}, err
+        }</span>
+
+        <span class="cov8" title="1">for rows.Next() </span><span class="cov8" title="1">{
+                product := models.Product{}
+                if err = rows.Scan(
+                        &amp;product.ID,
+                        &amp;product.Name,
+                        &amp;product.Price,
+                        &amp;product.OriginalPrice,
+                        &amp;product.Quantity,
+                        &amp;product.CategoryID,
+                        &amp;product.BranchID,
+                        &amp;createdAt,
+                        &amp;updatedAt); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error is while scanning products", err.Error())
+                        return models.ProductResponse{}, err
+                }</span>
+                <span class="cov8" title="1">if createdAt.Valid </span><span class="cov8" title="1">{
+                        product.CreatedAt = createdAt.String
+                }</span>
+
+                <span class="cov8" title="1">if updatedAt.Valid </span><span class="cov0" title="0">{
+                        product.UpdatedAt = updatedAt.String
+                }</span>
+                <span class="cov8" title="1">products = append(products, product)</span>
+        }
+        <span class="cov8" title="1">return models.ProductResponse{
+                Products: products,
+                Count:    count,
+        }, err</span>
+}
+
+func (p *productRepo) Update(ctx context.Context, product models.UpdateProduct) (string, error) <span class="cov8" title="1">{
+        query := `update products set name = $1, price = $2, original_price = $3, quantity = $4, 
+                    category_id = $5, updated_at = now()  where id = $6`
+
+        if _, err := p.db.Exec(ctx, query,
+                &amp;product.Name,
+                &amp;product.Price,
+                &amp;product.OriginalPrice,
+                &amp;product.Quantity,
+                &amp;product.CategoryID,
+                &amp;product.ID); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("error is while updating product", err.Error())
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return product.ID, nil</span>
+}
+
+func (p *productRepo) Delete(ctx context.Context, key models.PrimaryKey) error <span class="cov8" title="1">{
+        query := `update products set deleted_at = extract(epoch from current_timestamp) where id = $1`
+
+        if rowsAffected, err := p.db.Exec(ctx, query, key.ID); err != nil </span><span class="cov8" title="1">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov8" title="1">{
+                        fmt.Println("error is in rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while deleting product", err.Error())
+                return err</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]int) (models.ProductSell, error) <span class="cov0" title="0">{
+        var (
+                selectedProducts = models.SellRequest{
+                        Products: map[string]int{},
+                }
+                products               = make([]string, len(customerProductIDs))
+                selectedProductPrices  = make(map[string]int, 0)
+                notEnoughProducts      = make(map[string]int)
+                productsBranchID       string
+                notEnoughProductPrices = make(map[string]int)
+        )
+
+        for key := range customerProductIDs </span><span class="cov0" title="0">{
+                products = append(products, key)
+        }</span>
+
+        <span class="cov0" title="0">query := `
+                                select id, quantity, price, original_price, branch_id from products where id::varchar = ANY($1)
+        `
+
+        rows, err := p.db.Query(ctx, query, pq.Array(products)) // [a, b, c]
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error while getting products by product ids", err.Error())
+                return models.ProductSell{}, err
+        }</span>
+
+        <span class="cov0" title="0">for rows.Next() </span><span class="cov0" title="0">{
+                var (
+                        quantity, price, originalPrice int
+                        productID, branchID            string
+                )
+                if err = rows.Scan(
+                        &amp;productID,
+                        &amp;quantity,
+                        &amp;price,
+                        &amp;originalPrice,
+                        &amp;branchID,
+                ); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("Error while scanning rows one by one", err.Error())
+                        return models.ProductSell{}, err
+                }</span>
+
+                <span class="cov0" title="0">productsBranchID = branchID
+
+                if customerProductIDs[productID] &lt;= quantity </span><span class="cov0" title="0">{
+                        selectedProducts.Products[productID] = price
+                        selectedProductPrices[productID] = originalPrice
+                }</span> else<span class="cov0" title="0"> if customerProductIDs[productID] &gt; quantity || quantity == 0 </span><span class="cov0" title="0">{
+                        notEnoughProducts[productID] = customerProductIDs[productID]
+                        notEnoughProductPrices[productID] = originalPrice
+                }</span>
+        }
+
+        <span class="cov0" title="0">return models.ProductSell{
+                SelectedProducts:       selectedProducts,
+                ProductPrices:          selectedProductPrices,
+                NotEnoughProducts:      notEnoughProducts,
+                NotEnoughProductPrices: notEnoughProductPrices,
+                ProductsBranchID:       productsBranchID,
+        }, nil</span>
+}
+
+func (p *productRepo) TakeProducts(ctx context.Context, products map[string]int) error <span class="cov8" title="1">{
+        var (
+                updateStatements []string
+        )
+        query := `
+        DO $$
+        BEGIN
+                %s
+        END $$
+`
+
+        for productID, quantity := range products </span><span class="cov8" title="1">{
+                updateStatements = append(updateStatements, fmt.Sprintf(`update products 
+                        set quantity = quantity - %d where id = '%s' ;`, quantity, productID))
+        }</span>
+
+        <span class="cov8" title="1">finalQuery := fmt.Sprintf(query, strings.Join(updateStatements, "\n"))
+
+        if _, err := p.db.Exec(ctx, finalQuery); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("Error while updating product quantity", err.Error())
+                return err
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (p *productRepo) AddDeliveredProducts(ctx context.Context, products models.DeliverProducts, branchID string) error <span class="cov8" title="1">{
+
+        var (
+                updatedStatements []string
+        )
+
+        query := `
+                                        DO $$
+                                        BEGIN
+                       %s
+                                        END $$
+`
+        if products.NotEnoughProducts != nil </span><span class="cov8" title="1">{
+                for productID, quantity := range products.NotEnoughProducts </span><span class="cov8" title="1">{
+                        updatedStatements = append(updatedStatements, fmt.Sprintf(`update products set quantity = quantity + %d where id = '%s' ;`,
+                                quantity, productID))
+                }</span>
+
+                <span class="cov8" title="1">finalQuery := fmt.Sprintf(query, strings.Join(updatedStatements, "\n"))
+
+                if rowsAffected, err := p.db.Exec(ctx, finalQuery); err != nil </span><span class="cov8" title="1">{
+                        if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov8" title="1">{
+                                fmt.Println("error is while rows affected", err.Error())
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">fmt.Println("error is while updating quantity of delivered products", err.Error())
+                        return err</span>
+                }
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (p *productRepo) GetListByIDs(ctx context.Context, productIDs []string) (models.ProductResponse, error) <span class="cov8" title="1">{
+        productsResp := models.ProductResponse{
+                Products: make([]models.Product, 0),
+                Count:    0,
+        }
+
+        query := `select id, name, price from products where id::varchar = ANY($1)`
+
+        rows, err := p.db.Query(ctx, query, pq.Array(productIDs))
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error while getting products by product ids", err.Error())
+                return models.ProductResponse{}, err
+        }</span>
+
+        <span class="cov8" title="1">for rows.Next() </span><span class="cov0" title="0">{
+                product := models.Product{}
+
+                if err = rows.Scan(
+                        &amp;product.ID,
+                        &amp;product.Name,
+                        &amp;product.Price,
+                ); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("Error while scanning rows one by one", err.Error())
+                        return models.ProductResponse{}, err
+                }</span>
+
+                <span class="cov0" title="0">productsResp.Products = append(productsResp.Products, product)</span>
+        }
+
+        <span class="cov8" title="1">return productsResp, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package postgres
+
+import (
+        "context"
+        "fmt"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "test/storage"
+)
+
+type storeRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewStoreRepo(db *pgxpool.Pool) storage.IStoreStorage <span class="cov0" title="0">{
+        return &amp;storeRepo{
+                db: db,
+        }
+}</span>
+
+func (s *storeRepo) AddProfit(ctx context.Context, profit float32, branchID string) error <span class="cov0" title="0">{
+        rowsAffected, err := s.db.Exec(ctx, `update store set profit = profit + $1, updated_at = now() where branch_id = $2`, profit, branchID)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error while adding profit to store", err.Error())
+                return err
+        }</span>
+
+        <span class="cov0" title="0">if n := rowsAffected.RowsAffected(); n == 0 </span><span class="cov0" title="0">{
+                fmt.Println("Error in rows affected", err.Error())
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return err</span>
+}
+
+func (s *storeRepo) GetStoreBudget(ctx context.Context, branchID string) (float32, error) <span class="cov0" title="0">{
+        var budget float32
+        query := `select budget from store where branch_id = $1`
+        if err := s.db.QueryRow(ctx, query, branchID).Scan(&amp;budget); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error is while getting store budget", err.Error())
+                return 0, err
+        }</span>
+
+        <span class="cov0" title="0">return budget, nil</span>
+}
+
+func (s *storeRepo) WithdrawalDeliveredSum(ctx context.Context, totalSum float32, branchID string) error <span class="cov0" title="0">{
+        query := `update store set budget = budget - $1 where branch_id = $2 `
+        if rowsAffected, err := s.db.Exec(ctx, query, &amp;totalSum, &amp;branchID); err != nil </span><span class="cov0" title="0">{
+                if r := rowsAffected.RowsAffected(); r == 0 </span><span class="cov0" title="0">{
+                        fmt.Println("error is while rows affected", err.Error())
+                        return err
+                }</span>
+                <span class="cov0" title="0">fmt.Println("error is while updating budget", err.Error())
+                return err</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package postgres
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "github.com/google/uuid"
+        "github.com/jackc/pgx/v5/pgxpool"
+        "test/api/models"
+        "test/storage"
+)
+
+type userRepo struct {
+        db *pgxpool.Pool
+}
+
+func NewUserRepo(db *pgxpool.Pool) storage.IUserStorage <span class="cov8" title="1">{
+        return &amp;userRepo{
+                db: db,
+        }
+}</span>
+
+func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (string, error) <span class="cov8" title="1">{
+
+        uid := uuid.New()
+
+        if _, err := u.db.Exec(ctx, `insert into 
+                        users values ($1, $2, $3, $4, $5, $6, $7)
+                        `,
+                uid,
+                createUser.FullName,
+                createUser.Phone,
+                createUser.Password,
+                createUser.UserType,
+                createUser.Cash,
+                createUser.BranchID,
+        ); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("error while inserting data", err.Error())
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return uid.String(), nil</span>
+}
+
+func (u *userRepo) GetByID(ctx context.Context, pKey models.PrimaryKey) (models.User, error) <span class="cov8" title="1">{
+        var createdAt, updatedAt = sql.NullTime{}, sql.NullString{}
+        user := models.User{}
+
+        query := `
+                select id, full_name, phone, cash, branch_id, created_at, updated_at 
+                                                from users where id = $1 and deleted_at = 0 and user_role = 'customer'
+`
+        if err := u.db.QueryRow(ctx, query, pKey.ID).Scan(
+                &amp;user.ID,       //0
+                &amp;user.FullName, //1
+                &amp;user.Phone,    //2
+                &amp;user.Cash,     //3
+                &amp;user.BranchID,
+                &amp;createdAt, //4
+                &amp;updatedAt, //5
+        ); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("error while scanning user", err.Error())
+                return models.User{}, err
+        }</span>
+
+        <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                user.CreatedAt = createdAt.Time
+        }</span>
+
+        <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                user.UpdatedAt = updatedAt.String
+        }</span>
+
+        <span class="cov0" title="0">return user, nil</span>
+}
+
+func (u *userRepo) GetList(ctx context.Context, request models.GetListRequest) (models.UsersResponse, error) <span class="cov8" title="1">{
+        var (
+                users                = []models.User{}
+                count                = 0
+                countQuery, query    string
+                page                 = request.Page
+                offset               = (page - 1) * request.Limit
+                search               = request.Search
+                createdAt, updatedAt = sql.NullTime{}, sql.NullString{}
+        )
+
+        countQuery = `
+                SELECT count(1) from users where user_role = 'customer' and deleted_at = 0 `
+
+        if search != "" </span><span class="cov0" title="0">{
+                countQuery += fmt.Sprintf(` and (phone ilike '%s' or full_name ilike '%s')`, search, search)
+        }</span>
+
+        <span class="cov8" title="1">if err := u.db.QueryRow(ctx, countQuery).Scan(&amp;count); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("error while scanning count of users", err.Error())
+                return models.UsersResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">query = `
+                SELECT id, full_name, phone, cash, branch_id, created_at, updated_at
+                        FROM users
+                            WHERE user_role = 'customer' and deleted_at = 0
+                            `
+
+        if search != "" </span><span class="cov0" title="0">{
+                query += fmt.Sprintf(` and (phone ilike '%s' or full_name ilike '%s') `, search, search)
+        }</span>
+
+        <span class="cov0" title="0">query += ` order by created_at desc LIMIT $1 OFFSET $2`
+
+        rows, err := u.db.Query(ctx, query, request.Limit, offset)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error while query rows", err.Error())
+                return models.UsersResponse{}, err
+        }</span>
+
+        <span class="cov0" title="0">for rows.Next() </span><span class="cov0" title="0">{
+                user := models.User{}
+
+                if err = rows.Scan(
+                        &amp;user.ID,
+                        &amp;user.FullName,
+                        &amp;user.Phone,
+                        &amp;user.Cash,
+                        &amp;user.BranchID,
+                        &amp;createdAt,
+                        &amp;updatedAt,
+                ); err != nil </span><span class="cov0" title="0">{
+                        fmt.Println("error while scanning row", err.Error())
+                        return models.UsersResponse{}, err
+                }</span>
+                <span class="cov0" title="0">if createdAt.Valid </span><span class="cov0" title="0">{
+                        user.CreatedAt = createdAt.Time
+                }</span>
+
+                <span class="cov0" title="0">if updatedAt.Valid </span><span class="cov0" title="0">{
+                        user.UpdatedAt = updatedAt.String
+                }</span>
+                <span class="cov0" title="0">users = append(users, user)</span>
+        }
+
+        <span class="cov0" title="0">return models.UsersResponse{
+                Users: users,
+                Count: count,
+        }, nil</span>
+}
+
+func (u *userRepo) Update(ctx context.Context, request models.UpdateUser) (string, error) <span class="cov8" title="1">{
+        query := `
+                update users 
+                        set full_name = $1, phone = $2, cash = $3, updated_at = now()
+                                where user_role = 'customer' and id = $4`
+
+        if _, err := u.db.Exec(ctx, query, request.FullName, request.Phone, request.Cash, request.ID); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("error while updating user data", err.Error())
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return request.ID, nil</span>
+}
+
+func (u *userRepo) Delete(ctx context.Context, request models.PrimaryKey) error <span class="cov8" title="1">{
+        query := `update users set deleted_at = extract(epoch from current_timestamp) where id = $1`
+
+        if _, err := u.db.Exec(ctx, query, request.ID); err != nil </span><span class="cov8" title="1">{
+                fmt.Println("error while deleting user by id", err.Error())
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (u *userRepo) GetPassword(ctx context.Context, id string) (string, error) <span class="cov0" title="0">{
+        password := ""
+
+        query := `
+                select password from users 
+                                where user_role = 'customer' and id = $1`
+
+        if err := u.db.QueryRow(ctx, query, id).Scan(&amp;password); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("Error while scanning password from users", err.Error())
+                return "", err
+        }</span>
+
+        <span class="cov0" title="0">return password, nil</span>
+}
+
+func (u *userRepo) UpdatePassword(ctx context.Context, request models.UpdateUserPassword) error <span class="cov0" title="0">{
+        query := `
+                update users 
+                                set password = $1, updated_at = now()
+                                        where id = $2 and user_role = 'customer'`
+
+        if _, err := u.db.Exec(ctx, query, request.NewPassword, request.ID); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error while updating password for user", err.Error())
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (u *userRepo) UpdateCustomerCash(ctx context.Context, id string, sum int) error <span class="cov0" title="0">{
+        query := `update users set cash = cash - $1 where id = $2`
+
+        if _, err := u.db.Exec(ctx, query, sum, id); err != nil </span><span class="cov0" title="0">{
+                fmt.Println("error while updating customer cash", err.Error())
+                return err
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
