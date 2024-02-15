@@ -36,8 +36,9 @@ func (a authService) CustomerLogin(ctx context.Context, loginRequest models.Cust
 	m := make(map[interface{}]interface{})
 
 	m["user_id"] = customer.ID
+	m["user_role"] = "customer"
 
-	accessToken, refereshToken, err := jwt.GenerateJWT(m)
+	accessToken, refreshToken, err := jwt.GenerateJWT(m)
 	if err != nil {
 		a.log.Error("error while generating tokens for customer login", logger.Error(err))
 		return models.CustomerLoginResponse{}, err
@@ -45,6 +46,6 @@ func (a authService) CustomerLogin(ctx context.Context, loginRequest models.Cust
 
 	return models.CustomerLoginResponse{
 		AccessToken:  accessToken,
-		RefreshToken: refereshToken,
+		RefreshToken: refreshToken,
 	}, nil
 }

@@ -546,6 +546,11 @@ const docTemplate = `{
         },
         "/baskets": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get basket list",
                 "consumes": [
                     "application/json"
@@ -557,6 +562,7 @@ const docTemplate = `{
                     "basket"
                 ],
                 "summary": "Get basket list",
+                "operationId": "some id",
                 "parameters": [
                     {
                         "type": "string",
@@ -2747,7 +2753,12 @@ const docTemplate = `{
                 }
             }
         }
-    }
+    },
+    "security": [
+        {
+            "definitions.apikey": []
+        }
+    ]
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

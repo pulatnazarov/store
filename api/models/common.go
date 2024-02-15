@@ -9,4 +9,5 @@ type GetListRequest struct {
 	Limit    int    `json:"limit"`
 	Search   string `json:"search"`
 	BasketID string `json:"basket_id"`
+	UserID   string `json:"user_id"`
 }

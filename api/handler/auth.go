@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"test/api/models"
+	"test/pkg/jwt"
 	"time"
 )
 
@@ -39,4 +40,21 @@ func (h Handler) CustomerLogin(c *gin.Context) {
 	}
 
 	handleResponse(c, h.log, "success", http.StatusOK, loginResponse)
+}
+
+func getAuthInfo(c *gin.Context) (models.AuthInfo, error) {
+	accessToken := c.GetHeader("Authorization")
+	if accessToken == "" {
+		return models.AuthInfo{}, errors.New("unauthorized")
+	}
+
+	m, err := jwt.ExtractClaims(accessToken)
+	if err != nil {
+		return models.AuthInfo{}, err
+	}
+
+	return models.AuthInfo{
+		UserID:   m["user_id"].(string),
+		UserRole: m["user_role"].(string),
+	}, nil
 }

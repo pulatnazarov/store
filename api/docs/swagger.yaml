@@ -719,6 +719,7 @@ paths:
       consumes:
       - application/json
       description: get basket list
+      operationId: some id
       parameters:
       - description: page
         in: query
@@ -751,6 +752,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get basket list
       tags:
       - basket
@@ -1794,4 +1797,6 @@ paths:
       summary: Get user list
       tags:
       - user
+security:
+- definitions.apikey: []
 swagger: "2.0"

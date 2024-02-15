@@ -70,13 +70,18 @@ func (b *basketRepo) GetList(ctx context.Context, req models.GetListRequest) (mo
 		baskets              = []models.Basket{}
 		count                = 0
 		query, countQuery    string
+		filter               string
 		page                 = req.Page
 		offset               = (page - 1) * req.Limit
 		search               = req.Search
 		createdAt, updatedAt = sql.NullString{}, sql.NullString{}
 	)
 
-	countQuery = `select count(1) from baskets where deleted_at = 0 `
+	if req.UserID != "" {
+		filter += fmt.Sprintf(" and customer_id = '%s'", req.UserID)
+	}
+
+	countQuery = `select count(1) from baskets where deleted_at = 0 ` + filter
 
 	if search != "" {
 		countQuery += fmt.Sprintf(` and CAST(total_sum AS TEXT) ilike '%%%s%%'`, search)
@@ -86,7 +91,7 @@ func (b *basketRepo) GetList(ctx context.Context, req models.GetListRequest) (mo
 		return models.BasketResponse{}, err
 	}
 
-	query = `select id, customer_id, total_sum, created_at, updated_at from baskets where deleted_at = 0`
+	query = `select id, customer_id, total_sum, created_at, updated_at from baskets where deleted_at = 0 ` + filter
 
 	if search != "" {
 		query += fmt.Sprintf(` and CAST(total_sum AS TEXT) ilike '%%%s%%'`, search)

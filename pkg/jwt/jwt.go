@@ -3,6 +3,7 @@ package jwt
 import (
 	"github.com/golang-jwt/jwt"
 	"test/config"
+	"time"
 )
 
 func GenerateJWT(m map[interface{}]interface{}) (string, string, error) {
@@ -16,6 +17,12 @@ func GenerateJWT(m map[interface{}]interface{}) (string, string, error) {
 		aClaims[key.(string)] = value
 		rClaims[key.(string)] = value
 	}
+
+	aClaims["exp"] = time.Now().Add(config.AccessExpireTime).Unix()
+	aClaims["iat"] = time.Now().Unix()
+
+	rClaims["exp"] = time.Now().Add(config.RefreshExpireTime).Unix()
+	rClaims["iat"] = time.Now().Unix()
 
 	accessToken.Claims = aClaims
 	refreshToken.Claims = rClaims
@@ -47,9 +54,14 @@ func ExtractClaims(tokenString string) (map[interface{}]interface{}, error) {
 		return nil, err
 	}
 
-	value, ok := token.Claims.(jwt.MapClaims)["user_id"]
+	userID, ok := token.Claims.(jwt.MapClaims)["user_id"]
 	if ok {
-		m["user_id"] = value
+		m["user_id"] = userID
+	}
+
+	userRole, ok := token.Claims.(jwt.MapClaims)["user_role"]
+	if ok {
+		m["user_role"] = userRole
 	}
 
 	return m, nil

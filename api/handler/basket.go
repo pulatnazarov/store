@@ -63,7 +63,8 @@ func (h Handler) GetBasket(c *gin.Context) {
 }
 
 // GetBasketList godoc
-// @Security     AuthApiKey
+// @ID some id
+// @Security ApiKeyAuth
 // @Router       /baskets [GET]
 // @Summary      Get basket list
 // @Description  get basket list
@@ -79,10 +80,22 @@ func (h Handler) GetBasket(c *gin.Context) {
 // @Failure      500  {object}  models.Response
 func (h Handler) GetBasketList(c *gin.Context) {
 	var (
-		page, limit int
-		search      string
-		err         error
+		page, limit    int
+		search, userID string
+		err            error
 	)
+
+	authInfo, err := getAuthInfo(c)
+	if err != nil {
+		handleResponse(c, h.log, "Unauthorized", http.StatusUnauthorized, err)
+		return
+	}
+
+	if authInfo.UserRole != "customer" {
+		userID = ""
+	} else {
+		userID = authInfo.UserID
+	}
 
 	pageStr := c.DefaultQuery("page", "1")
 	page, err = strconv.Atoi(pageStr)
@@ -104,6 +117,7 @@ func (h Handler) GetBasketList(c *gin.Context) {
 		Page:   page,
 		Limit:  limit,
 		Search: search,
+		UserID: userID,
 	})
 	if err != nil {
 		handleResponse(c, h.log, "error is while getting list", http.StatusInternalServerError, err)

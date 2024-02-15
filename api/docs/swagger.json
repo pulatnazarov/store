@@ -538,6 +538,11 @@
         },
         "/baskets": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get basket list",
                 "consumes": [
                     "application/json"
@@ -549,6 +554,7 @@
                     "basket"
                 ],
                 "summary": "Get basket list",
+                "operationId": "some id",
                 "parameters": [
                     {
                         "type": "string",
@@ -2739,5 +2745,10 @@
                 }
             }
         }
-    }
+    },
+    "security": [
+        {
+            "definitions.apikey": []
+        }
+    ]
 }
