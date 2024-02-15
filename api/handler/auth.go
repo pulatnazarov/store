@@ -32,10 +32,11 @@ func (h Handler) CustomerLogin(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 
-	if err := h.services.AuthService().CustomerLogin(ctx, loginRequest); err != nil {
+	loginResponse, err := h.services.AuthService().CustomerLogin(ctx, loginRequest)
+	if err != nil {
 		handleResponse(c, h.log, "incorrect credentials", http.StatusBadRequest, errors.New("password or login incorrect"))
 		return
 	}
 
-	handleResponse(c, h.log, "success", http.StatusOK, "")
+	handleResponse(c, h.log, "success", http.StatusOK, loginResponse)
 }

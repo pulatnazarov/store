@@ -63,6 +63,7 @@ func (h Handler) GetBasket(c *gin.Context) {
 }
 
 // GetBasketList godoc
+// @Security     AuthApiKey
 // @Router       /baskets [GET]
 // @Summary      Get basket list
 // @Description  get basket list
