@@ -28,7 +28,6 @@ type UpdateProduct struct {
 	OriginalPrice int    `json:"original_price"`
 	Quantity      int    `json:"quantity"`
 	CategoryID    string `json:"category_id"`
-	
 }
 
 type ProductResponse struct {
@@ -43,6 +42,7 @@ type ProductSell struct {
 	NotEnoughProductPrices map[string]int `json:"prices"`
 	ProductsBranchID       string         `json:"products_branch_id"`
 	Check                  Check          `json:"check"`
+	OnlyOneProductIDs      []string       `json:"only_one_product_ids"`
 }
 
 type SellRequest struct {

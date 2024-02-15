@@ -7,6 +7,7 @@ import (
 	"test/pkg/logger"
 	"test/service"
 	"test/storage/postgres"
+	"test/storage/redis"
 )
 
 func main() {
@@ -21,7 +22,9 @@ func main() {
 	}
 	defer pgStore.Close()
 
-	services := service.New(pgStore, log)
+	newRedis := redis.New(cfg)
+
+	services := service.New(pgStore, log, newRedis)
 
 	server := api.New(services, log)
 

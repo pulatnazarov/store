@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"test/api/models"
+	"time"
 )
 
 type IStorage interface {
@@ -17,6 +18,7 @@ type IStorage interface {
 	Dealer() IDealerStorage
 	Income() IIncomeStorage
 	IncomeProduct() IIncomeProductStorage
+	Redis() IRedisStorage
 }
 
 type IUserStorage interface {
@@ -98,4 +100,9 @@ type IIncomeProductStorage interface {
 	GetList(context.Context, models.GetListRequest) (models.IncomeProductsResponse, error)
 	UpdateMultiple(context.Context, models.UpdateIncomeProducts) error
 	DeleteMultiple(context.Context, models.DeleteIncomeProducts) error
+}
+
+type IRedisStorage interface {
+	SetX(ctx context.Context, key string, value interface{}, duration time.Duration) error
+	Get(ctx context.Context, key string) interface{}
 }

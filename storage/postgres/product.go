@@ -190,6 +190,7 @@ func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]
 		notEnoughProducts      = make(map[string]int)
 		productsBranchID       string
 		notEnoughProductPrices = make(map[string]int)
+		onlyOneProductIDs      = []string{}
 	)
 
 	for key := range customerProductIDs {
@@ -224,7 +225,12 @@ func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]
 
 		productsBranchID = branchID
 
+		if quantity == 1 {
+			onlyOneProductIDs = append(onlyOneProductIDs, productID)
+		}
+
 		if customerProductIDs[productID] <= quantity {
+			// p.redis.Get(productID)
 			selectedProducts.Products[productID] = price
 			selectedProductPrices[productID] = originalPrice
 		} else if customerProductIDs[productID] > quantity || quantity == 0 {
@@ -239,6 +245,7 @@ func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]
 		NotEnoughProducts:      notEnoughProducts,
 		NotEnoughProductPrices: notEnoughProductPrices,
 		ProductsBranchID:       productsBranchID,
+		OnlyOneProductIDs:      onlyOneProductIDs,
 	}, nil
 }
 

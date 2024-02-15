@@ -6,15 +6,21 @@ import (
 	"test/api/models"
 	"test/pkg/logger"
 	"test/storage"
+	"time"
 )
 
 type productService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewProductService(storage storage.IStorage, log logger.ILogger) productService {
-	return productService{storage: storage, log: log}
+func NewProductService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) productService {
+	return productService{
+		storage: storage,
+		log:     log,
+		redis:   redis,
+	}
 }
 
 func (p productService) Create(ctx context.Context, product models.CreateProduct) (models.Product, error) {
@@ -89,6 +95,14 @@ func (p productService) StartSellNew(ctx context.Context, request models.SellReq
 	if err != nil {
 		p.log.Error("error in service layer while searching product", logger.Error(err))
 		return models.ProductSell{}, err
+	}
+
+	if len(productSell.OnlyOneProductIDs) != 0 {
+		for _, productID := range productSell.OnlyOneProductIDs {
+			if err = p.redis.SetX(ctx, productID, 1, time.Hour); err != nil {
+				p.log.Error("error while saving product id in redis", logger.Error(err), logger.String("product_id", productID))
+			}
+		}
 	}
 
 	basket, err := p.storage.Basket().GetByID(ctx, models.PrimaryKey{ID: request.BasketID})

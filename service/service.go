@@ -31,14 +31,14 @@ type Service struct {
 	authService          authService
 }
 
-func New(storage storage.IStorage, log logger.ILogger) Service {
+func New(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) Service {
 	services := Service{}
 
-	services.userService = NewUserService(storage, log)
+	services.userService = NewUserService(storage, log, redis)
 	services.categoryService = NewCategoryService(storage, log)
 	services.basketService = NewBasketService(storage, log)
 	services.basketProductService = NewBasketProductService(storage, log)
-	services.productService = NewProductService(storage, log)
+	services.productService = NewProductService(storage, log, redis)
 	services.branchService = NewBranchService(storage, log)
 	services.dealerService = NewDealerService(storage, log)
 	services.incomeService = NewIncomeService(storage, log)

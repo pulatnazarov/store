@@ -17,6 +17,10 @@ type Config struct {
 
 	ServiceName string
 	LoggerLevel string
+
+	RedisHost     string
+	RedisPort     string
+	RedisPassword string
 }
 
 func Load() Config {
@@ -28,12 +32,16 @@ func Load() Config {
 
 	cfg.PostgresHost = cast.ToString(getOrReturnDefault("POSTGRES_HOST", "localhost"))
 	cfg.PostgresPort = cast.ToString(getOrReturnDefault("POSTGRES_PORT", "5432"))
-	cfg.PostgresUser = cast.ToString(getOrReturnDefault("POSTGRES_USER", "person"))
-	cfg.PostgresPassword = cast.ToString(getOrReturnDefault("POSTGRES_PASSWORD", "12345"))
-	cfg.PostgresDB = cast.ToString(getOrReturnDefault("POSTGRES_DB", "store"))
+	cfg.PostgresUser = cast.ToString(getOrReturnDefault("POSTGRES_USER", "user"))
+	cfg.PostgresPassword = cast.ToString(getOrReturnDefault("POSTGRES_PASSWORD", "password"))
+	cfg.PostgresDB = cast.ToString(getOrReturnDefault("POSTGRES_DB", "password"))
 
 	cfg.ServiceName = cast.ToString(getOrReturnDefault("SERVICE_NAME", "store"))
 	cfg.LoggerLevel = cast.ToString(getOrReturnDefault("LOGGER_LEVEL", "debug"))
+
+	cfg.RedisHost = cast.ToString(getOrReturnDefault("REDIS_HOST", "localhost"))
+	cfg.RedisPort = cast.ToString(getOrReturnDefault("REDIS_PORT", "6379"))
+	cfg.RedisPassword = cast.ToString(getOrReturnDefault("REDIS_PASSWORD", "password"))
 
 	return cfg
 }

@@ -15,12 +15,14 @@ import (
 type userService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewUserService(storage storage.IStorage, log logger.ILogger) userService {
+func NewUserService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) userService {
 	return userService{
 		storage: storage,
 		log:     log,
+		redis:   redis,
 	}
 }
 
