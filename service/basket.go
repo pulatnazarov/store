@@ -10,12 +10,14 @@ import (
 type basketService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewBasketService(storage storage.IStorage, log logger.ILogger) basketService {
+func NewBasketService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) basketService {
 	return basketService{
 		storage: storage,
 		log:     log,
+		redis:   redis,
 	}
 }
 

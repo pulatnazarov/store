@@ -10,12 +10,14 @@ import (
 type incomeService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewIncomeService(storage storage.IStorage, log logger.ILogger) incomeService {
+func NewIncomeService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) incomeService {
 	return incomeService{
 		storage: storage,
 		log:     log,
+		redis:   redis,
 	}
 }
 

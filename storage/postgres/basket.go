@@ -12,14 +12,16 @@ import (
 )
 
 type basketRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewBasketRepo(db *pgxpool.Pool, log logger.ILogger) storage.IBasketStorage {
+func NewBasketRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.IBasketStorage {
 	return &basketRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 

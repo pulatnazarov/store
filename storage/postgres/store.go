@@ -8,14 +8,16 @@ import (
 )
 
 type storeRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewStoreRepo(db *pgxpool.Pool, log logger.ILogger) storage.IStoreStorage {
+func NewStoreRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.IStoreStorage {
 	return &storeRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 

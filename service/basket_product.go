@@ -10,10 +10,11 @@ import (
 type basketProductService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewBasketProductService(storage storage.IStorage, log logger.ILogger) basketProductService {
-	return basketProductService{storage: storage, log: log}
+func NewBasketProductService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) basketProductService {
+	return basketProductService{storage: storage, log: log, redis: redis}
 }
 
 func (b basketProductService) Create(ctx context.Context, createProduct models.CreateBasketProduct) (models.BasketProduct, error) {

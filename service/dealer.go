@@ -10,10 +10,11 @@ import (
 type dealerService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewDealerService(storage storage.IStorage, log logger.ILogger) dealerService {
-	return dealerService{storage: storage, log: log}
+func NewDealerService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) dealerService {
+	return dealerService{storage: storage, log: log, redis: redis}
 }
 
 func (d dealerService) Delivery(ctx context.Context, sell models.ProductSell) error {

@@ -12,6 +12,7 @@ type User struct {
 	BranchID  string    `json:"branch_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt string    `json:"updated_at"`
+	Login     string    `json:"login"`
 }
 
 type CreateUser struct {
@@ -21,6 +22,7 @@ type CreateUser struct {
 	Cash     uint   `json:"cash"`
 	UserType string `json:"user_type"`
 	BranchID string `json:"branch_id"`
+	Login    string `json:"login"`
 }
 
 type UpdateUser struct {

@@ -1,4 +1,18 @@
 definitions:
+  models.AdminLoginRequest:
+    properties:
+      login:
+        type: string
+      password:
+        type: string
+    type: object
+  models.AdminLoginResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
   models.Basket:
     properties:
       created_at:
@@ -168,6 +182,8 @@ definitions:
       cash:
         type: integer
       full_name:
+        type: string
+      login:
         type: string
       password:
         type: string
@@ -342,6 +358,8 @@ definitions:
         type: string
       id:
         type: string
+      login:
+        type: string
       password:
         type: string
       phone:
@@ -366,6 +384,40 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /auth/admin/login:
+    post:
+      consumes:
+      - application/json
+      description: admin login
+      parameters:
+      - description: login
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/models.AdminLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.AdminLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Admin login
+      tags:
+      - auth
   /auth/customer/login:
     post:
       consumes:

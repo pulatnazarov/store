@@ -15,14 +15,14 @@ func main() {
 
 	log := logger.New(cfg.ServiceName)
 
-	pgStore, err := postgres.New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+
+	pgStore, err := postgres.New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		log.Error("error while connecting to db", logger.Error(err))
 		return
 	}
 	defer pgStore.Close()
-
-	newRedis := redis.New(cfg)
 
 	services := service.New(pgStore, log, newRedis)
 

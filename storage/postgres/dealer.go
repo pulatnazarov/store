@@ -9,14 +9,16 @@ import (
 )
 
 type dealerRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewDealerRepo(db *pgxpool.Pool, log logger.ILogger) storage.IDealerStorage {
+func NewDealerRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.IDealerStorage {
 	return &dealerRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 
