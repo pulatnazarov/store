@@ -15,14 +15,16 @@ import (
 )
 
 type productRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewProductRepo(db *pgxpool.Pool, log logger.ILogger) storage.IProductStorage {
+func NewProductRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.IProductStorage {
 	return &productRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 
@@ -230,7 +232,9 @@ func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]
 		}
 
 		if customerProductIDs[productID] <= quantity {
-			// p.redis.Get(productID)
+			if p.redis.Get(ctx, productID) == "1" {
+				continue
+			}
 			selectedProducts.Products[productID] = price
 			selectedProductPrices[productID] = originalPrice
 		} else if customerProductIDs[productID] > quantity || quantity == 0 {

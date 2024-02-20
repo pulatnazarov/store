@@ -879,6 +879,11 @@ const docTemplate = `{
         },
         "/categories": {
             "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "get category list",
                 "consumes": [
                     "application/json"
@@ -2754,11 +2759,13 @@ const docTemplate = `{
             }
         }
     },
-    "security": [
-        {
-            "definitions.apikey": []
+    "securityDefinitions": {
+        "ApiKeyAuth": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
-    ]
+    }
 }`
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it

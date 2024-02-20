@@ -25,7 +25,7 @@ import (
 func (h Handler) CreateProduct(c *gin.Context) {
 	product := models.CreateProduct{}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*2)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 
 	if err := c.ShouldBindJSON(&product); err != nil {
@@ -57,7 +57,7 @@ func (h Handler) CreateProduct(c *gin.Context) {
 func (h Handler) GetProduct(c *gin.Context) {
 	uid := c.Param("id")
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond*2)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 	product, err := h.services.Product().Get(ctx, models.PrimaryKey{ID: uid})
 	if err != nil {
@@ -89,7 +89,7 @@ func (h Handler) GetProductList(c *gin.Context) {
 		err         error
 	)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*2)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	pageStr := c.DefaultQuery("page", "1")
 	page, err = strconv.Atoi(pageStr)
@@ -138,7 +138,7 @@ func (h Handler) UpdateProduct(c *gin.Context) {
 	uid := c.Param("id")
 
 	product := models.UpdateProduct{}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Microsecond*2)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	if err := c.ShouldBindJSON(&product); err != nil {
 		handleResponse(c, h.log, "error is while reading body", http.StatusBadRequest, err.Error())
@@ -201,7 +201,7 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 
 	productSell, err := h.services.Product().StartSellNew(ctx, request)

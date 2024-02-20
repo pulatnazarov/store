@@ -24,13 +24,15 @@ func handleResponse(c *gin.Context, log logger.ILogger, msg string, statusCode i
 
 	switch code := statusCode; {
 	case code < 400:
-		resp.Description = "success"
+		resp.Description = "OK"
 		log.Info("~~~~> OK", logger.String("msg", msg), logger.Any("status", code))
+	case code == 401:
+		resp.Description = "Unauthorized"
 	case code < 500:
-		resp.Description = "bad request"
+		resp.Description = "Bad Request"
 		log.Error("!!!!! BAD REQUEST", logger.String("msg", msg), logger.Any("status", code))
 	default:
-		resp.Description = "internal server error"
+		resp.Description = "Internal Server Error"
 		log.Error("!!!!! INTERNAL SERVER ERROR", logger.String("msg", msg), logger.Any("status", code))
 	}
 

@@ -969,6 +969,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.Response'
+      security:
+      - ApiKeyAuth: []
       summary: Get category list
       tags:
       - category
@@ -1797,6 +1799,9 @@ paths:
       summary: Get user list
       tags:
       - user
-security:
-- definitions.apikey: []
+securityDefinitions:
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

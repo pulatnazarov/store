@@ -149,6 +149,10 @@ func (p productService) StartSellNew(ctx context.Context, request models.SellReq
 		return models.ProductSell{}, err
 	}
 
+	// payment user_id, basket_id, amount
+	// product report
+	// income report
+
 	if err = p.storage.Store().AddProfit(ctx, profit, customer.BranchID); err != nil {
 		p.log.Error("error in service layer while adding amount of profit", logger.Error(err))
 		return models.ProductSell{}, err

@@ -8,6 +8,7 @@ import (
 	"test/config"
 	"test/pkg/logger"
 	"test/storage"
+	"test/storage/redis"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -18,11 +19,13 @@ import (
 )
 
 type Store struct {
-	pool *pgxpool.Pool
-	log  logger.ILogger
+	pool  *pgxpool.Pool
+	log   logger.ILogger
+	cfg   config.Config
+	redis storage.IRedisStorage
 }
 
-func New(ctx context.Context, cfg config.Config, log logger.ILogger) (storage.IStorage, error) {
+func New(ctx context.Context, cfg config.Config, log logger.ILogger, redis storage.IRedisStorage) (storage.IStorage, error) {
 	url := fmt.Sprintf(
 		`postgres://%s:%s@%s:%s/%s?sslmode=disable`,
 		cfg.PostgresUser,
@@ -81,8 +84,10 @@ func New(ctx context.Context, cfg config.Config, log logger.ILogger) (storage.IS
 	log.Info("!!!!! came here")
 
 	return Store{
-		pool: pool,
-		log:  log,
+		pool:  pool,
+		log:   log,
+		cfg:   cfg,
+		redis: redis,
 	}, nil
 }
 
@@ -99,7 +104,7 @@ func (s Store) Category() storage.ICategoryStorage {
 }
 
 func (s Store) Product() storage.IProductStorage {
-	return NewProductRepo(s.pool, s.log)
+	return NewProductRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Basket() storage.IBasketStorage {
@@ -129,4 +134,8 @@ func (s Store) Income() storage.IIncomeStorage {
 
 func (s Store) IncomeProduct() storage.IIncomeProductStorage {
 	return NewIncomeProductRepo(s.pool, s.log)
+}
+
+func (s Store) Redis() storage.IRedisStorage {
+	return redis.New(s.cfg)
 }
