@@ -19,7 +19,7 @@ import (
 // @Param        limit query string false "limit"
 // @Param        from query string false "from"
 // @Param        to query string false "to"
-// @Param        id query string false "branch_id"
+// @Param        branch_id query string false "branch_id"
 // @Success      201  {object}  models.ProductReportList
 // @Failure      400  {object}  models.Response
 // @Failure      404  {object}  models.Response
@@ -46,10 +46,9 @@ func (h Handler) ProductReportList(c *gin.Context) {
 		return
 	}
 
-	from = c.Query("from-amount")
-	// fmt.Sprintf("%f", math.MaxFloat64
-	to = c.Query("to-amount")
-	branchID = c.Query("id")
+	from = c.Query("from")
+	to = c.Query("to")
+	branchID = c.Query("branch_id")
 
 	productReport, err := h.services.Report().ProductReportList(context.Background(), models.ProductRepoRequest{
 		Page:     page,

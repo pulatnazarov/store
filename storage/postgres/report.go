@@ -49,15 +49,13 @@ func (r *report) ProductReportList(ctx context.Context, request models.ProductRe
 	overallPriceQuery = `select sum(price*quantity) as overall_price from products where deleted_at = 0 ` + filter
 
 	if err := r.db.QueryRow(ctx, overallPriceQuery).Scan(&overallPrice); err != nil {
-		fmt.Println("overal query", overallPriceQuery)
-		fmt.Println("ovreal price", overallPrice)
-		r.log.Error("error is while scanning overall price", logger.Error(err))
+		r.log.Error("error is while scanning overall price", logger.Error(err), logger.Any("overallQuery", overallPriceQuery))
 		return models.ProductReportList{}, err
 	}
 
 	rows, err := r.db.Query(ctx, query, request.Limit, offset)
 	if err != nil {
-		r.log.Error("error is while all selecting products", logger.Error(err))
+		r.log.Error("error is while all selecting products", logger.Error(err), logger.Any("main query", query))
 		return models.ProductReportList{}, err
 	}
 
@@ -70,6 +68,7 @@ func (r *report) ProductReportList(ctx context.Context, request models.ProductRe
 			&product.Price,
 			&product.TotalPrice,
 		); err != nil {
+			return models.ProductReportList{}, err
 		}
 
 		products = append(products, product)

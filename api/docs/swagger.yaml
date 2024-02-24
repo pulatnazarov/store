@@ -1646,7 +1646,7 @@ paths:
         type: string
       - description: branch_id
         in: query
-        name: id
+        name: branch_id
         type: string
       produces:
       - application/json

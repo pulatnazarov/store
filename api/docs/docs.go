@@ -1910,7 +1910,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "branch_id",
-                        "name": "id",
+                        "name": "branch_id",
                         "in": "query"
                     }
                 ],
