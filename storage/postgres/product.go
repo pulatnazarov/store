@@ -232,15 +232,11 @@ func (p *productRepo) Search(ctx context.Context, customerProductIDs map[string]
 		}
 
 		if customerProductIDs[productID] <= quantity {
-			// p.redis.Get(productID)
-			getRedis := p.redis.Get(ctx, productID)
-			fmt.Println("get", getRedis)
-			if getRedis == 1 {
+			if p.redis.Get(ctx, productID) == "1" {
 				continue
-			} else {
-				selectedProducts.Products[productID] = price
-				selectedProductPrices[productID] = originalPrice
 			}
+			selectedProducts.Products[productID] = price
+			selectedProductPrices[productID] = originalPrice
 		} else if customerProductIDs[productID] > quantity || quantity == 0 {
 			notEnoughProducts[productID] = customerProductIDs[productID]
 			notEnoughProductPrices[productID] = originalPrice

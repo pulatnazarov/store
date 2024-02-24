@@ -3,12 +3,13 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"strings"
 	"test/config"
 	"test/pkg/logger"
 	"test/storage"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	_ "github.com/golang-migrate/migrate/v4/database"          //database is needed for migration
 	_ "github.com/golang-migrate/migrate/v4/database/postgres" //postgres is used for database
@@ -19,6 +20,7 @@ import (
 type Store struct {
 	pool  *pgxpool.Pool
 	log   logger.ILogger
+	cfg   config.Config
 	redis storage.IRedisStorage
 }
 
@@ -83,6 +85,7 @@ func New(ctx context.Context, cfg config.Config, log logger.ILogger, redis stora
 	return Store{
 		pool:  pool,
 		log:   log,
+		cfg:   cfg,
 		redis: redis,
 	}, nil
 }

@@ -19,7 +19,9 @@ import (
 // @title           Swagger Example API
 // @version         1.0
 // @description     This is a sample server celler server.
-// @security definitions.apikey
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 	h := handler.New(services, log)
 
@@ -90,6 +92,9 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 
 		// start sell endpoint
 		r.POST("/sell-new", h.StartSellNew)
+
+		// report
+		r.POST("/")
 
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}

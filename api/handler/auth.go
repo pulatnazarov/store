@@ -24,7 +24,7 @@ import (
 // @Failure      500  {object}  models.Response
 func (h Handler) CustomerLogin(c *gin.Context) {
 	loginRequest := models.CustomerLoginRequest{}
-
+	
 	if err := c.ShouldBindJSON(&loginRequest); err != nil {
 		handleResponse(c, h.log, "error while binding body", http.StatusBadRequest, err)
 		return
