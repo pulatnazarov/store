@@ -94,7 +94,7 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 		r.POST("/sell-new", h.StartSellNew)
 
 		// report
-		r.POST("/")
+		r.GET("/products/report", h.ProductReportList)
 
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}

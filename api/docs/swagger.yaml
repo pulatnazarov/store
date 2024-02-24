@@ -263,6 +263,26 @@ definitions:
       updated_at:
         type: string
     type: object
+  models.ProductReport:
+    properties:
+      price:
+        type: integer
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: integer
+    type: object
+  models.ProductReportList:
+    properties:
+      overall_price:
+        type: integer
+      products:
+        items:
+          $ref: '#/definitions/models.ProductReport'
+        type: array
+    type: object
   models.Response:
     properties:
       data: {}
@@ -1021,8 +1041,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/models.Response'
-      security:
-      - ApiKeyAuth: []
       summary: Get category list
       tags:
       - category
@@ -1604,6 +1622,54 @@ paths:
       summary: Get product list
       tags:
       - product
+  /products/report:
+    get:
+      consumes:
+      - application/json
+      description: get product report
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: from
+        in: query
+        name: from
+        type: string
+      - description: to
+        in: query
+        name: to
+        type: string
+      - description: branch_id
+        in: query
+        name: id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.ProductReportList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get  product report
+      tags:
+      - report
   /sell-new:
     post:
       consumes:
