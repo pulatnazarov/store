@@ -12,14 +12,16 @@ import (
 )
 
 type userRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewUserRepo(db *pgxpool.Pool, log logger.ILogger) storage.IUserStorage {
+func NewUserRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.IUserStorage {
 	return &userRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 
@@ -28,7 +30,7 @@ func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (st
 	uid := uuid.New()
 
 	if _, err := u.db.Exec(ctx, `insert into 
-			users values ($1, $2, $3, $4, $5, $6, $7)
+			users (id, full_name, phone, password, user_role, cash, branch_id, login) values ($1, $2, $3, $4, $5, $6, $7, $8)
 			`,
 		uid,
 		createUser.FullName,
@@ -37,6 +39,7 @@ func (u *userRepo) Create(ctx context.Context, createUser models.CreateUser) (st
 		createUser.UserType,
 		createUser.Cash,
 		createUser.BranchID,
+		createUser.Login,
 	); err != nil {
 		u.log.Error("error while inserting data", logger.Error(err))
 		return "", err
@@ -220,6 +223,21 @@ func (u *userRepo) GetCustomerCredentialsByLogin(ctx context.Context, login stri
 	query := `
 		select id, password from users 
 		                where user_role = 'customer' and login = $1`
+
+	if err := u.db.QueryRow(ctx, query, login).Scan(&user.ID, &user.Password); err != nil {
+		fmt.Println("Error while scanning password from users", err.Error())
+		return models.User{}, err
+	}
+
+	return user, nil
+}
+
+func (u *userRepo) GetAdminCredentialsByLogin(ctx context.Context, login string) (models.User, error) {
+	user := models.User{}
+
+	query := `
+		select id, password from users 
+		                where user_role = 'admin' and login = $1`
 
 	if err := u.db.QueryRow(ctx, query, login).Scan(&user.ID, &user.Password); err != nil {
 		fmt.Println("Error while scanning password from users", err.Error())

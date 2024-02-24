@@ -12,14 +12,16 @@ import (
 )
 
 type categoryRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewCategoryRepo(db *pgxpool.Pool, log logger.ILogger) storage.ICategoryStorage {
+func NewCategoryRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.ICategoryStorage {
 	return &categoryRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 func (c *categoryRepo) Create(ctx context.Context, category models.CreateCategory) (string, error) {

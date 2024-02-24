@@ -12,14 +12,16 @@ import (
 )
 
 type branchRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewBranchRepo(db *pgxpool.Pool, log logger.ILogger) storage.IBranchStorage {
+func NewBranchRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.IBranchStorage {
 	return branchRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 

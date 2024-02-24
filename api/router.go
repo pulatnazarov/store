@@ -33,6 +33,7 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 	{
 		// auth endpoints
 		r.POST("/auth/customer/login", h.CustomerLogin)
+		r.POST("/auth/admin/login", h.AdminLogin)
 
 		// user endpoints
 		r.POST("/user", h.CreateUser)
@@ -93,7 +94,7 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 		r.POST("/sell-new", h.StartSellNew)
 
 		// report
-		r.POST("/")
+		r.GET("/products/report", h.ProductReportList)
 
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}

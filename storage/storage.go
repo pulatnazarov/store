@@ -19,6 +19,7 @@ type IStorage interface {
 	Income() IIncomeStorage
 	IncomeProduct() IIncomeProductStorage
 	Redis() IRedisStorage
+	Report() IReportStorage
 }
 
 type IUserStorage interface {
@@ -31,6 +32,7 @@ type IUserStorage interface {
 	UpdatePassword(context.Context, models.UpdateUserPassword) error
 	UpdateCustomerCash(context.Context, string, int) error
 	GetCustomerCredentialsByLogin(context.Context, string) (models.User, error)
+	GetAdminCredentialsByLogin(context.Context, string) (models.User, error)
 }
 
 type ICategoryStorage interface {
@@ -105,4 +107,9 @@ type IIncomeProductStorage interface {
 type IRedisStorage interface {
 	SetX(ctx context.Context, key string, value interface{}, duration time.Duration) error
 	Get(ctx context.Context, key string) interface{}
+}
+
+type IReportStorage interface {
+	ProductReportList(context.Context, models.ProductRepoRequest) (models.ProductReportList, error)
+	// IncomeReport()
 }

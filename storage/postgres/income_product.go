@@ -12,14 +12,16 @@ import (
 )
 
 type incomeProductRepo struct {
-	db  *pgxpool.Pool
-	log logger.ILogger
+	db    *pgxpool.Pool
+	log   logger.ILogger
+	redis storage.IRedisStorage
 }
 
-func NewIncomeProductRepo(db *pgxpool.Pool, log logger.ILogger) storage.IIncomeProductStorage {
+func NewIncomeProductRepo(db *pgxpool.Pool, log logger.ILogger, redis storage.IRedisStorage) storage.IIncomeProductStorage {
 	return &incomeProductRepo{
-		db:  db,
-		log: log,
+		db:    db,
+		log:   log,
+		redis: redis,
 	}
 }
 

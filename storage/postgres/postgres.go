@@ -3,13 +3,12 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/golang-migrate/migrate/v4"
 	"strings"
 	"test/config"
 	"test/pkg/logger"
 	"test/storage"
-	"test/storage/redis"
 
+	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	_ "github.com/golang-migrate/migrate/v4/database"          //database is needed for migration
@@ -96,11 +95,11 @@ func (s Store) Close() {
 }
 
 func (s Store) User() storage.IUserStorage {
-	return NewUserRepo(s.pool, s.log)
+	return NewUserRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Category() storage.ICategoryStorage {
-	return NewCategoryRepo(s.pool, s.log)
+	return NewCategoryRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Product() storage.IProductStorage {
@@ -108,34 +107,38 @@ func (s Store) Product() storage.IProductStorage {
 }
 
 func (s Store) Basket() storage.IBasketStorage {
-	return NewBasketRepo(s.pool, s.log)
+	return NewBasketRepo(s.pool, s.log, s.redis)
 
 }
 
 func (s Store) BasketProduct() storage.IBasketProductStorage {
-	return NewBasketProductRepo(s.pool, s.log)
+	return NewBasketProductRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Store() storage.IStoreStorage {
-	return NewStoreRepo(s.pool, s.log)
+	return NewStoreRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Branch() storage.IBranchStorage {
-	return NewBranchRepo(s.pool, s.log)
+	return NewBranchRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Dealer() storage.IDealerStorage {
-	return NewDealerRepo(s.pool, s.log)
+	return NewDealerRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Income() storage.IIncomeStorage {
-	return NewIncomeRepo(s.pool, s.log)
+	return NewIncomeRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) IncomeProduct() storage.IIncomeProductStorage {
-	return NewIncomeProductRepo(s.pool, s.log)
+	return NewIncomeProductRepo(s.pool, s.log, s.redis)
 }
 
 func (s Store) Redis() storage.IRedisStorage {
-	return redis.New(s.cfg)
+	return s.redis
+}
+
+func (s Store) Report() storage.IReportStorage {
+	return NewReport(s.pool, s.log)
 }

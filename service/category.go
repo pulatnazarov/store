@@ -12,12 +12,14 @@ import (
 type categoryService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewCategoryService(storage storage.IStorage, log logger.ILogger) categoryService {
+func NewCategoryService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) categoryService {
 	return categoryService{
 		storage: storage,
 		log:     log,
+		redis:   redis,
 	}
 }
 

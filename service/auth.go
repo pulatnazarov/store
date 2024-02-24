@@ -12,12 +12,14 @@ import (
 type authService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewAuthService(storage storage.IStorage, log logger.ILogger) authService {
+func NewAuthService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) authService {
 	return authService{
 		storage: storage,
 		log:     log,
+		redis:   redis,
 	}
 }
 
@@ -45,6 +47,34 @@ func (a authService) CustomerLogin(ctx context.Context, loginRequest models.Cust
 	}
 
 	return models.CustomerLoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
+}
+
+func (a authService) AdminLogin(ctx context.Context, loginRequest models.AdminLoginRequest) (models.AdminLoginResponse, error) {
+	admin, err := a.storage.User().GetAdminCredentialsByLogin(ctx, loginRequest.Login)
+	if err != nil {
+		a.log.Error("error is while getting admin", logger.Error(err))
+		return models.AdminLoginResponse{}, err
+	}
+
+	if err := security.CompareHashAndPassword(admin.Password, loginRequest.Password); err != nil {
+		a.log.Error("password is incorrect", logger.Error(err))
+		return models.AdminLoginResponse{}, err
+	}
+
+	m := make(map[interface{}]interface{})
+	m["user_id"] = admin.ID
+	m["user_role"] = "admin"
+
+	accessToken, refreshToken, err := jwt.GenerateJWT(m)
+	if err != nil {
+		a.log.Error("error while generate jwt token", logger.Error(err))
+		return models.AdminLoginResponse{}, err
+	}
+
+	return models.AdminLoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}, nil

@@ -8,6 +8,7 @@ import (
 	"test/config"
 	"test/pkg/helper"
 	"test/pkg/logger"
+	"test/storage/redis"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
@@ -16,7 +17,8 @@ import (
 func TestProductRepo_Create(t *testing.T) {
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -55,7 +57,8 @@ func TestProductRepo_Create(t *testing.T) {
 func TestProductRepo_GetByID(t *testing.T) {
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -152,7 +155,8 @@ func TestProductRepo_GetByID(t *testing.T) {
 func TestProductRepo_GetList(t *testing.T) {
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connecting db %q", err)
 	}
@@ -175,7 +179,8 @@ func TestProductRepo_GetList(t *testing.T) {
 func TestProductRepo_Update(t *testing.T) {
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}
@@ -233,7 +238,8 @@ func TestProductRepo_Update(t *testing.T) {
 func TestProductRepo_Delete(t *testing.T) {
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}
@@ -269,7 +275,8 @@ func TestProductRepo_TakeProducts(t *testing.T) {
 
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Fatal("error while connecting to db ", err)
 	}
@@ -311,7 +318,8 @@ func TestProductRepo_TakeProducts(t *testing.T) {
 func TestProductRepo_AddDeliveredpRoducts(t *testing.T) {
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}
@@ -340,7 +348,8 @@ func TestProductRepo_GetListByIDs(t *testing.T) {
 
 	cfg := config.Load()
 	log := logger.New(cfg.ServiceName)
-	pgStore, err := New(context.Background(), cfg, log)
+	newRedis := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Error("error while connecting to db ", err)
 	}

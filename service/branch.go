@@ -10,10 +10,11 @@ import (
 type branchService struct {
 	storage storage.IStorage
 	log     logger.ILogger
+	redis   storage.IRedisStorage
 }
 
-func NewBranchService(storage storage.IStorage, log logger.ILogger) branchService {
-	return branchService{storage: storage, log: log}
+func NewBranchService(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) branchService {
+	return branchService{storage: storage, log: log, redis: redis}
 }
 
 func (b branchService) Create(ctx context.Context, branch models.CreateBranch) (models.Branch, error) {
