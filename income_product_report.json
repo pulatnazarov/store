@@ -1,0 +1,40 @@
+[
+  {
+    "branch_id": "A",
+    "product_name": "Laptop",
+    "quantity": 4,
+    "price": 1000,
+    "total_price": 4000,
+    "day": "today"
+  },
+  {
+    "branch_id": "A",
+    "product_name": "Laptop",
+    "quantity": 5,
+    "price": 1000,
+    "total_price": 5000,
+    "day": "yesterday"
+  },
+  {
+    "branch_id": "B",
+    "product_name": "Laptop",
+    "quantity": 1,
+    "price": 1000,
+    "total_price": 1000
+  },
+  {
+    "branch_id": "A",
+    "product_name": "Iphone",
+    "quantity": 10,
+    "price": 900,
+    "total_price": 9000,
+    "day": "today"
+  },
+  {
+    "branch_id": "B",
+    "product_name": "Samsung",
+    "quantity": 6,
+    "price": 800,
+    "total_price": 4800
+  }
+]

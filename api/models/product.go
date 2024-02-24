@@ -74,3 +74,15 @@ type ProductCase struct {
 	UpdatedAt     string `json:"updated_at"`
 	Want          interface{}
 }
+
+type ProductReport struct {
+	ProductName string `json:"product_name"`
+	Quantity    int    `json:"quantity"`
+	Price       int    `json:"price"`
+	TotalPrice  int    `json:"total_price"`
+}
+
+type ProductReportList struct {
+	Products     []ProductReport `json:"products"`
+	OverallPrice int             `json:"overall_price"`
+}
