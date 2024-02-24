@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strconv"
 	"test/api/models"
@@ -206,7 +205,6 @@ func (h Handler) StartSellNew(c *gin.Context) {
 	defer cancel()
 
 	productSell, err := h.services.Product().StartSellNew(ctx, request)
-	fmt.Println("prodsell", productSell)
 	if err != nil {
 		handleResponse(c, h.log, "error is while start sell new", http.StatusInternalServerError, err.Error())
 		return
