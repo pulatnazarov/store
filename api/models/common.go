@@ -11,3 +11,11 @@ type GetListRequest struct {
 	BasketID string `json:"basket_id"`
 	UserID   string `json:"user_id"`
 }
+
+type ReportRequest struct {
+	Page     int    `json:"page"`
+	Limit    int    `json:"limit"`
+	BranchID string `json:"branch_id"`
+	From     string `json:"from"`
+	To       string `json:"to"`
+}

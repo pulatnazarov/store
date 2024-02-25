@@ -95,6 +95,7 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 
 		// report
 		r.GET("/products/report", h.ProductReportList)
+		r.GET("/income-product/report", h.IncomeProductReport)
 
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
