@@ -2,16 +2,19 @@ package postgres
 
 import (
 	"context"
-	"github.com/go-playground/assert/v2"
 	"test/api/models"
 	"test/config"
+	"test/pkg/logger"
 	"testing"
+
+	"github.com/go-playground/assert/v2"
 )
 
 func TestCategoryRepo_Create(t *testing.T) {
 	cfg := config.Load()
+	log := logger.New(cfg.ServiceName)
 
-	pgStore, err := New(context.Background(), cfg)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -38,8 +41,9 @@ func TestCategoryRepo_Create(t *testing.T) {
 
 func TestCategoryRepo_GetByID(t *testing.T) {
 	cfg := config.Load()
+	log := logger.New(cfg.ServiceName)
 
-	pgStore, err := New(context.Background(), cfg)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -64,8 +68,9 @@ func TestCategoryRepo_GetByID(t *testing.T) {
 
 func TestCategoryRepo_GetList(t *testing.T) {
 	cfg := config.Load()
+	log := logger.New(cfg.ServiceName)
 
-	pgStore, err := New(context.Background(), cfg)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -88,8 +93,9 @@ func TestCategoryRepo_GetList(t *testing.T) {
 
 func TestCategoryRepo_Update(t *testing.T) {
 	cfg := config.Load()
+	log := logger.New(cfg.ServiceName)
 
-	pgStore, err := New(context.Background(), cfg)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -117,8 +123,9 @@ func TestCategoryRepo_Update(t *testing.T) {
 
 func TestCategoryRepo_Delete(t *testing.T) {
 	cfg := config.Load()
+	log := logger.New(cfg.ServiceName)
 
-	pgStore, err := New(context.Background(), cfg)
+	pgStore, err := New(context.Background(), cfg, log)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
