@@ -4,38 +4,25 @@ import (
 	"context"
 	"test/api/models"
 	"test/config"
-<<<<<<< HEAD
-=======
 	"test/pkg/logger"
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
+	"test/storage/redis"
 	"testing"
 
 	"github.com/go-playground/assert/v2"
 )
 
 func TestBasketRepo_Create(t *testing.T) {
-
 	cfg := config.Load()
-<<<<<<< HEAD
-
-	pgStore, err := New(context.Background(), cfg)
-=======
 	log := logger.New(cfg.ServiceName)
+	newRedis := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
-
 	createBasket := models.CreateBasket{
-<<<<<<< HEAD
-		CustomerID: "",
-		TotalSum:   0,
-=======
 		CustomerID: "6df52ee6-8dbf-42fb-be0d-9810038f909fq",
 		TotalSum:   1000,
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
 	}
 
 	basketID, err := pgStore.Basket().Create(context.Background(), createBasket)
@@ -52,23 +39,18 @@ func TestBasketRepo_Create(t *testing.T) {
 
 	assert.Equal(t, basket.CustomerID, createBasket.CustomerID)
 	assert.Equal(t, basket.TotalSum, createBasket.TotalSum)
-
 }
 
 func TestBasketRepo_GetByID(t *testing.T) {
-
 	cfg := config.Load()
-<<<<<<< HEAD
-
-	pgStore, err := New(context.Background(), cfg)
-=======
 	log := logger.New(cfg.ServiceName)
+	newRedis := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
+
 	createBasket := models.CreateBasket{
 		TotalSum: 0,
 	}
@@ -86,19 +68,14 @@ func TestBasketRepo_GetByID(t *testing.T) {
 	}
 
 	assert.Equal(t, basket.ID, basketID)
-
 }
 
 func TestBasketRepo_GetList(t *testing.T) {
 	cfg := config.Load()
-<<<<<<< HEAD
-
-	pgStore, err := New(context.Background(), cfg)
-=======
 	log := logger.New(cfg.ServiceName)
-
-	pgStore, err := New(context.Background(), cfg, log)
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
+	newRedis := redis.New(cfg)
+	
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -111,38 +88,20 @@ func TestBasketRepo_GetList(t *testing.T) {
 		t.Errorf("error while getting basketResp error: %v", err)
 	}
 
-<<<<<<< HEAD
-	if len(basketResp.Baskets) != 2 {
-		t.Errorf("expected 16, but got: %d", len(basketResp.Baskets))
-=======
-	if len(basketResp.Baskets) != 1 {
-		t.Errorf("expected 1, but got: %d", len(basketResp.Baskets))
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
-	}
-
 	assert.Equal(t, len(basketResp.Baskets), 2)
-
 }
 
 func TestBasketRepo_Update(t *testing.T) {
 	cfg := config.Load()
-<<<<<<< HEAD
-
-	pgStore, err := New(context.Background(), cfg)
-=======
 	log := logger.New(cfg.ServiceName)
-
-	pgStore, err := New(context.Background(), cfg, log)
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
+	newRedis := redis.New(cfg)
+	
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
 	createBasket := models.CreateBasket{
-<<<<<<< HEAD
-		CustomerID: "",
-=======
 		CustomerID: "6df52ee6-8dbf-42fb-be0d-9810038f909f",
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
 		TotalSum:   0,
 	}
 
@@ -153,11 +112,7 @@ func TestBasketRepo_Update(t *testing.T) {
 
 	updateBasket := models.UpdateBasket{
 		ID:         basketID,
-<<<<<<< HEAD
-		CustomerID: "",
-=======
 		CustomerID: "6df52ee6-8dbf-42fb-be0d-9810038f909f",
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
 		TotalSum:   0,
 	}
 
@@ -171,20 +126,16 @@ func TestBasketRepo_Update(t *testing.T) {
 
 func TestBasketRepo_Delete(t *testing.T) {
 	cfg := config.Load()
-<<<<<<< HEAD
-
-	pgStore, err := New(context.Background(), cfg)
-=======
 	log := logger.New(cfg.ServiceName)
-
-	pgStore, err := New(context.Background(), cfg, log)
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995
+	newRedis := redis.New(cfg)
+	
+	pgStore, err := New(context.Background(), cfg, log, newRedis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
 
 	createBasket := models.CreateBasket{
-		CustomerID: "",
+		CustomerID: "6df52ee6-8dbf-42fb-be0d-9810038f909f",
 		TotalSum:   0,
 	}
 
@@ -198,8 +149,4 @@ func TestBasketRepo_Delete(t *testing.T) {
 	}); err != nil {
 		t.Errorf("Error deleting basket: %v", err)
 	}
-<<<<<<< HEAD
-} 
-=======
 }
->>>>>>> 9d59e4f7867687dbf2acbc948c87730baba47995

@@ -1622,7 +1622,7 @@ paths:
       summary: Get product list
       tags:
       - product
-  /products/report:
+  /report:
     get:
       consumes:
       - application/json

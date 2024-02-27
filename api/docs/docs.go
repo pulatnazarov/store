@@ -1869,7 +1869,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/products/report": {
+        "/report": {
             "get": {
                 "description": "get product report",
                 "consumes": [

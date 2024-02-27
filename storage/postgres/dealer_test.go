@@ -5,6 +5,7 @@ import (
 	"test/api/models"
 	"test/config"
 	"test/pkg/logger"
+	"test/storage/redis"
 	"testing"
 )
 
@@ -12,8 +13,9 @@ func TestDealerRepo_AddSum(t *testing.T) {
 	cfg := config.Load()
 
 	log := logger.New(cfg.ServiceName)
+	redis := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
+	pgStore, err := New(context.Background(), cfg, log, redis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -79,8 +81,9 @@ func TestDealerRepo_Get(t *testing.T) {
 	cfg := config.Load()
 
 	log := logger.New(cfg.ServiceName)
+	redis := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
+	pgStore, err := New(context.Background(), cfg, log, redis)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}

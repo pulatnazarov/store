@@ -138,7 +138,3 @@ func (s Store) IncomeProduct() storage.IIncomeProductStorage {
 func (s Store) Redis() storage.IRedisStorage {
 	return s.redis
 }
-
-func (s Store) Report() storage.IReportStorage {
-	return NewReport(s.pool, s.log)
-}

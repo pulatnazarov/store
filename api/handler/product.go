@@ -59,7 +59,7 @@ func (h Handler) GetProduct(c *gin.Context) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
-	product, err := h.services.Product().Get(ctx, models.PrimaryKey{ID: uid})
+	product, err := h.services.Product().Get(ctx, uid)
 	if err != nil {
 		handleResponse(c, h.log, "error is while getting by id", http.StatusInternalServerError, err.Error())
 		return
@@ -217,7 +217,65 @@ func (h Handler) StartSellNew(c *gin.Context) {
 		return
 	}
 
-	// report
 
 	handleResponse(c, h.log, "successfully finished the purchase", http.StatusOK, productSell.Check)
+}
+
+
+
+// ProductReportList godoc
+// @Router       /report [GET]
+// @Summary      Get  product report
+// @Description  get product report
+// @Tags         report
+// @Accept       json
+// @Produce      json
+// @Param        page query string false "page"
+// @Param        limit query string false "limit"
+// @Param        from query string false "from"
+// @Param        to query string false "to"
+// @Param        branch_id query string false "branch_id"
+// @Success      201  {object}  models.ProductReportList
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h Handler) ProductReportList(c *gin.Context) {
+	var (
+		page, limit int
+		branchID    string
+		from, to    string
+		err         error
+	)
+
+	pageStr := c.DefaultQuery("page", "1")
+	page, err = strconv.Atoi(pageStr)
+	if err != nil {
+		handleResponse(c, h.log, "error is while converting pageStr", http.StatusBadRequest, err)
+		return
+	}
+
+	limitStr := c.DefaultQuery("limit", "100")
+	limit, err = strconv.Atoi(limitStr)
+	if err != nil {
+		handleResponse(c, h.log, "error is while converting limitStr", http.StatusBadRequest, err)
+		return
+	}
+
+	from = c.Query("from")
+	to = c.Query("to")
+	branchID = c.Query("branch_id")
+
+	productReport, err := h.services.Product().ProductReportList(context.Background(), models.ProductRepoRequest{
+		Page:     page,
+		Limit:    limit,
+		BranchID: branchID,
+		From:     from,
+		To:       to,
+	})
+	if err != nil {
+		handleResponse(c, h.log, "error is while getting product report", http.StatusInternalServerError, err)
+		return
+	}
+
+	handleResponse(c, h.log, "", http.StatusOK, productReport)
 }

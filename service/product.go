@@ -32,7 +32,7 @@ func (p productService) Create(ctx context.Context, product models.CreateProduct
 		return models.Product{}, err
 	}
 
-	createdProduct, err := p.storage.Product().GetByID(ctx, models.PrimaryKey{ID: id})
+	createdProduct, err := p.storage.Product().GetByID(ctx, id)
 	if err != nil {
 		p.log.Error("error in service layer while getting by id", logger.Error(err))
 		return models.Product{}, err
@@ -41,7 +41,7 @@ func (p productService) Create(ctx context.Context, product models.CreateProduct
 	return createdProduct, nil
 }
 
-func (p productService) Get(ctx context.Context, key models.PrimaryKey) (models.Product, error) {
+func (p productService) Get(ctx context.Context, key string) (models.Product, error) {
 	product, err := p.storage.Product().GetByID(ctx, key)
 	if err != nil {
 		p.log.Error("error in service layer while getting by id", logger.Error(err))
@@ -70,7 +70,7 @@ func (p productService) Update(ctx context.Context, product models.UpdateProduct
 		return models.Product{}, err
 	}
 
-	updatedProduct, err := p.storage.Product().GetByID(ctx, models.PrimaryKey{ID: id})
+	updatedProduct, err := p.storage.Product().GetByID(ctx, id)
 	if err != nil {
 		p.log.Error("error in service layer while getting by id", logger.Error(err))
 		return models.Product{}, err
@@ -189,7 +189,16 @@ func (p productService) StartSellNew(ctx context.Context, request models.SellReq
 
 	productSell.Check = check
 
-	//report
 
 	return productSell, nil
+}
+
+
+func (p productService) ProductReportList(ctx context.Context, request models.ProductRepoRequest) (models.ProductReportList, error) {
+	productList, err := p.storage.Product().ProductReportList(ctx, request)
+	if err != nil {
+		p.log.Error("error is while getting product report list", logger.Error(err))
+		return models.ProductReportList{}, err
+	}
+	return productList, nil
 }
