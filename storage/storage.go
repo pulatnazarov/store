@@ -102,10 +102,10 @@ type IIncomeProductStorage interface {
 	GetList(context.Context, models.GetListRequest) (models.IncomeProductsResponse, error)
 	UpdateMultiple(context.Context, models.UpdateIncomeProducts) error
 	DeleteMultiple(context.Context, models.DeleteIncomeProducts) error
+	IncomeProductList(context.Context, models.IncomeProductReportRequest) (models.IncomeProductReportList, error)
 }
 
 type IRedisStorage interface {
 	SetX(ctx context.Context, key string, value interface{}, duration time.Duration) error
 	Get(ctx context.Context, key string) interface{}
 }
-
