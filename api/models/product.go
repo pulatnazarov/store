@@ -86,11 +86,3 @@ type ProductReportList struct {
 	Products     []ProductReport `json:"products"`
 	OverallPrice int             `json:"overall_price"`
 }
-
-type ProductRepoRequest struct {
-	Page     int    `json:"page"`
-	Limit    int    `json:"limit"`
-	BranchID string `json:"branch_id"`
-	From     string `json:"from"`
-	To       string `json:"to"`
-}

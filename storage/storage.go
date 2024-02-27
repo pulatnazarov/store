@@ -110,6 +110,6 @@ type IRedisStorage interface {
 }
 
 type IReportStorage interface {
-	ProductReportList(context.Context, models.ProductRepoRequest) (models.ProductReportList, error)
-	// IncomeReport()
+	ProductReportList(context.Context, models.ReportRequest) (models.ProductReportList, error)
+	IncomeProductList(context.Context, models.ReportRequest) (models.IncomeProductReportList, error)
 }

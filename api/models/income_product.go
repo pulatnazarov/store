@@ -35,3 +35,15 @@ type IncomeProducts struct {
 type DeleteIncomeProducts struct {
 	IDs []PrimaryKey
 }
+
+type IncomeProductReport struct {
+	ProductName string `json:"product_name"`
+	Quantity    int    `json:"quantity"`
+	Price       int    `json:"price"`
+	TotalPrice  int    `json:"total_price"`
+}
+
+type IncomeProductReportList struct {
+	IncomeProducts []IncomeProductReport `json:"income_products"`
+	OverallPrice   int                   `json:"overall_price"`
+}

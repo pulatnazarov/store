@@ -228,6 +228,26 @@ definitions:
       quantity:
         type: integer
     type: object
+  models.IncomeProductReport:
+    properties:
+      price:
+        type: integer
+      product_name:
+        type: string
+      quantity:
+        type: integer
+      total_price:
+        type: integer
+    type: object
+  models.IncomeProductReportList:
+    properties:
+      income_products:
+        items:
+          $ref: '#/definitions/models.IncomeProductReport'
+        type: array
+      overall_price:
+        type: integer
+    type: object
   models.IncomesResponse:
     properties:
       count:
@@ -1206,6 +1226,54 @@ paths:
       summary: Creates a new income
       tags:
       - income
+  /income-product/report:
+    get:
+      consumes:
+      - application/json
+      description: get income product report
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: string
+      - description: from
+        in: query
+        name: from
+        type: string
+      - description: to
+        in: query
+        name: to
+        type: string
+      - description: branch_id
+        in: query
+        name: branch_id
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.IncomeProductReportList'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.Response'
+      summary: Get  income product report
+      tags:
+      - report
   /income/{id}:
     delete:
       consumes:

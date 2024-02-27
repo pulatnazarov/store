@@ -19,11 +19,20 @@ func NewReportService(storage storage.IStorage, log logger.ILogger) reportServic
 	}
 }
 
-func (r reportService) ProductReportList(ctx context.Context, request models.ProductRepoRequest) (models.ProductReportList, error) {
+func (r reportService) ProductReportList(ctx context.Context, request models.ReportRequest) (models.ProductReportList, error) {
 	productList, err := r.storage.Report().ProductReportList(ctx, request)
 	if err != nil {
 		r.log.Error("error is while getting product report list", logger.Error(err))
 		return models.ProductReportList{}, err
 	}
 	return productList, nil
+}
+
+func (r reportService) IncomeProductList(ctx context.Context, request models.ReportRequest) (models.IncomeProductReportList, error) {
+	incomeProductList, err := r.storage.Report().IncomeProductList(ctx, request)
+	if err != nil {
+		r.log.Error("error in service later while getting report income product list", logger.Error(err))
+		return models.IncomeProductReportList{}, err
+	}
+	return incomeProductList, err
 }
