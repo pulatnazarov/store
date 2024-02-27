@@ -10,6 +10,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ReportProduct godoc
+// @Router /report_product [POST]
+// @Summary reports
+// @Description reports
+// @Tags report
+// @Accept json
+// @Produce json
+// @Param report_products body models.Search true "database_report"
+// @Success      200  {object}  models.Response
+// @Failure      400  {object}  models.Response
+// @Failure      404  {object}  models.Response
+// @Failure      500  {object}  models.Response
+func (h Handler) ProductReport(c *gin.Context) {
+	
+
+}
+
 // CreateProduct godoc
 // @Router       /product [POST]
 // @Summary      Create a new product

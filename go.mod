@@ -4,7 +4,6 @@ go 1.21.5
 
 require (
 	github.com/google/uuid v1.5.0
-	github.com/lib/pq v1.10.9
 	github.com/spf13/cast v1.6.0
 )
 
@@ -15,6 +14,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.17.0
 	github.com/jackc/pgx/v5 v5.5.2
 	github.com/joho/godotenv v1.5.1
+	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.4.0
 	github.com/swaggo/files v1.0.1
 	github.com/swaggo/gin-swagger v1.6.0

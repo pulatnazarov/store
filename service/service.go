@@ -16,6 +16,7 @@ type IServiceManager interface {
 	Income() incomeService
 	IncomeProduct() incomeProductService
 	AuthService() authService
+	Report() reportService
 }
 
 type Service struct {
@@ -29,6 +30,7 @@ type Service struct {
 	incomeService        incomeService
 	incomeProductService incomeProductService
 	authService          authService
+	reportService        reportService
 }
 
 func New(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStorage) Service {
@@ -44,6 +46,7 @@ func New(storage storage.IStorage, log logger.ILogger, redis storage.IRedisStora
 	services.incomeService = NewIncomeService(storage, log)
 	services.incomeProductService = NewIncomeProductService(storage, log)
 	services.authService = NewAuthService(storage, log)
+	services.reportService=NewReportService(storage,log)
 
 	return services
 }
@@ -86,4 +89,7 @@ func (s Service) IncomeProduct() incomeProductService {
 
 func (s Service) AuthService() authService {
 	return s.authService
+}
+func (s Service) Report() reportService {
+	return s.reportService
 }

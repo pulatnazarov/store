@@ -11,3 +11,9 @@ type GetListRequest struct {
 	BasketID string `json:"basket_id"`
 	UserID   string `json:"user_id"`
 }
+
+type Request struct {
+	From     string `json:"from"`
+	To       string `json:"to"`
+	BranchID string `json:"branch_id"`
+}

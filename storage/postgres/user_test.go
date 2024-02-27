@@ -3,20 +3,24 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/go-playground/assert/v2"
 	"test/api/models"
 	"test/config"
 	"test/pkg/helper"
 	"test/pkg/logger"
+	"test/storage/redis"
+
 	"testing"
+
+	"github.com/go-playground/assert/v2"
 )
 
 func TestUserRepo_Create(t *testing.T) {
 	cfg := config.Load()
 
 	log := logger.New(cfg.ServiceName)
+	r := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
+	pgStore, err := New(context.Background(), cfg, log, r)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -51,8 +55,9 @@ func TestUserRepo_GetByID(t *testing.T) {
 	cfg := config.Load()
 
 	log := logger.New(cfg.ServiceName)
+	r := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
+	pgStore, err := New(context.Background(), cfg, log, r)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -92,7 +97,7 @@ func TestUserRepo_GetByID(t *testing.T) {
 			t.Errorf("expected phone length: 13, but got %d, user id is %s", len(user.Phone), user.ID)
 		}
 
-		if user.Cash < 0 {
+		if user.Cash <= 0 {
 			t.Errorf("expected > 0, but got %d", user.Cash)
 		}
 
@@ -124,7 +129,7 @@ func TestUserRepo_GetByID(t *testing.T) {
 			t.Errorf("expected phone length: 13, but got %d, user id is %s", len(user.Phone), user.ID)
 		}
 
-		if user.Cash < 0 {
+		if user.Cash <= 0 {
 			t.Errorf("expected > 0, but got %d", user.Cash)
 		}
 
@@ -138,8 +143,9 @@ func TestUserRepo_GetList(t *testing.T) {
 	cfg := config.Load()
 
 	log := logger.New(cfg.ServiceName)
+	r := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
+	pgStore, err := New(context.Background(), cfg, log, r)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -159,8 +165,9 @@ func TestUserRepo_Update(t *testing.T) {
 	cfg := config.Load()
 
 	log := logger.New(cfg.ServiceName)
+	r := redis.New(cfg)
 
-	pgStore, err := New(context.Background(), cfg, log)
+	pgStore, err := New(context.Background(), cfg, log, r)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}
@@ -207,8 +214,8 @@ func TestUserRepo_Delete(t *testing.T) {
 	cfg := config.Load()
 
 	log := logger.New(cfg.ServiceName)
-
-	pgStore, err := New(context.Background(), cfg, log)
+	r := redis.New(cfg)
+	pgStore, err := New(context.Background(), cfg, log, r)
 	if err != nil {
 		t.Errorf("error while connection to db error: %v", err)
 	}

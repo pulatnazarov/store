@@ -3,12 +3,12 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/golang-migrate/migrate/v4"
 	"strings"
 	"test/config"
 	"test/pkg/logger"
 	"test/storage"
-	"test/storage/redis"
+
+	"github.com/golang-migrate/migrate/v4"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 
@@ -137,5 +137,8 @@ func (s Store) IncomeProduct() storage.IIncomeProductStorage {
 }
 
 func (s Store) Redis() storage.IRedisStorage {
-	return redis.New(s.cfg)
+	return s.redis
+}
+func (s Store) Report()storage.IReportStorage  {
+	return NewReport(s.pool,s.log)
 }

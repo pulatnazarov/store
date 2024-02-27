@@ -3,9 +3,6 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	"log"
 	"net/http"
 	_ "test/api/docs"
@@ -13,6 +10,10 @@ import (
 	"test/pkg/logger"
 	"test/service"
 	"time"
+
+	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // New ...
@@ -27,8 +28,9 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 
 	r := gin.New()
 
-	//r.Use(authenticateMiddleware)
+	r.Use(authenticateMiddleware)
 	r.Use(gin.Logger())
+	r.Use(traceRequest)
 
 	{
 		// auth endpoints
@@ -93,7 +95,8 @@ func New(services service.IServiceManager, log logger.ILogger) *gin.Engine {
 		r.POST("/sell-new", h.StartSellNew)
 
 		// report
-		r.POST("/")
+		r.POST("/report", h.ReportProduct)
+		r.POST("/report", h.ReportIncome)
 
 		r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}

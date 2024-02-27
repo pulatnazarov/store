@@ -45,6 +45,9 @@ func (u userService) Create(ctx context.Context, createUser models.CreateUser) (
 	user, err := u.storage.User().GetByID(ctx, models.PrimaryKey{
 		ID: pKey,
 	})
+	if err!=nil{
+		u.log.Error("error",logger.Error(err))
+	}
 
 	return user, nil
 }

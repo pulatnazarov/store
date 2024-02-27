@@ -85,6 +85,7 @@ func (p productService) Delete(ctx context.Context, key models.PrimaryKey) error
 	return err
 }
 
+
 func (p productService) StartSellNew(ctx context.Context, request models.SellRequest) (models.ProductSell, error) {
 	check := models.Check{
 		Products: make([]models.Product, 0),

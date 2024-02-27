@@ -4,14 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 	"strings"
 	"test/api/models"
 	"test/pkg/logger"
 	"test/storage"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lib/pq"
 )
 
 type productRepo struct {

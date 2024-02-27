@@ -10,6 +10,7 @@ type Product struct {
 	BranchID      string `json:"branch_id"`
 	CreatedAt     string `json:"created_at"`
 	UpdatedAt     string `json:"updated_at"`
+	DeletadAt     int    `json:"deleted_at"`
 }
 
 type CreateProduct struct {
@@ -75,6 +76,7 @@ type ProductCase struct {
 	Want          interface{}
 }
 
+// //////// product report
 type ProductReport struct {
 	ProductName string `json:"product_name"`
 	Quantity    int    `json:"quantity"`
@@ -85,4 +87,13 @@ type ProductReport struct {
 type ProductReportList struct {
 	Products     []ProductReport `json:"products"`
 	OverallPrice int             `json:"overall_price"`
+	Count        int             `json:"count"`
+}
+
+type ProductReportListRequest struct {
+	From     string `json:"from"`
+	To       string `json:"to"`
+	BranchId string `json:"branch_id"`
+	Page     int    `json:"page"`
+	Limit    int    `json:"limit"`
 }

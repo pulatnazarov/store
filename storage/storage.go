@@ -19,6 +19,7 @@ type IStorage interface {
 	Income() IIncomeStorage
 	IncomeProduct() IIncomeProductStorage
 	Redis() IRedisStorage
+	Report() IReportStorage
 }
 
 type IUserStorage interface {
@@ -106,3 +107,8 @@ type IRedisStorage interface {
 	SetX(ctx context.Context, key string, value interface{}, duration time.Duration) error
 	Get(ctx context.Context, key string) interface{}
 }
+type IReportStorage interface {
+	Report(context.Context, models.ProductReportListRequest) (models.ProductReportList, error)
+	IncomeReport(context.Context, models.IncomeProductReportListRequest)(models.IncomeProductReportList,error)
+}
+
