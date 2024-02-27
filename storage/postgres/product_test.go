@@ -36,9 +36,7 @@ func TestProductRepo_Create(t *testing.T) {
 		t.Error("error while inserting product", err)
 
 	}
-	idproduct, err := pgStore.Product().GetByID(context.Background(), models.PrimaryKey{
-		ID: id,
-	})
+	idproduct, err := pgStore.Product().GetByID(context.Background(), id)
 	if err != nil {
 		t.Error("error", err)
 	}
@@ -75,7 +73,7 @@ func TestProductRepo_GetByID(t *testing.T) {
 
 	expectedproducts := products.Products[0].ID
 	t.Run("succes", func(t *testing.T) {
-		product, err := pgStore.Product().GetByID(context.Background(), models.PrimaryKey{ID: expectedproducts})
+		product, err := pgStore.Product().GetByID(context.Background(), expectedproducts)
 
 		if err != nil {
 			t.Error("error while geting by id product", err)
@@ -113,9 +111,7 @@ func TestProductRepo_GetByID(t *testing.T) {
 
 	t.Run("fail", func(t *testing.T) {
 		productid := ""
-		product, err := pgStore.Product().GetByID(context.Background(), models.PrimaryKey{
-			ID: productid,
-		})
+		product, err := pgStore.Product().GetByID(context.Background(), expectedproducts)
 		if err != nil {
 			t.Error("error while getting product id", err)
 		}
@@ -216,9 +212,7 @@ func TestProductRepo_Update(t *testing.T) {
 		t.Error("error updatinf product in testing", err)
 	}
 
-	product, err := pgStore.Product().GetByID(context.Background(), models.PrimaryKey{
-		ID: productupdateid,
-	})
+	product, err := pgStore.Product().GetByID(context.Background(), productID)
 	if err != nil {
 		t.Error("error while geting by id in testing product", err)
 	}

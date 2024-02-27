@@ -19,7 +19,6 @@ type IStorage interface {
 	Income() IIncomeStorage
 	IncomeProduct() IIncomeProductStorage
 	Redis() IRedisStorage
-	Report() IReportStorage
 }
 
 type IUserStorage interface {
@@ -45,7 +44,7 @@ type ICategoryStorage interface {
 
 type IProductStorage interface {
 	Create(context.Context, models.CreateProduct) (string, error)
-	GetByID(context.Context, models.PrimaryKey) (models.Product, error)
+	GetByID(context.Context, string) (models.Product, error)
 	GetList(context.Context, models.GetListRequest) (models.ProductResponse, error)
 	Update(context.Context, models.UpdateProduct) (string, error)
 	Delete(context.Context, models.PrimaryKey) error
@@ -53,6 +52,7 @@ type IProductStorage interface {
 	TakeProducts(context.Context, map[string]int) error
 	AddDeliveredProducts(context.Context, models.DeliverProducts, string) error
 	GetListByIDs(context.Context, []string) (models.ProductResponse, error)
+	ProductReportList(context.Context, models.ProductRepoRequest) (models.ProductReportList, error)
 }
 type IBasketStorage interface {
 	Create(context.Context, models.CreateBasket) (string, error)
@@ -102,14 +102,10 @@ type IIncomeProductStorage interface {
 	GetList(context.Context, models.GetListRequest) (models.IncomeProductsResponse, error)
 	UpdateMultiple(context.Context, models.UpdateIncomeProducts) error
 	DeleteMultiple(context.Context, models.DeleteIncomeProducts) error
+	IncomeProductList(context.Context, models.IncomeProductReportRequest) (models.IncomeProductReportList, error)
 }
 
 type IRedisStorage interface {
 	SetX(ctx context.Context, key string, value interface{}, duration time.Duration) error
 	Get(ctx context.Context, key string) interface{}
-}
-
-type IReportStorage interface {
-	ProductReportList(context.Context, models.ProductRepoRequest) (models.ProductReportList, error)
-	// IncomeReport()
 }

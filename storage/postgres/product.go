@@ -4,14 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/lib/pq"
-	_ "github.com/lib/pq"
 	"strings"
 	"test/api/models"
 	"test/pkg/logger"
 	"test/storage"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type productRepo struct {
@@ -52,13 +53,13 @@ func (p *productRepo) Create(ctx context.Context, product models.CreateProduct) 
 	return id.String(), nil
 }
 
-func (p *productRepo) GetByID(ctx context.Context, key models.PrimaryKey) (models.Product, error) {
+func (p *productRepo) GetByID(ctx context.Context, id string) (models.Product, error) {
 	var createdAt, updatedAt = sql.NullString{}, sql.NullString{}
 	product := models.Product{}
 	query := `select id, name, price, original_price, quantity, category_id, branch_id, created_at, updated_at
 							from products where id = $1 and deleted_at = 0`
-	if err := p.db.QueryRow(ctx, query, key.ID).Scan(
-		&product.ID,
+	if err := p.db.QueryRow(ctx, query, id).Scan(
+		&id,
 		&product.Name,
 		&product.Price,
 		&product.OriginalPrice,
@@ -341,4 +342,57 @@ func (p *productRepo) GetListByIDs(ctx context.Context, productIDs []string) (mo
 	}
 
 	return productsResp, nil
+}
+
+func (p *productRepo) ProductReportList(ctx context.Context, request models.ProductRepoRequest) (models.ProductReportList, error) {
+	var (
+		page                      = request.Page
+		offset                    = (page - 1) * request.Limit
+		pagination, query, filter string
+		overallPrice              int
+		products                  []models.ProductReport
+	)
+
+	pagination = ` limit $1 offset $2`
+
+	if request.From != "" && request.To != "" {
+		filter += fmt.Sprintf(` and created_at::text between '%s' and '%s' `, request.From, request.To)
+	} else if request.From != "" {
+		filter += fmt.Sprintf(` and created_at::text <= '%s' `, request.From)
+	} else if request.To != "" {
+		filter += fmt.Sprintf(` and created_at::text >= '%s' `, request.To)
+	}
+
+	if request.BranchID != "" {
+		filter += fmt.Sprintf(` and branch_id = '%s'`, request.BranchID)
+	}
+
+	query = `select name, quantity, price, quantity*price from products where deleted_at = 0 ` + filter + pagination
+
+	rows, err := p.db.Query(ctx, query, request.Limit, offset)
+	if err != nil {
+		p.log.Error("error is while all selecting products", logger.Error(err), logger.Any("main query", query))
+		return models.ProductReportList{}, err
+	}
+
+	for rows.Next() {
+		product := models.ProductReport{}
+
+		if err := rows.Scan(
+			&product.ProductName,
+			&product.Quantity,
+			&product.Price,
+			&product.TotalPrice,
+		); err != nil {
+			return models.ProductReportList{}, err
+		}
+
+		products = append(products, product)
+		overallPrice += product.TotalPrice
+	}
+
+	return models.ProductReportList{
+		Products:     products,
+		OverallPrice: overallPrice,
+	}, nil
 }
